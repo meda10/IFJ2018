@@ -7,6 +7,68 @@
 #include "scaner.h"
 #include "tokens.h"
 
+const char* reservedWords[] = {
+        "def",
+        "do",
+        "else",
+        "end",
+        "if",
+        "not",
+        "nil",
+        "then",
+        "when",
+        "inputs",
+        "inputi",
+        "inputf",
+        "print",
+        "length",
+        "substr",
+        "ord",
+        "chr",
+};
+
+const char* names[] = {
+        "DEF",
+        "DO",
+        "ELSE",
+        "END",
+        "IF",
+        "NOT",
+        "NIL",
+        "THEN",
+        "WHEN",
+        "INPUTS",
+        "INPUTI",
+        "INPUTF",
+        "PRINT",
+        "LENGTH",
+        "SUBSTR",
+        "ORD",
+        "CHR",
+        "OPENNING_BRACKET",
+        "CLOSING_BRACKET",
+        "IDENTIFIER",
+        "SEMICOLON",
+        "INTEGER_TYPE",
+        "STRING_TYPE",
+        "DOUBLE_TYPE",
+        "LESS",
+        "GREATER",
+        "LESS_OR_EQUAL",
+        "GREATER_OR_EQUAL",
+        "EQUAL",
+        "NOT_EQUAL",
+        "PLUS",
+        "MINUS",
+        "ASTERISK",
+        "COMMA",
+        "DIVISION",
+        "INT_DIVISION",
+        "DOUBLE_EQUAL",
+        "EOL",
+        "ENDOFFILE",
+};
+
 FILE *source_file = NULL;
 int line = 1;
 int internal_error = 0;

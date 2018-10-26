@@ -1,5 +1,5 @@
-#ifndef tokens
-#define tokens
+#ifndef tokens_H
+#define tokens_H
 
 #define DEF 0
 #define DO 1
@@ -41,66 +41,7 @@
 #define EOL 37
 #define ENDOFFILE 38
 
-const char* names[] = {
-        "DEF",
-        "DO",
-        "ELSE",
-        "END",
-        "IF",
-        "NOT",
-        "NIL",
-        "THEN",
-        "WHEN",
-        "INPUTS",
-        "INPUTI",
-        "INPUTF",
-        "PRINT",
-        "LENGTH",
-        "SUBSTR",
-        "ORD",
-        "CHR",
-        "OPENNING_BRACKET",
-        "CLOSING_BRACKET",
-        "IDENTIFIER",
-        "SEMICOLON",
-        "INTEGER_TYPE",
-        "STRING_TYPE",
-        "DOUBLE_TYPE",
-        "LESS",
-        "GREATER",
-        "LESS_OR_EQUAL",
-        "GREATER_OR_EQUAL",
-        "EQUAL",
-        "NOT_EQUAL",
-        "PLUS",
-        "MINUS",
-        "ASTERISK",
-        "COMMA",
-        "DIVISION",
-        "INT_DIVISION",
-        "DOUBLE_EQUAL",
-        "EOL",
-        "ENDOFFILE",
-};
+extern const char* names[];
 
-const char* reservedWords[] = {
-        "def",
-        "do",
-        "else",
-        "end",
-        "if",
-        "not",
-        "nil",
-        "then",
-        "when",
-        "inputs",
-        "inputi",
-        "inputf",
-        "print",
-        "length",
-        "substr",
-        "ord",
-        "chr",
-};
-
+extern const char* reservedWords[];
 #endif
