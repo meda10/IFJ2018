@@ -25,6 +25,7 @@ const char* reservedWords[] = {
         "substr",
         "ord",
         "chr",
+        "while",
 };
 
 const char* names[] = {
@@ -45,6 +46,7 @@ const char* names[] = {
         "SUBSTR",
         "ORD",
         "CHR",
+        "while",
         "OPENNING_BRACKET",
         "CLOSING_BRACKET",
         "IDENTIFIER",
@@ -220,7 +222,7 @@ int get_next_token(token_t *token) {
                         token->type = SEMICOLON;
                         return return_code();
                     case '#' :
-                        state = STATE_COMMENT;
+                        state = STATE_COMMENT; //todo EOF
                         break;
                     case '"' :
                         strAddChar(s,c);
@@ -381,6 +383,10 @@ int get_next_token(token_t *token) {
                         delete_string(s);
                         return RET_ERR;
                     }
+                }else if(isalpha(c)){
+                    fprintf(stderr, "Unexpected char %c\n",c);
+                    delete_string(s);
+                    return RET_ERR;
                 } else if(c != EOF){
                     if(ungetc(c,source_file) == EOF){
                         fprintf(stderr,"Internal error\n");
@@ -404,6 +410,10 @@ int get_next_token(token_t *token) {
                 if(isdigit(c)){
                     strAddChar(s,c);
                     break;
+                }else if(isalpha(c)){
+                    fprintf(stderr, "Unexpected char %c\n",c);
+                    delete_string(s);
+                    return RET_ERR;
                 } else if(c != EOF){
                     if(ungetc(c,source_file) == EOF){
                         fprintf(stderr,"Internal error\n");
@@ -511,13 +521,17 @@ int get_next_token(token_t *token) {
                     if(c == 'n' || c == 's' || c == 't' || c == '"' || c == '\\'){          //if(c == 'n' | c == '"' | c == 't' | c == '\\'){
                         strAddChar(s, c);
                         break;
-                    }
-                    if(c == 'x'){
+                    }else if(c == 'x'){
+                        strAddChar(s,c);
                         c = (char) fgetc(source_file);
                         if(isxdigit(c)){
                             strAddChar(s, c);
                             break; //todo hex digit 2
                         }
+                    }else{
+                        fprintf(stderr, "Unexpected string \\%c\n",c);
+                        delete_string(s);
+                        return RET_ERR;
                     }
                 } else if(c >= 31){
                     strAddChar(s,c);

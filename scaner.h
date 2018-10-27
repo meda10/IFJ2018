@@ -6,7 +6,7 @@
 #define RET_OK 0
 #define RET_ERR 1
 #define INTERNAL_ERROR 99
-#define KEY_WORDS_END 17
+#define KEY_WORDS_END 18
 
 /*
  * Token
