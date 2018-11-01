@@ -31,7 +31,7 @@ int PROGRAM(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;
 			
-			get_next_token(token);
+			//get_next_token(token);
 			return PROGRAM();
 		case ENDOFFILE:
 			return SYNTAX_OK;
@@ -65,6 +65,8 @@ int FUNC_DEF(){
 			if (result != SYNTAX_OK) return result;
 			
 			if (token->type != END) return SYNTAX_ERR;
+
+			get_next_token(token);
 			return SYNTAX_OK;
 		case IF:
 		case WHILE:
@@ -92,7 +94,6 @@ int STL(){
 		case END:
 		case ELSE:
 		case ENDOFFILE:
-		case EOL:
 			return SYNTAX_OK;						//9. <STL> ->eps
 		case IF:
 		case WHILE:
@@ -104,6 +105,7 @@ int STL(){
 		case NIL:
 		case OPENNING_BRACKET:
 		case NOT:
+		case EOL:
 			result = S();							//10. <STL> -> <S> <STL>
 			if (result != SYNTAX_OK) return result;
 			return STL();
@@ -116,9 +118,9 @@ int S(){
 	print_token(token);
 	int result;
 	switch(token->type){
-		case IF:
+		case IF:									//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
 			get_next_token(token);
-			result = E();	//precedencni			//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
+			result = E();	//precedencni			
 			if (result != SYNTAX_OK) return result;
 
 			get_next_token(token);
@@ -131,7 +133,6 @@ int S(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;
 
-			get_next_token(token);
 			if (token->type != ELSE) return SYNTAX_ERR;						
 			
 			get_next_token(token);
@@ -141,13 +142,15 @@ int S(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;	
 
-			get_next_token(token);
 			if (token->type != END) return SYNTAX_ERR;
-			printf("END == END\n");
 
 			get_next_token(token); 
 			return SYNTAX_OK;
-		case WHILE:									//13. <S> -> while <E> do EOL <STL> end	
+		case WHILE:										//13. <S> -> while <E> do EOL <STL> end
+			get_next_token(token);
+			result = E();	//precedencni			
+			if (result != SYNTAX_OK) return result;
+													
 			get_next_token(token);
 			if (token->type != DO) return SYNTAX_ERR;						
 			
@@ -158,11 +161,14 @@ int S(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;	
 
-			get_next_token(token);
 			if (token->type != END) return SYNTAX_ERR;
 
+			get_next_token(token);
 			return SYNTAX_OK;
 
+		case EOL:									//11. <S> -> eps
+			get_next_token(token);
+			return SYNTAX_OK;
 		case IDENTIFIER:
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
