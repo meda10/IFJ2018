@@ -6,7 +6,7 @@
 #include "parser.h"
 
 
-token_t *token;
+token_t *token, *next_token;
 
 int PROGRAM(){
 	int result;
@@ -123,7 +123,6 @@ int S(){
 			result = E();	//precedencni			
 			if (result != SYNTAX_OK) return result;
 
-			get_next_token(token);
 			if (token->type != THEN) return SYNTAX_ERR;
 
 			get_next_token(token);
@@ -151,7 +150,6 @@ int S(){
 			result = E();	//precedencni			
 			if (result != SYNTAX_OK) return result;
 													
-			get_next_token(token);
 			if (token->type != DO) return SYNTAX_ERR;						
 			
 			get_next_token(token);
@@ -186,21 +184,119 @@ int S(){
 }
 
 int ASS(){
-	return SYNTAX_OK;
+	printf("ASS\n");
+	print_token(token);
+	switch(token->type){
+		case STRING_TYPE:
+		case DOUBLE_TYPE:
+		case INTEGER_TYPE:
+		case NIL:
+		case NOT:									//16. <ASS> -> eps
+			return SYNTAX_OK;
+		case IDENTIFIER:							//16. <ASS> -> eps or 15. <ASS> -> ID =							
+			get_next_token(next_token);				//TODOD this section
+			if (next_token->type == EQUAL)			//problem with next_token, can be lost
+			{
+				//token EQUAL in next_token, get_next_token will return after token after EQUAL
+				get_next_token(token);
+				return SYNTAX_OK;
+			}else
+				return SYNTAX_OK;
+			//if ID in SYMTABLE(check if ID in symtable)
+			// if (token->data_t.string.str[0] == 97){	//if a == function then sem_error
+			// 	return SYNTAX_OK;
+			// }else{
+			// 	get_next_token(token);
+			// 	if (token->type != EQUAL) return SYNTAX_ERR;
+
+			// 	get_next_token(token);
+			// 	return SYNTAX_OK;				
+			// }	
+	}	
+	return SYNTAX_ERR;
 }
 
 int VALUE(){
+	printf("VALUE\n");
+	print_token(token);
+	switch(token->type){
+		case STRING_TYPE:
+		case DOUBLE_TYPE:
+		case INTEGER_TYPE:
+		case NIL:
+		case NOT:									//17. <VALUE> -> <E>
+			return E(); //precedencni
+		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
+			//if ID in SYMTABLE_FUNC (check if it is a function)
+			if (token->data_t.string.str[0] == 97){	//for testing purpose "a" is function, else id
+				return FUNC_CALL();
+			}else{
+				return E();	
+			}	
+	}	
+	return SYNTAX_ERR;
+}
+
+int FUNC_CALL(){
+	printf("FUNC_CALL\n");
+	print_token(token);
+	if(token->type == IDENTIFIER){					//19.<FUNC_CALL> -> ID <INPUT_PARAMS>
+		get_next_token(token);
+		return INPUT_PARAMS();
+	} else
+		return SYNTAX_ERR;
+}
+
+int INPUT_PARAMS(){
+	printf("INPUT_PARAMS\n");
+	print_token(token);
+	int result;
+	switch(token->type){
+		case IF:
+		case WHILE:
+		case EOL:	//*
+		case ENDOFFILE:								//21. <INPUT_PARAMS> -> eps
+			return SYNTAX_OK;
+		case IDENTIFIER:
+		case STRING_TYPE:
+		case INTEGER_TYPE:
+		case DOUBLE_TYPE:
+		case NIL:									//22. <INPUT_PARAMS> -> <TERM> <NEXT_TERM> 
+			result = TERM();
+			if (result != SYNTAX_OK) return result;
+
+			return NEXT_TERM();
+		case OPENNING_BRACKET:						//20.<INPUT_PARAMS> -> (<INPUT_PARAMS>)
+			get_next_token(token);
+			result = INPUT_PARAMS();
+			if (result != SYNTAX_OK) return result;
+
+			if (token->type != CLOSING_BRACKET) return SYNTAX_ERR;
+
+			get_next_token(token);
+			return SYNTAX_OK;
+	}	
+	return SYNTAX_ERR;
+}
+
+int TERM(){
+	return SYNTAX_OK;
+}
+
+int NEXT_TERM(){
 	return SYNTAX_OK;
 }
 
 int E(){
 	printf("E\n");
 	print_token(token);
+	get_next_token(token);
 	return SYNTAX_OK;
 }
 
 int PARAMS(){
 	printf("PARAMS\n");
+	print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 			get_next_token(token);					//6. <PARAMS> -> ID <NEXT_PARAM>
@@ -213,7 +309,7 @@ int PARAMS(){
 
 int NEXT_PARAM(){
 	printf("NEXT_PARAM\n");
-	int result;
+	print_token(token);
 	switch(token->type){
 		case COMMA:
 			get_next_token(token);
@@ -230,6 +326,7 @@ int NEXT_PARAM(){
 int parse(){
   int result;
   token = make_new_token();
+  next_token = make_new_token();
   if (get_next_token(token) == RET_ERR)
      result = RET_ERR;
   else
