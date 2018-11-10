@@ -8,16 +8,15 @@ void B_tree_init(BTNode *root) {
 }
 
 BTNode B_tree_search(BTNode root, int V){
-    while (root != NULL) {
+    while(root != NULL){
         //printf("Looking for %d, looking at %d\n", V, root->data);
-
-        if (root->data == V){ //todo cmp
+        if(root->data == V){ //todo cmp
             return root;
         }
 
-        if (root->data < V){ //todo cmp
+        if(root->data < V){ //todo cmp
             root = root->R_ptr;
-        } else{
+        }else{
             root = root->L_ptr;
         }
     }
@@ -27,36 +26,33 @@ BTNode B_tree_search(BTNode root, int V){
 int B_tree_insert(BTNode *root, int V){
     BTNode tmp_root = *root;
     BTNode tmp = NULL;
-
     while(tmp_root != NULL){
         tmp = tmp_root;
-        if (tmp_root->data == V){ //todo cmp
+        if(tmp_root->data == V){ //todo cmp
             //printf("NODE %d, ALREADY EXISTS\n", tmp_root->data);
             return RET_ERR;
         }
-        if (tmp_root->data > V){ //todo cmp
+        if(tmp_root->data > V){ //todo cmp
             tmp_root = tmp_root->L_ptr;
-        } else{
+        }else{
             tmp_root = tmp_root->R_ptr;
         }
     }
 
     BTNode new_node = (BTNode) malloc(sizeof(struct node));
     if(new_node == NULL){
-        //todo malloc error
         return INTERNAL_ERROR;
     }
     new_node->data = V;
     new_node->L_ptr = NULL;
     new_node->R_ptr = NULL;
 
-    if (tmp == NULL) {
+    if(tmp == NULL){
         *root = new_node;
-
-    } else {
-        if (tmp->data > V) { //todo cmp
+    }else{
+        if(tmp->data > V){ //todo cmp
             tmp->L_ptr = new_node;
-        } else {
+        }else{
             tmp->R_ptr = new_node;
         }
     }
@@ -64,8 +60,8 @@ int B_tree_insert(BTNode *root, int V){
     return RET_OK;
 }
 
-void B_tree_walk(BTNode root) {
-    if (root != NULL){
+void B_tree_walk(BTNode root){
+    if(root != NULL){
         B_tree_walk(root->L_ptr);
         printf("%d ", root->data);
         B_tree_walk(root->R_ptr);

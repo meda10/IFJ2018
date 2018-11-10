@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "parser.h"
 #include "scaner.h"
@@ -10,8 +11,8 @@ int main() {
 
     FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
 
-    int result = parse();
-    printf("%d\n", result);
+    //int result = parse();
+    //printf("%d\n", result);
 
     /**
      * Jenom Scaner - cteni jednotlivych tokenu
@@ -40,13 +41,17 @@ int main() {
     BTNode root_ptr;
     BTNode node;
     int a;
+    int ret = 0;
     B_tree_init(&root_ptr);
 
     // Prida cisla 4,2,6,1,3,5,7
     int numbers[] = { 4, 2, 6, 1, 3, 5, 7 };
 
     for(int i = 0; i < 7; i++){
-        B_tree_insert(&root_ptr,numbers[i]);
+        ret = B_tree_insert(&root_ptr,numbers[i]);
+        if(ret != 0){
+            exit(ret);
+        }
     }
 
     //Hleda v root_ptr cislo 85
