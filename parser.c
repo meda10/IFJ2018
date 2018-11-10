@@ -227,14 +227,11 @@ int ASS(){
 		case IDENTIFIER:							//16. <ASS> -> eps or 15. <ASS> -> ID =							
 			get_next_token(next_token);
 			read_token = true;
-			if (next_token->type == EQUAL)			//problem with next_token, can be lost
-			{
-				//token EQUAL in next_token, get_next_token and return
+			if (next_token->type == EQUAL){
 				read_token = false;
 				get_next_token(token);
 				return SYNTAX_OK;
 			}else
-				//rollback get_next_token()
 				return SYNTAX_OK;
 	}	
 	return SYNTAX_ERR;
@@ -268,7 +265,7 @@ int FUNC_CALL(){
 	print_token(token);
 	if(token->type == IDENTIFIER){					//19.<FUNC_CALL> -> ID <INPUT_PARAMS>
 		if (read_token){
-			token = next_token;
+			*token = *next_token;
 			read_token = false;
 		}
 		else
@@ -357,9 +354,10 @@ int NEXT_TERM(){
 int E(){
 	printf("E\n");
 	print_token(token);
+	//zpracuj token, dalsi token neni treba volat pokud je v next_token
 	if (read_token){
-		token = next_token;
-		read_token = true;
+		*token = *next_token;
+		read_token = false;
 	}
 	else
 		get_next_token(token);
