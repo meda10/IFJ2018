@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "symtable.h"
 
 
@@ -26,11 +27,14 @@ BTNode B_tree_search(BTNode root, int V){
 int B_tree_insert(BTNode *root, int V){
     BTNode tmp_root = *root;
     BTNode tmp = NULL;
-    while(tmp_root != NULL){
+    bool found = false;
+
+    while((tmp_root != NULL) && (!found)){
         tmp = tmp_root;
         if(tmp_root->data == V){ //todo cmp
             //printf("NODE %d, ALREADY EXISTS\n", tmp_root->data);
-            return RET_ERR;
+            //tmp_root->data = V; todo insert
+            found = true;
         }
         if(tmp_root->data > V){ //todo cmp
             tmp_root = tmp_root->L_ptr;
@@ -39,24 +43,26 @@ int B_tree_insert(BTNode *root, int V){
         }
     }
 
-    BTNode new_node = (BTNode) malloc(sizeof(struct node));
-    if(new_node == NULL){
-        return INTERNAL_ERROR;
-    }
-    new_node->data = V;
-    new_node->L_ptr = NULL;
-    new_node->R_ptr = NULL;
-
-    if(tmp == NULL){
-        *root = new_node;
-    }else{
-        if(tmp->data > V){ //todo cmp
-            tmp->L_ptr = new_node;
-        }else{
-            tmp->R_ptr = new_node;
+    if(!found){
+        BTNode new_node = (BTNode) malloc(sizeof(struct node));
+        if(new_node == NULL){
+            return INTERNAL_ERROR;
         }
+        new_node->data = V;
+        new_node->L_ptr = NULL;
+        new_node->R_ptr = NULL;
+
+        if(tmp == NULL){
+            *root = new_node;
+        }else{
+            if(tmp->data > V){ //todo cmp
+                tmp->L_ptr = new_node;
+            }else{
+                tmp->R_ptr = new_node;
+            }
+        }
+        //printf("Created Node %d, Left: %s Right: %s\n", new_node->data,new_node->L_ptr, new_node->R_ptr);
     }
-    //printf("Created Node %d, Left: %s Right: %s\n", new_node->data,new_node->L_ptr, new_node->R_ptr);
     return RET_OK;
 }
 
@@ -65,5 +71,13 @@ void B_tree_walk(BTNode root){
         B_tree_walk(root->L_ptr);
         printf("%d ", root->data);
         B_tree_walk(root->R_ptr);
+    }
+}
+
+void B_tree_free(BTNode root){
+    if(root != NULL){
+        B_tree_free(root->L_ptr);
+        B_tree_free(root->R_ptr);
+        free(root);
     }
 }

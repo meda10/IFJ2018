@@ -76,6 +76,9 @@ int main() {
     printf("STROM: ");
     B_tree_walk(root_ptr);
     printf("\n");
+
+    //Projde cely strom a uvolni pamet
+    B_tree_free(root_ptr);
 */
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));

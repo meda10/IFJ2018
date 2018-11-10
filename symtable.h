@@ -15,5 +15,6 @@ void B_tree_init(BTNode *root);
 BTNode B_tree_search(BTNode root, int V);
 int B_tree_insert(BTNode *root, int V);
 void B_tree_walk(BTNode root);
+void B_tree_free(BTNode root);
 
 #endif //TREE_BT_H
