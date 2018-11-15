@@ -179,6 +179,7 @@ void print_token(token_t *token){
 }
 
 int get_next_token(token_t *token) {
+    printf("------> READING NEXT TOKEN\n");
     char c;
     token->line = line;
     tState state = STATE_START;
@@ -225,6 +226,7 @@ int get_next_token(token_t *token) {
                         state = STATE_COMMENT; //todo EOF
                         break;
                     case '"' :
+                        strInit(s);
                         strAddChar(s,c);
                         state = STATE_STRING_TYPE;
                         break;
@@ -250,7 +252,7 @@ int get_next_token(token_t *token) {
                         c = (char) fgetc(source_file);
                         if(c == '='){
                             token->type = NOT_EQUAL;
-                            break;
+                            return return_code();
                         } else{
                             fprintf(stderr,"Unexpected char_%c_\n",c);
                             return RET_ERR;
