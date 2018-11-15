@@ -82,5 +82,10 @@ int get_next_token(token_t *token);
  * Function will free alocated memory
  */
 void free_token(token_t *token);
+/*
+ * Function will clear token
+ */
+void clear_token(token_t *token);
+
 
 #endif //SCANNER_scaner_H

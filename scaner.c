@@ -156,6 +156,14 @@ void free_token(token_t *token){
     }
 }
 
+void clear_token(token_t *token){
+    if(token->type == 23 || token->type < 18 || token->type == 20){
+        strFree(&token->data_t.string);
+    }
+    token->type = -1;
+    token->line = -1;
+}
+
 void print_token(token_t *token){
     printf("TOKEN:\n");
     printf("   Type: %s -> %d \n",names[token->type],token->type);
@@ -184,6 +192,11 @@ void print_token(token_t *token){
 
 int get_next_token(token_t *token) {
     printf("------> READING NEXT TOKEN \n");
+
+    if(token->type != -1){
+        clear_token(token);
+    }
+
     char c;
     token->line = line;
     tState state = STATE_START;
