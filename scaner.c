@@ -183,7 +183,7 @@ void print_token(token_t *token){
 }
 
 int get_next_token(token_t *token) {
-    printf("------> READING NEXT TOKEN\n");
+    printf("------> READING NEXT TOKEN \n");
     char c;
     token->line = line;
     tState state = STATE_START;
