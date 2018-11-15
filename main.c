@@ -38,24 +38,28 @@ int main() {
 /*
     BTNode root_ptr;
     BTNode node;
-    int ret = 0;
-    BTNode param = NULL;
     B_tree_init(&root_ptr);
 
-    //create_node(&btGetVariable(symtable, functionName)->data.treeOfFunction, name, type, true, false, false, &params, NULL, 0); // Add new arguments
-    //create_node(&root_ptr, "NAME",true, false, false, &params, NULL, 0); // Add new arguments
+    //vlozeni uzlu
+    create_node(&root_ptr,"TEXT", "25" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"M", "2www5" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"O", "2kkk5" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"TEXT123", "25" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"H", "25" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"G", "2dawd" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"FF", "w5" , 3,0, NULL,false, false,false,false, NULL);
+    create_node(&root_ptr,"AWD", "2w" , 3,0, NULL,false, false,false,false, NULL);
 
-    create_node(&root_ptr,"M",false,true,false,0,&param);
-    create_node(&root_ptr,"H",false,true,false,0,&param);
-    create_node(&root_ptr,"I",false,true,false,0,&param);
-    create_node(&root_ptr,"W",false,true,false,0,&param);
-    create_node(&root_ptr,"C",false,true,false,5,&param);
-    create_node(&root_ptr,"M",true,true,false,88,&param); // chyba
+    //pokus o vloyeni stejneho prvku
+    int ret = create_node(&root_ptr,"AWD", "684" , 3,0, NULL,false, true,true,false, NULL);
+    if(ret == RET_ERR){
+        fprintf(stderr,"ERROR: Already in symtable\n");
+    }
 
     //Hleda v root_ptr H
-    node = B_tree_search(root_ptr,"C");
+    node = B_tree_search(root_ptr,"H");
     if(node != NULL){
-        printf("FOUND: %s P_NUM: %d\n",node->data.name,node->data.params_number);
+        printf("FOUND: %s\n",node->data.name);
     } else{
         printf("NOT FOUND: H\n");
     }
@@ -63,7 +67,7 @@ int main() {
     //Hleda v root_ptr X
     node = B_tree_search(root_ptr,"X");
     if(node != NULL){
-        printf("FOUND: %s P_NUM: %d\n",node->data.name,node->data.params_number);
+        printf("FOUND: %s\n",node->data.name);
     } else{
         printf("NOT FOUND: X\n");
     }
