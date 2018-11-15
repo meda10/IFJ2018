@@ -69,6 +69,10 @@ const char* names[] = {
         "DOUBLE_EQUAL",
         "EOL",
         "ENDOFFILE",
+        "DOL",  // pomocny token na precedencni analyzu
+        "EXP",  // pomocny token na precedencni analyzu
+        "START_OF_RULE" // pomocny token na precedencni analyzu, znaci < zacatek pravidla v zasobniku
+
 };
 
 FILE *source_file = NULL;
