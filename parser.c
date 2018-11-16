@@ -251,7 +251,7 @@ int VALUE(){
 			return E(); //precedencni
 		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
 			//if ID in SYMTABLE_FUNC (check if it is a function)
-			if (token->data_t.string.str[0] == 97){	//for testing purpose "a" is function, else id
+			if (token->string.str[0] == 97){	//for testing purpose "a" is function, else id
 				return FUNC_CALL();
 			}else{
 				return E();	

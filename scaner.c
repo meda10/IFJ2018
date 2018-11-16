@@ -148,8 +148,8 @@ token_t* make_new_token(){
 
 void free_token(token_t *token){
     if(&token != NULL){
-        if(token->type < KEY_WORDS_END || token->type == IDENTIFIER || token->type == STRING_TYPE) {
-            delete_string(&token->data_t.string);
+        if(token->type < KEY_WORDS_END || token->type == IDENTIFIER || token->type == STRING_TYPE || token->type == DOUBLE_TYPE || token->type == INTEGER_TYPE){
+            delete_string(&token->string);
         }
         free(token);
         token = NULL;
@@ -157,8 +157,8 @@ void free_token(token_t *token){
 }
 
 void clear_token(token_t *token){
-    if(token->type == 23 || token->type < 18 || token->type == 20){
-        strFree(&token->data_t.string);
+    if(token->type < KEY_WORDS_END || token->type == IDENTIFIER || token->type == STRING_TYPE || token->type == DOUBLE_TYPE || token->type == INTEGER_TYPE){
+        delete_string(&token->string);
     }
     token->type = -1;
     token->line = -1;
@@ -170,23 +170,21 @@ void print_token(token_t *token){
     printf("   Line: %d\n",token->line);
     if(token->type < KEY_WORDS_END || token->type == IDENTIFIER || token->type == STRING_TYPE){
         printf("   STRING: ");
-        int i = 0;
-        while (token->data_t.string.str[i] != '\0'){
-            printf("%c",token->data_t.string.str[i]);
-            i++;
-        }
-        printf("\n      ALLOC: %d",token->data_t.string.allocSize);
-        printf("\n      LENGTH: %d",token->data_t.string.length);
-        printf("\n");
     } else if(token->type == INTEGER_TYPE){
         printf("   INTEGER: ");
-        printf("%d",token->data_t.integer_data);
-        printf("\n");
     } else if(token->type == DOUBLE_TYPE){
         printf("   DOUBLE: ");
-        printf("%e",token->data_t.double_data);
-        printf("\n");
+    } else{
+        return;
     }
+    int i = 0;
+    while (token->string.str[i] != '\0'){
+        printf("%c",token->string.str[i]);
+        i++;
+    }
+    printf("\n      ALLOC: %d",token->string.allocSize);
+    printf("\n      LENGTH: %d",token->string.length);
+    printf("\n");
     printf("\n");
 }
 
@@ -200,7 +198,7 @@ int get_next_token(token_t *token) {
     char c;
     token->line = line;
     tState state = STATE_START;
-    string *s = &(token->data_t.string);
+    string *s = &(token->string);
 
     while (1) {
         //printf("STATE> %d | char %c\n",state,c);
@@ -362,15 +360,15 @@ int get_next_token(token_t *token) {
                         fprintf(stderr,"Internal error\n");
                         return INTERNAL_ERROR;
                     }
-                    int n = string_To_Int(s);
-                    delete_string(s);
-                    token->data_t.integer_data = n;
+                    //int n = string_To_Int(s);
+                    //delete_string(s);
+                    //token->data_t.integer_data = n;
                     token->type = INTEGER_TYPE;
                     return return_code();
                 } else{
-                    int n = string_To_Int(s);
-                    delete_string(s);
-                    token->data_t.integer_data = n;
+                    //int n = string_To_Int(s);
+                    //delete_string(s);
+                    //token->data_t.integer_data = n;
                     token->type = INTEGER_TYPE;
                     return return_code();
                 }
@@ -412,15 +410,16 @@ int get_next_token(token_t *token) {
                         delete_string(s);
                         return INTERNAL_ERROR;
                     }
-                    double n = string_to_Double(s);
-                    delete_string(s);
-                    token->data_t.double_data = n;
+                    //double n = string_to_Double(s);
+                    //delete_string(s);
+                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
                     return return_code();
                 }else{
-                    double n = string_to_Double(s);
-                    delete_string(s);
-                    token->data_t.double_data = n;
+                    //double n = string_to_Double(s);
+                    //delete_string(s);
+
+                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
                     return return_code();
                 }
@@ -439,15 +438,15 @@ int get_next_token(token_t *token) {
                         delete_string(s);
                         return INTERNAL_ERROR;
                     }
-                    double n = string_to_Double(s);
-                    delete_string(s);
-                    token->data_t.double_data = n;
+                    //double n = string_to_Double(s);
+                    //delete_string(s);
+                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
                     return return_code();
                 } else{
-                    double n = string_to_Double(s);
-                    delete_string(s);
-                    token->data_t.double_data = n;
+                    //double n = string_to_Double(s);
+                    //delete_string(s);
+                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
                     return return_code();
                 }
