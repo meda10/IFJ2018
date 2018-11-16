@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "tokens.h"
 #include "scaner.h"
@@ -233,6 +234,14 @@ int rule(stack_t* s, item_stack_t* start_rule){
 	}
 }
 
+void get_next_token_prec(){
+	if (read_token){
+		read_token = false; 
+		*token = *next_token;
+	}
+	get_next_token(token);
+}
+
 /*
  * Funkce resi precedencni analyzu
  */
@@ -276,7 +285,8 @@ int precedence(){
 						/*// jen na testovani	
 						printf("=\n");*/			
 				stackPush(s, *token);
-				get_next_token(token);
+				get_next_token_prec();
+				//get_next_token(token);
 				break;
 
 			// pokud je v precedencni tabulce <	
@@ -285,8 +295,8 @@ int precedence(){
 						printf("<\n");*/
 				stackPushBeforeTerm(s, stackTopTerm (s));
 				stackPush (s, *token);
-
-				get_next_token(token);
+				get_next_token_prec();
+				//get_next_token(token);
 				break;
 
 			// pokud je v precedencni tabulce > 
