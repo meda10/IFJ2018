@@ -40,34 +40,29 @@ int main() {
     BTNode node;
     B_tree_init(&root_ptr);
 
-    //vlozeni uzlu
-    create_node(&root_ptr,"TEXT", "25" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"M", "2www5" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"O", "2kkk5" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"TEXT123", "25" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"H", "25" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"G", "2dawd" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"FF", "w5" , 3,0, NULL,false, false,false,false, NULL);
-    create_node(&root_ptr,"AWD", "2w" , 3,0, NULL,false, false,false,false, NULL);
-
-    //pokus o vloyeni stejneho prvku
-    int ret = create_node(&root_ptr,"AWD", "684" , 3,0, NULL,false, true,true,false, NULL);
-    if(ret == RET_ERR){
-        fprintf(stderr,"ERROR: Already in symtable\n");
+    //ulozi tokeny do tabulky symbolu
+    token_t *token = make_new_token();
+    for(int i = 0; i < 50; i++){
+        if (get_next_token(token) == RET_ERR)
+            return RET_ERR;
+        else{
+            create_node(&root_ptr,&token->string, 3,0, NULL,false, false,false,false, NULL);
+        }
     }
+    free_token(token);
 
-    //Hleda v root_ptr H
-    node = B_tree_search(root_ptr,"H");
+    //Hleda v root_ptr 55
+    node = B_tree_search(root_ptr,"55");
     if(node != NULL){
-        printf("FOUND: %s\n",node->data.name);
+        printf("FOUND: %s\n",node->data.name->str);
     } else{
-        printf("NOT FOUND: H\n");
+        printf("NOT FOUND: 55\n");
     }
 
     //Hleda v root_ptr X
     node = B_tree_search(root_ptr,"X");
     if(node != NULL){
-        printf("FOUND: %s\n",node->data.name);
+        printf("FOUND: %s\n",node->data.name->str);
     } else{
         printf("NOT FOUND: X\n");
     }

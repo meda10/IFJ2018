@@ -66,7 +66,7 @@ void strAddChar(string *s1, char c) {
 void strCopyString(string *s1, string *s2){
     int newLength = s2->length;
     if (newLength >= s1->allocSize) {
-        if ((s1->str = (char*) realloc(s1->str, newLength + 1)) == NULL){
+        if ((s1->str = (char*) realloc(s1->str, (size_t)newLength + 1)) == NULL){
             fprintf(stderr, "Internl Error: %s\n", strerror(errno));
             set_error_string();
             return;

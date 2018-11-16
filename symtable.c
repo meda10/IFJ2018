@@ -2,21 +2,26 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 #include "symtable.h"
+#include "string.h"
 
-Values init_val(const char *name) {
-    Values data;
-    data.name = name;
-    data.value = NULL;
-    data.type = -1;
-    data.params_number = -1;
-    data.params = NULL;
-    data.defined = false;
-    data.initialized = false;
-    data.is_function = false;
-    data.used = false;
-    B_tree_init(&data.local_sym_table);
-    return data;
+TValues init_val(string *name) {
+    TValues data;
+    if(name->str != NULL){
+        strInit(&data.name);
+        strCopyString(data.name,name);
+        //data.value = NULL;
+        data.type = -1;
+        data.params_number = -1;
+        data.params = NULL;
+        data.defined = false;
+        data.initialized = false;
+        data.is_function = false;
+        data.used = false;
+        B_tree_init(&data.local_sym_table);
+        return data;
+    }
 }
 
 
@@ -26,11 +31,14 @@ void B_tree_init(BTNode *root) {
 
 BTNode B_tree_search(BTNode root, char *name){
     while(root != NULL){
-        if(strcmp(root->data.name,name) == 0){ //todo cmp
+        if(name == NULL){
+            return NULL;
+        }
+        if(strcmp(root->data.name->str,name) == 0){ //todo cmp
             return root;
         }
 
-        if(strcmp(root->data.name,name) > 0){ //todo cmp
+        if(strcmp(root->data.name->str,name) > 0){ //todo cmp
             root = root->L_ptr;
         }else{
             root = root->R_ptr;
@@ -46,12 +54,12 @@ int B_tree_insert(BTNode *root, struct Values data){
 
     while((tmp_root != NULL) && (!found)){
         tmp = tmp_root;
-        if(strcmp(tmp_root->data.name,data.name) == 0){ //todo cmp
+        if(strcmp(tmp_root->data.name->str,data.name->str) == 0){ //todo cmp
             //printf("NODE %d, ALREADY EXISTS\n", tmp_root->data);
             //tmp_root->data = V; todo insert
             found = true;
         }
-        if(strcmp(tmp_root->data.name,data.name) > 0){ //todo cmp
+        if(strcmp(tmp_root->data.name->str,data.name->str) > 0){ //todo cmp
             tmp_root = tmp_root->L_ptr;
         }else{
             tmp_root = tmp_root->R_ptr;
@@ -70,7 +78,7 @@ int B_tree_insert(BTNode *root, struct Values data){
         if(tmp == NULL){
             *root = new_node;
         }else{
-            if(strcmp(tmp->data.name,data.name) > 0){ //todo cmp
+            if(strcmp(tmp->data.name->str,data.name->str) > 0){ //todo cmp
                 tmp->L_ptr = new_node;
             }else{
                 tmp->R_ptr = new_node;
@@ -84,7 +92,7 @@ int B_tree_insert(BTNode *root, struct Values data){
 void B_tree_walk(BTNode root){
     if(root != NULL){
         B_tree_walk(root->L_ptr);
-        printf("%s ", root->data.name);
+        printf("%s ", root->data.name->str);
         B_tree_walk(root->R_ptr);
     }
 }
@@ -93,15 +101,18 @@ void B_tree_free(BTNode root){
     if(root != NULL){
         B_tree_free(root->L_ptr);
         B_tree_free(root->R_ptr);
+        delete_string(root->data.name);
+        delete_string(&root->data.name);
         free(root);
     }
 }
 
-int create_node(BTNode *table, char *name, char *value, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
-    BTNode node = B_tree_search(*table, name);
-    if(node == NULL) {
-        Values val = init_val(name);
-        val.value = value;
+int create_node(BTNode *table, string *name, int type, int params_number, string** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
+    BTNode node = B_tree_search(*table, name->str);
+
+    if(node == NULL && name->str != NULL) {
+        TValues val = init_val(name);
+        //val.value = value;
         val.type = type;
         val.params_number = params_number;
         val.params = params;
@@ -112,6 +123,7 @@ int create_node(BTNode *table, char *name, char *value, int type, int params_num
         val.local_sym_table = local_sym_table;
 
         B_tree_insert(table, val);
+
         return RET_OK;
     }else {
         return RET_ERR;

@@ -2,6 +2,8 @@
 #define TREE_BT_H
 
 #include <stdbool.h>
+#include "string.h"
+
 
 #define RET_OK 0
 #define RET_ERR 1
@@ -14,11 +16,11 @@ typedef union val{
 }U_value;
 
 typedef struct Values {
-    const char *name;
-    char *value;
+    string *name;
+    //char *value;
     int type;
     int params_number;
-    char** params;      //kde bude ulozen typ parametru?
+    string** params;      //kde bude ulozen typ parametru?
     bool defined;
     bool initialized;
     bool is_function; // pozname jestli je to funkce nebo promena
@@ -26,7 +28,7 @@ typedef struct Values {
     bool used;    // kontrola jestli to neni mrtvy kod
 
     struct node *local_sym_table;
-}Values;
+}TValues;
 
 typedef struct node {
     //int data;
@@ -36,10 +38,10 @@ typedef struct node {
 } *BTNode;
 
 void B_tree_init(BTNode *root);
-BTNode B_tree_search(BTNode root, char *name);
+BTNode B_tree_search(BTNode root, char* name);
 int B_tree_insert(BTNode *root, struct Values data);
 void B_tree_walk(BTNode root);
 void B_tree_free(BTNode root);
-int create_node(BTNode *table, char *name, char *value, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table);
+int create_node(BTNode *table, string *name, int type, int params_number, string** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table);
 
 #endif //TREE_BT_H
