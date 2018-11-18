@@ -7,13 +7,19 @@
 #include "parser.h"
 #include "scaner.h"
 #include "symtable.h"
+#include "generator.h"
+#include "string.h"
+#include "tokens.h"
+
+
+
 
 int main() {
 
     FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
 
-    int result = parse();
-    printf("%d\n", result);
+    //int result = parse();
+    //printf("%d\n", result);
 
     /**
      * Jenom Scaner - cteni jednotlivych tokenu
@@ -75,6 +81,26 @@ int main() {
     //Projde cely strom a uvolni pamet
     B_tree_free(root_ptr);
 */
+
+    /**
+     * Generator
+     */
+
+    BTNode root_ptr;
+    BTNode n;
+
+    string s;
+    strInit(&s);
+
+    s.str = "a";
+
+    startGenerating();
+
+    variable_declare(INTEGER_TYPE,&s,true);
+    generate_print(IDENTIFIER,&s);
+
+
+
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;
