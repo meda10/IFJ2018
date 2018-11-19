@@ -101,7 +101,7 @@ void B_tree_free(BTNode root){
     if(root != NULL){
         B_tree_free(root->L_ptr);
         B_tree_free(root->R_ptr);
-        delete_string(root->data.name);
+        //delete_string(root->data.name);
         delete_string(&root->data.name);
         free(root);
     }

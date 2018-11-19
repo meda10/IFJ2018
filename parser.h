@@ -1,5 +1,13 @@
 #define SYNTAX_OK	0
+#define SEM_OK 0
 #define SYNTAX_ERR	2
+#define SEM_ERR 3
+#define SEM_RUNTIME_ERR 4
+#define ARGS_NUMBER_ERR 5
+#define OTHER_SEM_ERR 6
+#define ZERO_DIV_ERR 9
+#define INTERNAL_ERR 99
+
 
 static int PROGRAM(); // program
 static int FUNC_DEF(); // function definition

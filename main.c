@@ -11,39 +11,126 @@
 #include "string.h"
 #include "tokens.h"
 
+BTNode *local_TS;
+BTNode root_GTS;
+BTNode node;
+int number_of_func;
+int ts_number;
 
+void built_in_functions(){
+    string tmp;
+    strInit(&tmp);
+    
+    tmp.str = "inputs";
+    create_node(&root_GTS, &tmp, -1, 0, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "inputi";
+    create_node(&root_GTS, &tmp, -1, 0, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "inputf";
+    create_node(&root_GTS, &tmp, -1, 0, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "print";  //number of params >=1  ?
+    create_node(&root_GTS, &tmp, -1, 1, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "length";
+    create_node(&root_GTS, &tmp, -1, 1, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "substr";
+    create_node(&root_GTS, &tmp, -1, 3, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "ord";
+    create_node(&root_GTS, &tmp, -1, 2, NULL, true, false, true, false, &root_GTS);
+    
+    tmp.str = "chr";
+    create_node(&root_GTS, &tmp, -1, 1, NULL, true, false, true, false, &root_GTS);
+}
 
+int fill_TS(){
+    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/source");
+    string function_id;
+    int params_number = 0;
+    int initial_size = 5;
+    ts_number = 5; 
+    int result;
+    number_of_func = 0;
+    string **params;
+
+    built_in_functions();   //fill GTS with built-in functions first
+
+    strInit(&function_id);  //string for storing function id
+    
+
+    params = malloc(sizeof(string*) * initial_size);
+    if (params == NULL){
+        fprintf(stderr, "Memmory allocation error.\n");
+        return INTERNAL_ERROR;
+    }
+    token_t *token = make_new_token();
+    get_next_token(token);
+    while(token->type != ENDOFFILE){
+        if (token->type == DEF){
+            number_of_func++;
+            get_next_token(token);  //function id
+            strCopyString(&function_id, &token->string);
+
+            get_next_token(token); // OPENINGBRACKET
+            while(true){
+                get_next_token(token);  //parameter
+                if (token->type == CLOSING_BRACKET)
+                    break;
+
+                if (params_number + 1 > initial_size){
+                    initial_size *= 2;
+                    params = realloc(params, sizeof(string*) * initial_size);
+                }
+                //TODO params
+                params[params_number] = &token->string;
+                printf("%s\n", token->string.str);
+                params_number++;
+
+                get_next_token(token);  //comma or closing bracket
+                if (token->type == COMMA)
+                    continue;
+                else if (token->type == CLOSING_BRACKET)
+                    break;
+            }
+            // params[0]->str = "afaff";
+            // printf("params[0] :%s\n", params[0]->str);
+            result = create_node(&root_GTS, &function_id, -1, params_number, params, true, false, true, false, NULL);
+            if (result != 0){
+                //TODO if it should be an error
+                printf("Warning: Multiple function definition!\n");
+                return SEM_ERR;
+            }
+        }
+        get_next_token(token);
+    }
+
+    strFree(&function_id);
+    free(params);
+    if(fclose(source_file) == EOF){
+        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+        return INTERNAL_ERROR;
+    }
+    return SEM_OK;
+}
 
 int main() {
-
-    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
-
-    //int result = parse();
-    //printf("%d\n", result);
-
-    /**
-     * Jenom Scaner - cteni jednotlivych tokenu
-     */
-/*
-    token_t *token = make_new_token();
-    for(int i = 0; i < 500; i++){
-        if (get_next_token(token) == RET_ERR)
-            return RET_ERR;
-        else
-            print_token(token);
-
-        if(token->type == 39){
-            free_token(token);
-            return 0;
-        }
-    }
-*/
+    B_tree_init(&root_GTS);
+    int result;
+    result = fill_TS();
+    if (result != SEM_OK) return SEM_ERR;
+    
+    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/source");
+    result = parse();
+    printf("%d\n", result);
+    
     /**
      * Tabulka symbolu - priklad pouziti
      */
 /*
-    BTNode root_ptr;
-    BTNode node;
+    
     B_tree_init(&root_ptr);
 
     //ulozi tokeny do tabulky symbolu
@@ -86,24 +173,34 @@ int main() {
      * Generator
      */
 
-    BTNode root_ptr;
-    BTNode n;
+    // BTNode root_ptr;
+    // BTNode n;
 
-    string s;
-    strInit(&s);
+    // string s;
+    // strInit(&s);
 
-    s.str = "a";
+    // s.str = "a";
 
-    startGenerating();
+    // startGenerating();
 
-    variable_declare(INTEGER_TYPE,&s,true);
-    generate_print(IDENTIFIER,&s);
+    // variable_declare(INTEGER_TYPE,&s,true);
+    // generate_print(IDENTIFIER,&s);
 
+    // node = B_tree_search(root_GTS,"inputs");
+    // if(node != NULL){
+    //     printf("FOUND: %s\n",node->data.name->str);
+    // } else{
+    //     printf("NOT FOUND: X\n");
+    // }
 
-
+    printf("GTS :\n");
+    B_tree_walk(root_GTS);
+    printf("\n");
+    
+    B_tree_free(root_GTS);
+    
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;
     }
-
 }
