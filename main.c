@@ -96,7 +96,7 @@ int fill_TS(){
                 }
                 //TODO params
                 params[params_number] = &token->string;
-                printf("%s\n", token->string.str);
+                //printf("%s\n", token->string.str);
                 params_number++;
 
                 get_next_token(token);  //comma or closing bracket
@@ -135,11 +135,11 @@ int main() {
 
     FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     result = parse();
-    printf("%d\n", result);
+    //printf("%d\n", result);
 
     printf("GTS :\n");
     B_tree_walk(root_GTS);
-
+    printf("\n");
 
     BTNode n;
     char *c= "inputi";

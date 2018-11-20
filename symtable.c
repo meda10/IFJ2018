@@ -115,7 +115,7 @@ void B_tree_free(BTNode root){
     }
 }
 
-int create_node(BTNode *table, string *name, int type, int params_number, string** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
+int create_node(BTNode *table, string *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
     BTNode node = B_tree_search(*table, name->str);
 
     if(node == NULL && name->str != NULL) {
