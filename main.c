@@ -76,7 +76,7 @@ int fill_TS(){
         fprintf(stderr, "Memmory allocation error.\n");
         return INTERNAL_ERROR;
     }
-    token_t *token = make_new_token();      //todo uvolnit pamet!!!! --> pouzit free_token(token)
+    token_t *token = make_new_token();
     get_next_token(token);
     while(token->type != ENDOFFILE){
         if (token->type == DEF){
@@ -123,6 +123,7 @@ int fill_TS(){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;
     }
+    free_token(token);
     return SEM_OK;
 }
 
