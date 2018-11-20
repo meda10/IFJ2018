@@ -20,34 +20,44 @@ int ts_number;
 void built_in_functions(){
     string tmp;
     strInit(&tmp);
-    
-    tmp.str = "inputs";
+
+    strAddCharArray(&tmp,"inputs");
     create_node(&root_GTS, &tmp, -1, 0, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "inputi";
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"inputi");
     create_node(&root_GTS, &tmp, -1, 0, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "inputf";
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"inputf");
     create_node(&root_GTS, &tmp, -1, 0, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "print";  //number of params >=1  ?
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"print"); //number of params >=1  ?
     create_node(&root_GTS, &tmp, -1, 1, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "length";
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"length");
     create_node(&root_GTS, &tmp, -1, 1, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "substr";
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"substr");
     create_node(&root_GTS, &tmp, -1, 3, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "ord";
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"ord");
     create_node(&root_GTS, &tmp, -1, 2, NULL, true, false, true, false, &root_GTS);
-    
-    tmp.str = "chr";
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"chr");
     create_node(&root_GTS, &tmp, -1, 1, NULL, true, false, true, false, &root_GTS);
+    strClear(&tmp);
+
+    delete_string(&tmp);
 }
 
 int fill_TS(){
-    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/source");
+    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     string function_id;
     int params_number = 0;
     int initial_size = 5;
@@ -66,7 +76,7 @@ int fill_TS(){
         fprintf(stderr, "Memmory allocation error.\n");
         return INTERNAL_ERROR;
     }
-    token_t *token = make_new_token();
+    token_t *token = make_new_token();      //todo uvolnit pamet!!!! --> pouzit free_token(token)
     get_next_token(token);
     while(token->type != ENDOFFILE){
         if (token->type == DEF){
@@ -121,10 +131,30 @@ int main() {
     int result;
     result = fill_TS();
     if (result != SEM_OK) return SEM_ERR;
-    
-    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/source");
+
+    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     result = parse();
     printf("%d\n", result);
+
+    printf("GTS :\n");
+    B_tree_walk(root_GTS);
+
+
+    BTNode n;
+    char *c= "inputi";
+    node = B_tree_search(root_GTS,c);
+    if(node != NULL){
+        printf("FOUND: %s\n",node->data.name);
+    } else{
+        printf("NOT FOUND: %s\n",c);
+    }
+    printf("\n");
+
+
+
+    B_tree_free(root_GTS);
+
+
     
     /**
      * Tabulka symbolu - priklad pouziti
@@ -193,12 +223,6 @@ int main() {
     //     printf("NOT FOUND: X\n");
     // }
 
-    printf("GTS :\n");
-    B_tree_walk(root_GTS);
-    printf("\n");
-    
-    B_tree_free(root_GTS);
-    
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;

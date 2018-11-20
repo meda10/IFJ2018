@@ -16,7 +16,7 @@ typedef union val{
 }U_value;
 
 typedef struct Values {
-    string *name;
+    char *name;
     //char *value;
     int type;
     int params_number;

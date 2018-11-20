@@ -42,6 +42,11 @@
 #define EOL 38
 #define ENDOFFILE 39
 
+
+#define EXPRESSION_TYPE 40
+
+
+
 extern const char* names[];
 
 extern const char* reservedWords[];

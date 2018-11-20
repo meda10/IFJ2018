@@ -6,12 +6,15 @@
 #include "symtable.h"
 #include "string.h"
 
-TValues init_val(string *name) {
+TValues init_val(char *name, int len) {
     TValues data;
-    if(name->str != NULL){
-        strInit(&data.name);
-        strCopyString(data.name,name);
-        //data.value = NULL;
+    if(name != NULL){
+        if ((data.name = (char*) malloc((size_t)len + 1)) == NULL){
+            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+            //todo set_error_string();
+        }
+        strcpy(data.name, name);
+        //printf("CPY: %s -> %s FROM %p TO %p\n",name,data.name,name,data.name);
         data.type = -1;
         data.params_number = -1;
         data.params = NULL;
@@ -34,11 +37,11 @@ BTNode B_tree_search(BTNode root, char *name){
         if(name == NULL){
             return NULL;
         }
-        if(strcmp(root->data.name->str,name) == 0){ //todo cmp
+        if(strcmp(root->data.name,name) == 0){ //todo cmp
             return root;
         }
 
-        if(strcmp(root->data.name->str,name) > 0){ //todo cmp
+        if(strcmp(root->data.name,name) > 0){ //todo cmp
             root = root->L_ptr;
         }else{
             root = root->R_ptr;
@@ -54,12 +57,14 @@ int B_tree_insert(BTNode *root, struct Values data){
 
     while((tmp_root != NULL) && (!found)){
         tmp = tmp_root;
-        if(strcmp(tmp_root->data.name->str,data.name->str) == 0){ //todo cmp
+        //printf("LF -> %s IN -> %s\n",tmp_root->data.name,data.name);
+        if(strcmp(tmp_root->data.name,data.name) == 0){ //todo cmp
             //printf("NODE %d, ALREADY EXISTS\n", tmp_root->data);
             //tmp_root->data = V; todo insert
+
             found = true;
         }
-        if(strcmp(tmp_root->data.name->str,data.name->str) > 0){ //todo cmp
+        if(strcmp(tmp_root->data.name,data.name) > 0){ //todo cmp
             tmp_root = tmp_root->L_ptr;
         }else{
             tmp_root = tmp_root->R_ptr;
@@ -75,10 +80,11 @@ int B_tree_insert(BTNode *root, struct Values data){
         new_node->L_ptr = NULL;
         new_node->R_ptr = NULL;
 
+        //printf("CREATE NEW NODE: %s  %p\n",new_node->data.name, new_node->data.name);
         if(tmp == NULL){
             *root = new_node;
         }else{
-            if(strcmp(tmp->data.name->str,data.name->str) > 0){ //todo cmp
+            if(strcmp(tmp->data.name,data.name) > 0){ //todo cmp
                 tmp->L_ptr = new_node;
             }else{
                 tmp->R_ptr = new_node;
@@ -92,8 +98,9 @@ int B_tree_insert(BTNode *root, struct Values data){
 void B_tree_walk(BTNode root){
     if(root != NULL){
         B_tree_walk(root->L_ptr);
-        printf("%s ", root->data.name->str);
         B_tree_walk(root->R_ptr);
+        printf("%s ", root->data.name);
+        //printf("%s ->%p\n", root->data.name,root->data.name);
     }
 }
 
@@ -101,8 +108,9 @@ void B_tree_free(BTNode root){
     if(root != NULL){
         B_tree_free(root->L_ptr);
         B_tree_free(root->R_ptr);
+        free(root->data.name);
         //delete_string(root->data.name);
-        delete_string(&root->data.name);
+        //delete_string(&root->data.name);
         free(root);
     }
 }
@@ -111,7 +119,7 @@ int create_node(BTNode *table, string *name, int type, int params_number, string
     BTNode node = B_tree_search(*table, name->str);
 
     if(node == NULL && name->str != NULL) {
-        TValues val = init_val(name);
+        TValues val = init_val(name->str, name->length);
         //val.value = value;
         val.type = type;
         val.params_number = params_number;
@@ -123,6 +131,7 @@ int create_node(BTNode *table, string *name, int type, int params_number, string
         val.local_sym_table = local_sym_table;
 
         B_tree_insert(table, val);
+        //printf("ADD: %s -> %p %d\n",val.name,val.name,val.params_number);
 
         return RET_OK;
     }else {

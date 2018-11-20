@@ -20,8 +20,8 @@ extern int number_of_func;
 
 int PROGRAM(){
 	int result;
-	printf("PROGRAM\n");
-	print_token(token);
+	//printf("PROGRAM\n");
+	//print_token(token);
 	switch(token->type){
 		case DEF:
 		case IF:
@@ -58,8 +58,8 @@ int PROGRAM(){
 }
 
 int FUNC_DEF(){
-	printf("FUNC_DEF\n");
-	print_token(token);
+	//printf("FUNC_DEF\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case DEF:									//4.<FUNC_DEF> -> def ID (<PARAMS>) EOL <STL> end
@@ -114,8 +114,8 @@ int FUNC_DEF(){
 }
 
 int PARAMS(){
-	printf("PARAMS\n");
-	print_token(token);
+	//printf("PARAMS\n");
+	//print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 			get_next_token(token);					//6. <PARAMS> -> ID <NEXT_PARAM>
@@ -127,8 +127,8 @@ int PARAMS(){
 }
 
 int NEXT_PARAM(){
-	printf("NEXT_PARAM\n");
-	print_token(token);
+	//printf("NEXT_PARAM\n");
+	//print_token(token);
 	switch(token->type){
 		case COMMA:
 			get_next_token(token);
@@ -143,8 +143,8 @@ int NEXT_PARAM(){
 }
 
 int STL(){
-	printf("STL\n");
-	print_token(token);
+	//printf("STL\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case DEF:
@@ -180,8 +180,8 @@ int STL(){
 }
 
 int S(){
-	printf("S\n");
-	print_token(token);
+	//printf("S\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case IF:									//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
@@ -258,8 +258,8 @@ int S(){
 }
 
 int ASS(){
-	printf("ASS\n");
-	print_token(token);
+	//printf("ASS\n");
+	//print_token(token);
 	switch(token->type){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
@@ -284,9 +284,9 @@ int ASS(){
 				create_node(&root_GTS, &token->string, 0, 0, NULL, false, true, false, true, NULL);
 				node = B_tree_search(root_GTS, token->string.str);
     			if(node != NULL){
-			        printf("FOUND: %s\n",node->data.name->str);
+			        //printf("FOUND: %s\n",node->data.name);
 			    } else{
-			        printf("NOT FOUND: X\n");
+			        //printf("NOT FOUND: X\n");
 			    }
 				read_token = false;
 				get_next_token(token);
@@ -299,8 +299,8 @@ int ASS(){
 
 
 int VALUE(){
-	printf("VALUE\n");
-	print_token(token);
+	//printf("VALUE\n");
+	//print_token(token);
 	switch(token->type){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
@@ -330,8 +330,8 @@ int VALUE(){
 }
 
 int FUNC_CALL(){
-	printf("FUNC_CALL\n");
-	print_token(token);
+	//printf("FUNC_CALL\n");
+	//print_token(token);
 	switch(token->type){
 		case INPUTS:
 		case INPUTI:
@@ -354,8 +354,8 @@ int FUNC_CALL(){
 }
 
 int INPUT_PARAMS(){
-	printf("INPUT_PARAMS\n");
-	print_token(token);
+	//printf("INPUT_PARAMS\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case IF:
@@ -387,8 +387,8 @@ int INPUT_PARAMS(){
 }
 
 int TERM(){
-	printf("TERM\n");
-	print_token(token);
+	//printf("TERM\n");
+	//print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 		case STRING_TYPE:
@@ -403,8 +403,8 @@ int TERM(){
 }
 
 int NEXT_TERM(){
-	printf("NEXT_TERM\n");
-	print_token(token);
+	//printf("NEXT_TERM\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case IF:
@@ -431,8 +431,8 @@ int NEXT_TERM(){
 }
 
 int E(){
-	printf("E\n");
-	print_token(token);
+	//printf("E\n");
+	//print_token(token);
 	int result;
 	result = precedence();
 	if(result != SYNTAX_OK)

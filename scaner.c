@@ -200,9 +200,6 @@ int get_next_token(token_t *token) {
     tState state = STATE_START;
     string *s = &(token->string);
 
-    if(token->string.allocSize == 0)
-        strInit(s);
-
     while (1) {
         //printf("STATE> %d | char %c\n",state,c);
         c = (char) fgetc(source_file);
