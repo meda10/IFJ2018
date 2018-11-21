@@ -3,8 +3,11 @@
 
 // pomocne tokeny pro precedencni analyzu
 #define DOL 40 // hodnota DOLAR
-#define EXP 41 // hodnota EXPRESSION
-#define START_OF_RULE 42 // hodnota zacatku pravidla u precedencni analyzy
+#define EXP_IDENTIFIER 41 // hodnota EXPRESSION
+#define EXP_INTEGER 42 // hodnota EXPRESSION
+#define EXP_DOUBLE 43 // hodnota EXPRESSION
+#define EXP_STRING 44 // hodnota EXPRESSION
+#define START_OF_RULE 45 // hodnota zacatku pravidla u precedencni analyzy
 
 typedef struct item {
 	token_t token;         //  jeden prvek (data) zasobniku 

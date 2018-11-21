@@ -16,17 +16,17 @@ extern token_t *token;
 extern bool read_token;
 extern token_t *next_token;
 
+
 tPrec prec_table[ PREC_TABE_SIZE ][ PREC_TABE_SIZE ] = 
-//       */   |	   +-	|< <= > >=| == !=  |    (    |    )    |   ID    |    not    |   $
-{	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,    L_P  ,    G_P },
-	{    L_P  ,    G_P  ,    G_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,    L_P  ,    G_P },
-	{    L_P  ,    L_P  ,    N_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,    L_P  ,    G_P },
-	{    L_P  ,    L_P  ,    L_P  ,   N_P  ,    L_P  ,    G_P  ,    L_P  ,    L_P  ,    G_P },
-	{    L_P  ,    L_P  ,    L_P  ,   L_P  ,    L_P  ,    E_P  ,    L_P  ,    L_P  ,    N_P },
-	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    N_P  ,    G_P  ,    N_P  ,    G_P  ,    G_P }, // u not ma jeste nevim je tam zatim GN
-	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    N_P  ,    G_P  ,    N_P  ,    G_P  ,    G_P }, // u not ma jeste nevim je tam zatim GN
-	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,    L_P  ,    G_P },  
-	{    L_P  ,    L_P  ,    L_P  ,   L_P  ,    L_P  ,    N_P  ,    L_P  ,    L_P  ,    N_P } };
+//       */   |	   +-	|< <= > >=| == !=  |    (    |    )    |   ID    |   $
+{	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,  G_P },
+	{    L_P  ,    G_P  ,    G_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,  G_P },
+	{    L_P  ,    L_P  ,    N_P  ,   G_P  ,    L_P  ,    G_P  ,    L_P  ,  G_P },
+	{    L_P  ,    L_P  ,    L_P  ,   N_P  ,    L_P  ,    G_P  ,    L_P  ,  G_P },
+	{    L_P  ,    L_P  ,    L_P  ,   L_P  ,    L_P  ,    E_P  ,    L_P  ,  N_P },
+	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    N_P  ,    G_P  ,    N_P  ,  G_P },
+	{    G_P  ,    G_P  ,    G_P  ,   G_P  ,    N_P  ,    G_P  ,    N_P  ,  G_P },  
+	{    L_P  ,    L_P  ,    L_P  ,   L_P  ,    L_P  ,    N_P  ,    L_P  ,  N_P } };
 	
 
 
@@ -44,10 +44,31 @@ void push_dolar(stack_t* s){
 /*
  * Funkce na pushnuti znaku E(EXPRESSION) na zacatek zasobniku
  */
-void push_E(stack_t* s){
+void push_E(stack_t* s, token_t token){
 	token_t t;
-    t.type = EXP;
-    t.line = 1; // jen kvuli validnimu pouziti print_token
+	switch(token.type){
+		case IDENTIFIER:
+		case EXP_IDENTIFIER:
+			t.type = EXP_IDENTIFIER;
+			break;
+		case INTEGER_TYPE:
+		case EXP_INTEGER:
+			t.type = EXP_INTEGER;
+			break;
+		case STRING_TYPE:
+		case EXP_STRING:
+			t.type = EXP_STRING;
+			break;
+		case DOUBLE_TYPE:
+		case EXP_DOUBLE:
+			t.type = EXP_DOUBLE;
+			break;
+	}
+
+    t.line = token.line;
+    strInit(&t.string);
+    strCopyString(&t.string, &token.string);
+
     stackPush (s, t);
 }
 
@@ -105,32 +126,70 @@ tPrec_op token_to_prec(token_t t){
 		case DOUBLE_TYPE:
 			return ID_P;
 
-		case NOT:
-			return NOT_P;
-
 		case DOL:
 		case EOL:
 		case ENDOFFILE:
+		case THEN:
+		case DO:
 			return DOL_P;
 
-		case EXP:
+		case EXP_IDENTIFIER:
+		case EXP_INTEGER:
+		case EXP_DOUBLE:
+		case EXP_STRING:
 			return EXP_P;
-		//default:
-		//	return DOL_P;
+		
+		default:
+			return OTHER_P;
 
 	}
 }
 
 /*
- * Funkce vymaze zasobnik od zacatku po znak < (start of rule)
+ * Funkce vymaze zasobnik od zacatku po znak < (start of rule) a vlozi <E> na zasobnik 
  */
-void delete_rule(stack_t* s, item_stack_t* start_rule){
+void delete_rule(stack_t* s, item_stack_t* start_rule, token_t token){
+	token_t t;
+	if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
+		(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
+		
+		switch(token.type){
+			case IDENTIFIER:
+			case EXP_IDENTIFIER:
+				t.type = EXP_IDENTIFIER;
+				break;
+			case INTEGER_TYPE:
+			case EXP_INTEGER:
+				t.type = EXP_INTEGER;
+				break;
+			case STRING_TYPE:
+			case EXP_STRING:
+				t.type = EXP_STRING;
+				break;
+			case DOUBLE_TYPE:
+			case EXP_DOUBLE:
+				t.type = EXP_DOUBLE;
+				break;
+		}
+	    t.line = token.line;
+	    strInit(&t.string);
+	    strCopyString(&t.string, &token.string);
+	}
+
+
 	item_stack_t* actual = s->top;
 	while (actual != start_rule){
 		stackPop(s);
 		actual = s->top;
 	}
 	stackPop(s);
+
+	if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
+		(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
+		stackPush (s, t);
+		delete_string(&t.string);
+	}
+		
 }
 
 
@@ -138,16 +197,19 @@ void delete_rule(stack_t* s, item_stack_t* start_rule){
  * Funkce prevadi pravidlo na neterminal E 
  */
 int rule(stack_t* s, item_stack_t* start_rule){
+
 	item_stack_t* rule = start_rule->previous;
 	int operator;
+
 	switch(rule->token.type){
 		// pokud pravidlo zacina ID
 		case IDENTIFIER:
 		case INTEGER_TYPE:
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
-			delete_rule(s, start_rule);
-			push_E(s);
+
+			delete_rule(s, start_rule, rule->token);
+			//push_E(s, E_rule.token);
 			return 12;				// 12. <E> -> ID
 
 		// pokud pravidlo zacina (	
@@ -155,13 +217,13 @@ int rule(stack_t* s, item_stack_t* start_rule){
 			if (rule->previous == NULL)
 				return 0; // error
 			rule = rule->previous;
-			if (rule->token.type == EXP){
+			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
 				if (rule->previous == NULL)
 					return 0; // error
 				rule = rule->previous;
 				if(rule->token.type == CLOSING_BRACKET){
-					delete_rule(s, start_rule);
-					push_E(s);
+					delete_rule(s, start_rule, rule->next->token);
+					//push_E(s, E_rule.token);
 					return 11;			//11. <E> -> (<E>)
 				}
 				else 
@@ -171,12 +233,17 @@ int rule(stack_t* s, item_stack_t* start_rule){
 				return 0; //error
 
 		// pokud pravidlo zacina <E>
-		case EXP:
+		case EXP_IDENTIFIER:
+		case EXP_INTEGER:
+		case EXP_DOUBLE:
+		case EXP_STRING:
+
+
 			if (rule->previous == NULL)
 				return 0;
 			rule = rule->previous;
 			switch(rule->token.type){
-				//1.  <E> -> <E> * <E> nebo 
+				//1.  <E> -> <E> * <E>
 				case ASTERISK:
 					operator = 1;
 					break;
@@ -222,10 +289,11 @@ int rule(stack_t* s, item_stack_t* start_rule){
 			}
 			if (rule->previous == NULL)
 				return 0;
+			
 			rule = rule->previous;
-			if (rule->token.type == EXP){
-				delete_rule(s, start_rule);
-				push_E(s);
+			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
+				delete_rule(s, start_rule, rule->token);
+				//push_E(s, E_rule.token);
 				return operator;
 			}
 			else 
@@ -236,13 +304,18 @@ int rule(stack_t* s, item_stack_t* start_rule){
 	}
 }
 
+// Funkce vola get_next_token pokud uz neni novy token v next_token
 void get_next_token_prec(){
+
 	if (read_token){
 		read_token = false; 
 		*token = *next_token;
 	}
 	get_next_token(token);
 }
+
+//void semantic()
+
 
 /*
  * Funkce resi precedencni analyzu
@@ -262,13 +335,19 @@ int precedence(){
 	int use_rule;
 
 	while(1){
-		// get_next_token(token); // to by se melo volat pred touto funkci
+		
+					/*	// jen pro testovani
+						printStack(s);
+					*/	
 
-						/*// jen pro testovani
-						printStack(s);*/
-
-		a = token_to_prec(stackTopTerm(s)->token);
-		b = token_to_prec(*token);
+		if ((a = token_to_prec(stackTopTerm(s)->token)) >= PREC_TABE_SIZE ){
+			stackFree(s);
+			return SYNTAX_ERR;
+		}
+		if ((b = token_to_prec(*token)) >= PREC_TABE_SIZE ){
+			stackFree(s);
+			return SYNTAX_ERR;
+		}
 
 		if(a == DOL_P && b == DOL_P){
 			stackFree(s);
@@ -288,7 +367,6 @@ int precedence(){
 						printf("=\n");*/			
 				stackPush(s, *token);
 				get_next_token_prec();
-				//get_next_token(token);
 				break;
 
 			// pokud je v precedencni tabulce <	
@@ -298,7 +376,6 @@ int precedence(){
 				stackPushBeforeTerm(s, stackTopTerm (s));
 				stackPush (s, *token);
 				get_next_token_prec();
-				//get_next_token(token);
 				break;
 
 			// pokud je v precedencni tabulce > 

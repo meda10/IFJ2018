@@ -70,7 +70,10 @@ const char* names[] = {
         "EOL",
         "ENDOFFILE",
         "DOL",  // pomocny token na precedencni analyzu
-        "EXP",  // pomocny token na precedencni analyzu
+        "EXP_IDENTIFIER", // pomocny token na precedencni analyzu
+        "EXP_INTEGER",// pomocny token na precedencni analyzu
+        "EXP_DOUBLE",// pomocny token na precedencni analyzu
+        "EXP_STRING",// pomocny token na precedencni analyzu
         "START_OF_RULE" // pomocny token na precedencni analyzu, znaci < zacatek pravidla v zasobniku
 
 };

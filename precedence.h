@@ -1,14 +1,14 @@
 #ifndef precedence_H
 #define precedence_H
 
-#define PREC_TABE_SIZE 9
+#define PREC_TABE_SIZE 8
 
 typedef enum {L_P, E_P, G_P, N_P } tPrec; //LESS , EQUAL, GREATER , NOTHING
 
 
-     //		   0		1		 2			 3		  4     5	  6 	 7		8		 9
-     //       */       +-    < <= > >=     == !=      (     )     ID    not     $		EXP
-typedef enum {MUL_P, ADD_P,    LEG_P,      EN_P,     LB_P, RB_P, ID_P, NOT_P , DOL_P, EXP_P } tPrec_op;
+     //		   0		1		 2			 3		  4     5	  6 	 7		 8      9
+     //       */       +-    < <= > >=     == !=      (     )     ID     $		EXP     
+typedef enum {MUL_P, ADD_P,    LEG_P,      EN_P,     LB_P, RB_P, ID_P , DOL_P, EXP_P, OTHER_P } tPrec_op;
 
 tPrec prec_table[ PREC_TABE_SIZE ][ PREC_TABE_SIZE ];
 
@@ -21,7 +21,7 @@ void push_dolar(stack_t* s);
 /*
  * Funkce na pushnuti znaku E(EXPRESSION) na zacatek zasobniku
  */
-void push_E(stack_t* s);
+void push_E(stack_t* s, token_t token);
 
 /*
  * Funkce najde a vrati ukazatel na start of rule (znacka < )
@@ -34,9 +34,9 @@ item_stack_t* find_StartOfRule(stack_t* s);
 tPrec_op token_to_prec(token_t t);
 
 /*
- * Funkce vymaze zasobnik od zacatku po znak < (start of rule)
+ * Funkce vymaze zasobnik od zacatku po znak < (start of rule) a vlozi <E> na zasobnik 
  */
-void delete_rule(stack_t* s, item_stack_t* start_rule);
+void delete_rule(stack_t* s, item_stack_t* start_rule, token_t t);
 
 
 /*
