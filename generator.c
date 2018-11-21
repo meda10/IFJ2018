@@ -10,13 +10,13 @@
 
 char *get_new_label() {
     char *reg = (char *) malloc(30 * sizeof(char));
-    sprintf(reg, "%%label_number_%d", label_number++);
+    sprintf(reg, "%%L_NUM_%d", label_number++);
     return reg; //todo malloc
 }
 
 char *get_frame() {
     char *frameTP = (char *) malloc(30 * sizeof(char));
-    if (!inScope) {
+    if (inScope) {
         strcpy(frameTP, "LF");
     } else {
         strcpy(frameTP, "GF");
@@ -44,6 +44,7 @@ char *get_type(int type) {
 
 
 void variable_declare(int type, char *name) {
+    printf("# Variable declare\n");
     printf("DEFVAR %s@%s\n", get_frame(), name);
     double a = 0;
     switch (type) {
@@ -64,7 +65,7 @@ void variable_declare(int type, char *name) {
 
 void generate_start(){
     label_number = 0;
-    inScope = true;
+    inScope = false;
 
     printf(".IFJcode18\n");
 
@@ -96,7 +97,7 @@ void generate_main_end(){
     printf("CLEARS\n");
 }
 
-void generateDataConversion() {
+void data_conversion() {
     printf("# Data Conversion\n");
     printf("POPS GF@$$var_3\n");
     printf("POPS GF@$$var_4\n");
@@ -107,11 +108,11 @@ void generateDataConversion() {
     char *conversionLabel = get_new_label();
 
     printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
-    printf("JUMPIFEQ %sN GF@$$var_1 string@float\n", conversionLabel);
+    printf("JUMPIFEQ %sv1_not GF@$$var_1 string@float\n", conversionLabel);
 
     printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
 
-    printf("LABEL %sN\n", conversionLabel);
+    printf("LABEL %sv1_not\n", conversionLabel);
     printf("JUMPIFEQ %s GF@$$var_2 string@float\n", conversionLabel);
     printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
 
@@ -119,6 +120,65 @@ void generateDataConversion() {
     printf("PUSHS GF@$$var_4\n");
     printf("PUSHS GF@$$var_3\n");
 }
+
+void data_conversion_to_float() {
+    printf("# Data Conversion to float\n");
+    printf("POPS GF@$$var_3\n");
+    printf("POPS GF@$$var_4\n");
+
+    printf("TYPE GF@$$var_1 GF@$$var_3\n");
+    printf("TYPE GF@$$var_2 GF@$$var_4\n");
+
+    char *conversionLabel = get_new_label();
+
+    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@float\n", conversionLabel);
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", conversionLabel);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+
+
+    printf("LABEL %sv1_not\n", conversionLabel);
+    printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", conversionLabel);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+
+    printf("LABEL %sv2_not\n", conversionLabel);
+    printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
+    printf("JUMP %s\n", conversionLabel);
+
+    printf("LABEL %s\n", conversionLabel);
+    printf("PUSHS GF@$$var_4\n");
+    printf("PUSHS GF@$$var_3\n");
+}
+
+void data_conversion_to_int() {
+    printf("# Data Conversion to float\n");
+    printf("POPS GF@$$var_3\n");
+    printf("POPS GF@$$var_4\n");
+
+    printf("TYPE GF@$$var_1 GF@$$var_3\n");
+    printf("TYPE GF@$$var_2 GF@$$var_4\n");
+
+    char *conversionLabel = get_new_label();
+
+    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@int\n", conversionLabel);
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", conversionLabel);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+
+
+    printf("LABEL %sv1_not\n", conversionLabel);
+    printf("FLOAT2INT GF@$$var_3 GF@$$var_3\n");
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", conversionLabel);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+
+    printf("LABEL %sv2_not\n", conversionLabel);
+    printf("FLOAT2INT GF@$$var_4 GF@$$var_4\n");
+    printf("JUMP %s\n", conversionLabel);
+
+    printf("LABEL %s\n", conversionLabel);
+    printf("PUSHS GF@$$var_4\n");
+    printf("PUSHS GF@$$var_3\n");
+}
+
 
 void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value) {
     printf("# Variable assign\n");
@@ -135,18 +195,7 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
             printf("MOVE %s@%s string@%s\n", get_frame(), variable_name, variable_value);
             break;
         case VARIABLE_E:
-            //if ((var1->data.type == INTEGER_TYPE && var2->data.type == DOUBLE_TYPE) || (var1->data.type == DOUBLE_TYPE && var2->data.type == INTEGER_TYPE)) {
-
-            //todo konvert
-            /*
-            char *hReg = get_new_label();
-            printf("DEFVAR %s@%s\n", frame, hReg);
-            generateImplicitConversion(getWholeRegisterName(hReg, frame), getWholeRegisterName(expression->op.variableExp->data.name, getVarFrame()), expression->op.variableExp->data.type, var->data.type);
-            printf("MOVE %s@%s %s@%s\n", get_frame(), var->data.name, frame, hReg);
-            */
-            //} else {
             printf("MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
-            //}
             break;
 
         default:
@@ -179,14 +228,19 @@ void generate_push(int type, char* name) {
 }
 
 void generate_mathemeatical_operations(int type){
-    generateDataConversion();
+    data_conversion();
     printf("# Mathematical operations\n");
     switch (type){
         case G_TYPE_PLUS:
             printf("ADDS\n");
             break;
         case G_TYPE_DIV:
+            data_conversion_to_float();
             printf("DIVS\n");
+            break;
+        case G_TYPE_IDIV:
+            data_conversion_to_int();
+            printf("IDIVS\n");
             break;
         case G_TYPE_MNUS:
             printf("SUBS\n");
@@ -220,6 +274,7 @@ void generate_print(int type, char* name) {
 }
 
 void gensr(char* name){
+    printf("# Pop \n");
     printf("POPS GF@$$result\n");
 }
 

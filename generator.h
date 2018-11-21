@@ -38,7 +38,7 @@ void generate_print(int type, char* name);
 void generate_print_result();
 void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value);
 void gensr(char* name);
-void generateDataConversion();
+void data_conversion();
 
 
 #endif //SCANNER_GENERATOR_H

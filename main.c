@@ -209,14 +209,18 @@ int main() {
     generate_start();
     generate_main();
 
-    //deklarace promene a prirayeni hodnoty
-    variable_declare(INTEGER_TYPE,"a");
-    generate_variable_assign(INT_E,"a","87");
+    //deklarace promene a prirazeni hodnoty
+    variable_declare(DOUBLE_TYPE,"a");
+    generate_variable_assign(DOUBLE_E,"a","90");
 
-    //push hodnot na zasobnik a secteni
+    //deklarace promene a prirazeni hodnoty
+    variable_declare(INTEGER_TYPE,"b");
+    generate_variable_assign(INT_E,"b","11");
+
+    //push hodnot na zasobnik a provedeni matematicke operace
     generate_push(IDENTIFIER,"a");
-    generate_push(DOUBLE_TYPE,"55.5");
-    generate_mathemeatical_operations(G_TYPE_PLUS);
+    generate_push(IDENTIFIER,"b");
+    generate_mathemeatical_operations(G_TYPE_IDIV);
 
     //vypis hodnoty
     gensr("");
@@ -224,6 +228,9 @@ int main() {
 
     //konec
     generate_main_end();
+
+    double a = 90 / 10;
+    //printf("--> %a\n",a);
 
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
