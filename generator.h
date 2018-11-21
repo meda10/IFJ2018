@@ -1,7 +1,3 @@
-//
-// Created by petr on 18.11.18.
-//
-
 #ifndef SCANNER_GENERATOR_H
 #define SCANNER_GENERATOR_H
 

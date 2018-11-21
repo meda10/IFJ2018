@@ -9,13 +9,6 @@
 #define KEY_WORDS_END 18
 
 /*
- union data{
-
-        double double_data;
-        int   integer_data;
-    }data_t;
- */
-/*
  * Token
  */
 typedef struct token{
