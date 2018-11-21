@@ -65,6 +65,7 @@ void variable_declare(int type, char *name) {
 
 void generate_start(){
     label_number = 0;
+    if_number = 0;
     inScope = false;
 
     printf(".IFJcode18\n");
@@ -105,18 +106,18 @@ void data_conversion() {
     printf("TYPE GF@$$var_1 GF@$$var_3\n");
     printf("TYPE GF@$$var_2 GF@$$var_4\n");
 
-    char *conversionLabel = get_new_label();
+    char *label = get_new_label();
 
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
-    printf("JUMPIFEQ %sv1_not GF@$$var_1 string@float\n", conversionLabel);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
+    printf("JUMPIFEQ %sv1_not GF@$$var_1 string@float\n", label);
 
     printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
 
-    printf("LABEL %sv1_not\n", conversionLabel);
-    printf("JUMPIFEQ %s GF@$$var_2 string@float\n", conversionLabel);
+    printf("LABEL %sv1_not\n", label);
+    printf("JUMPIFEQ %s GF@$$var_2 string@float\n", label);
     printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
 
-    printf("LABEL %s\n", conversionLabel);
+    printf("LABEL %s\n", label);
     printf("PUSHS GF@$$var_4\n");
     printf("PUSHS GF@$$var_3\n");
 }
@@ -129,23 +130,23 @@ void data_conversion_to_float() {
     printf("TYPE GF@$$var_1 GF@$$var_3\n");
     printf("TYPE GF@$$var_2 GF@$$var_4\n");
 
-    char *conversionLabel = get_new_label();
+    char *label = get_new_label();
 
-    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@float\n", conversionLabel);
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", conversionLabel);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@float\n", label);
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", label);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
 
-    printf("LABEL %sv1_not\n", conversionLabel);
+    printf("LABEL %sv1_not\n", label);
     printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", conversionLabel);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", label);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
-    printf("LABEL %sv2_not\n", conversionLabel);
+    printf("LABEL %sv2_not\n", label);
     printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
-    printf("JUMP %s\n", conversionLabel);
+    printf("JUMP %s\n", label);
 
-    printf("LABEL %s\n", conversionLabel);
+    printf("LABEL %s\n", label);
     printf("PUSHS GF@$$var_4\n");
     printf("PUSHS GF@$$var_3\n");
 }
@@ -158,23 +159,23 @@ void data_conversion_to_int() {
     printf("TYPE GF@$$var_1 GF@$$var_3\n");
     printf("TYPE GF@$$var_2 GF@$$var_4\n");
 
-    char *conversionLabel = get_new_label();
+    char *label = get_new_label();
 
-    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@int\n", conversionLabel);
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", conversionLabel);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@int\n", label);
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", label);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
 
-    printf("LABEL %sv1_not\n", conversionLabel);
+    printf("LABEL %sv1_not\n", label);
     printf("FLOAT2INT GF@$$var_3 GF@$$var_3\n");
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", conversionLabel);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", conversionLabel);
+    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", label);
+    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
-    printf("LABEL %sv2_not\n", conversionLabel);
+    printf("LABEL %sv2_not\n", label);
     printf("FLOAT2INT GF@$$var_4 GF@$$var_4\n");
-    printf("JUMP %s\n", conversionLabel);
+    printf("JUMP %s\n", label);
 
-    printf("LABEL %s\n", conversionLabel);
+    printf("LABEL %s\n", label);
     printf("PUSHS GF@$$var_4\n");
     printf("PUSHS GF@$$var_3\n");
 }
@@ -242,7 +243,7 @@ void generate_mathemeatical_operations(int type){
             data_conversion_to_int();
             printf("IDIVS\n");
             break;
-        case G_TYPE_MNUS:
+        case G_TYPE_MINUS:
             printf("SUBS\n");
             break;
         case G_TYPE_MUL:
@@ -253,6 +254,36 @@ void generate_mathemeatical_operations(int type){
             break;
     }
 }
+
+
+void generate_comparative_operations(int type){
+    data_conversion();
+    printf("# Mathematical operations\n");
+    switch (type){
+        case G_TYPE_LESS:
+            printf("LTS\n");
+            break;
+        case G_TYPE_LESS_OR_EQUAL:
+            printf("\n");
+            break;
+        case G_TYPE_GREATER:
+            printf("GTS\n");
+            break;
+        case G_TYPE_GREATER_OR_EQUAL:
+            printf("\n");
+            break;
+        case G_TYPE_EQUAL:
+            printf("EQS\n");
+            break;
+        case G_TYPE_NOT_EQUAL:
+            printf("\n");
+            break;
+        default:
+            //todo
+            break;
+    }
+}
+
 
 void generate_print(int type, char* name) {
     switch (type) {
@@ -273,7 +304,7 @@ void generate_print(int type, char* name) {
     }
 }
 
-void gensr(char* name){
+void generate_pop_to_result(){
     printf("# Pop \n");
     printf("POPS GF@$$result\n");
 }
@@ -282,3 +313,31 @@ void generate_print_result(){
     printf("WRITE GF@$$result\n");
 
 }
+
+void generate_if() {
+    if_number++;
+    printf("# If start \n");
+    printf("JUMPIFEQ if_%d_ELSE GF@$$result bool@false\n",if_number);
+}
+
+/**
+ * Musi se vydy volat!! Kdyz neexistuje else vola se s false
+ * @param else_statment - true pokud existuje else statment, false pokud ne
+ */
+void generate_else(bool else_statment) {
+    printf("# else \n");
+    printf("JUMP if_%d_END\n",if_number);
+
+
+    printf("LABEL if_%d_ELSE\n",if_number);
+    if(else_statment == false){
+        printf("JUMP if_%d_END\n",if_number);
+    }
+}
+
+
+void generate_if_else_end() {
+    printf("# End If\n");
+    printf("LABEL if_%d_END\n",if_number);
+}
+

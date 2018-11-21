@@ -204,27 +204,68 @@ int main() {
      * Generator
      */
 
+    /*
+     int result; //globalni promena
+
+     int a = 0;
+     a = 50;
+     int b = 0;
+     b = 15;
+
+     if(5 > 3){
+        result = a + b;
+        printf(result);
+     }else {
+        result = a - b;
+        printf(result);
+     }
+
+     */
+
 
     //start generatoru
     generate_start();
     generate_main();
 
     //deklarace promene a prirazeni hodnoty
-    variable_declare(DOUBLE_TYPE,"a");
-    generate_variable_assign(DOUBLE_E,"a","90");
+    variable_declare(INTEGER_TYPE,"a");
+    generate_variable_assign(INT_E,"a","50");
 
     //deklarace promene a prirazeni hodnoty
     variable_declare(INTEGER_TYPE,"b");
-    generate_variable_assign(INT_E,"b","11");
+    generate_variable_assign(INT_E,"b","15");
 
-    //push hodnot na zasobnik a provedeni matematicke operace
-    generate_push(IDENTIFIER,"a");
-    generate_push(IDENTIFIER,"b");
-    generate_mathemeatical_operations(G_TYPE_IDIV);
+    //push hodnot co se maji porovnat
+    generate_push(INTEGER_TYPE,"5");
+    generate_push(INTEGER_TYPE,"3");
+
+    //porovnani hodnot
+    generate_comparative_operations(G_TYPE_GREATER);
+
+    //pop hodnoty a test IF podminky
+    generate_pop_to_result();
+    generate_if();
+        //push hodnot na zasobnik a provedeni matematicke operace
+        generate_push(IDENTIFIER,"a");
+        generate_push(IDENTIFIER,"b");
+        generate_mathemeatical_operations(G_TYPE_PLUS);
+        //vypis
+        generate_pop_to_result();
+        generate_print_result();
+
+    //ELSE
+    generate_else(true);
+        generate_push(IDENTIFIER,"a");
+        generate_push(IDENTIFIER,"b");
+        generate_mathemeatical_operations(G_TYPE_MINUS);
+        //vypis
+        generate_pop_to_result();
+        generate_print_result();
+        generate_if_else_end();
 
     //vypis hodnoty
-    gensr("");
-    generate_print_result();
+    //generate_pop_to_result();
+    //generate_print_result();
 
     //konec
     generate_main_end();
