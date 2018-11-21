@@ -49,6 +49,12 @@ void delete_string(string *s){
     }
 }
 
+void strAddCharArray(string *s1, char *arr){
+    for(int i = 0; i < strlen(arr);i ++){
+        strAddChar(s1,arr[i]);
+    }
+}
+
 void strAddChar(string *s1, char c) {
     if (s1->length + 1 >= s1->allocSize){
         if ((s1->str = (char*) realloc(s1->str, s1->length + ALOCATION_SIZE)) == NULL){

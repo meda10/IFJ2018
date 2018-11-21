@@ -192,7 +192,7 @@ void print_token(token_t *token){
 }
 
 int get_next_token(token_t *token) {
-    printf("------> READING NEXT TOKEN \n");
+    //printf("------> READING NEXT TOKEN \n");
 
     if(token->type != -1){
         clear_token(token);

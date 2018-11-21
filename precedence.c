@@ -12,8 +12,14 @@
 #include "string.h"
 #include "precedence.h"
 
+<<<<<<< HEAD
 token_t *token, *next_token;
 bool read_token;
+=======
+extern token_t *token;
+extern bool read_token;
+extern token_t *next_token;
+>>>>>>> master
 
 tPrec prec_table[ PREC_TABE_SIZE ][ PREC_TABE_SIZE ] = 
 //       */   |	   +-	|< <= > >=| == !=  |    (    |    )    |   ID    |   $
@@ -388,7 +394,7 @@ int precedence(){
 					stackFree(s);
 					return SYNTAX_ERR;
 				}
-				printf(" Pouzito pravidlo: %d\n", use_rule);
+				//printf(" Pouzito pravidlo: %d\n", use_rule);
 				break;
 
 			// pokud je v tabulce prazdne policko -> chyba

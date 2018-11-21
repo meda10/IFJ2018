@@ -1,18 +1,27 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <malloc.h>
 #include "tokens.h"
 #include "scaner.h"
 #include "parser.h"
+#include "symtable.h"
+#include "stack.h"
+#include "precedence.h"
 
 
 token_t *token, *next_token;
 bool read_token;
+extern BTNode *local_TS;
+extern BTNode root_GTS;
+extern BTNode node;
+extern int ts_number;
+extern int number_of_func;
 
 int PROGRAM(){
 	int result;
-	printf("PROGRAM\n");
-	print_token(token);
+	//printf("PROGRAM\n");
+	//print_token(token);
 	switch(token->type){
 		case DEF:
 		case IF:
@@ -23,6 +32,14 @@ int PROGRAM(){
 		case INTEGER_TYPE:
 		case DOUBLE_TYPE:
 		case NIL:
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
 		case OPENNING_BRACKET:
 		case NOT:
 		case EOL:
@@ -41,14 +58,15 @@ int PROGRAM(){
 }
 
 int FUNC_DEF(){
-	printf("FUNC_DEF\n");
-	print_token(token);
+	//printf("FUNC_DEF\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case DEF:									//4.<FUNC_DEF> -> def ID (<PARAMS>) EOL <STL> end
 			get_next_token(token);
 			if (token->type != IDENTIFIER) return SYNTAX_ERR;
-			
+			//create node in context of this function(local TS)
+			//TODO
 			get_next_token(token);
 			if (token->type != OPENNING_BRACKET) return SYNTAX_ERR;
 			
@@ -66,7 +84,8 @@ int FUNC_DEF(){
 			if (result != SYNTAX_OK) return result;
 			
 			if (token->type != END) return SYNTAX_ERR;
-
+			//change context to main function(global TS)
+			//TODO
 			get_next_token(token);
 			return SYNTAX_OK;
 		case IF:
@@ -77,6 +96,14 @@ int FUNC_DEF(){
 		case INTEGER_TYPE:
 		case DOUBLE_TYPE:
 		case NIL:
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
 		case OPENNING_BRACKET:
 		case NOT:
 		case ENDOFFILE:
@@ -87,8 +114,8 @@ int FUNC_DEF(){
 }
 
 int PARAMS(){
-	printf("PARAMS\n");
-	print_token(token);
+	//printf("PARAMS\n");
+	//print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 			get_next_token(token);					//6. <PARAMS> -> ID <NEXT_PARAM>
@@ -100,8 +127,8 @@ int PARAMS(){
 }
 
 int NEXT_PARAM(){
-	printf("NEXT_PARAM\n");
-	print_token(token);
+	//printf("NEXT_PARAM\n");
+	//print_token(token);
 	switch(token->type){
 		case COMMA:
 			get_next_token(token);
@@ -116,8 +143,8 @@ int NEXT_PARAM(){
 }
 
 int STL(){
-	printf("STL\n");
-	print_token(token);
+	//printf("STL\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case DEF:
@@ -133,6 +160,14 @@ int STL(){
 		case INTEGER_TYPE:
 		case DOUBLE_TYPE:
 		case NIL:
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
 		case OPENNING_BRACKET:
 		case NOT:
 		case EOL:
@@ -145,8 +180,8 @@ int STL(){
 }
 
 int S(){
-	printf("S\n");
-	print_token(token);
+	//printf("S\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case IF:									//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
@@ -203,31 +238,56 @@ int S(){
 		case DOUBLE_TYPE:
 		case INTEGER_TYPE:
 		case NIL:
-		case NOT:									//14. <S> -> <ASS> <VALUE>
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
+		case NOT:
+		case OPENNING_BRACKET:					 	//14. <S> -> <ASS> <VALUE>
 			result = ASS();
 			if (result != SYNTAX_OK) return result;
 
-			return VALUE();				
-		case CLOSING_BRACKET:
-			return SYNTAX_OK;						//5. <PARAMS> -> eps
+			return VALUE();
+
 	}
 	return SYNTAX_ERR;
 }
 
 int ASS(){
-	printf("ASS\n");
-	print_token(token);
+	//printf("ASS\n");
+	//print_token(token);
 	switch(token->type){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
 		case INTEGER_TYPE:
 		case NIL:
-		case NOT:									//16. <ASS> -> eps
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
+		case NOT:
+		case OPENNING_BRACKET:						//16. <ASS> -> eps
 			return SYNTAX_OK;
-		case IDENTIFIER:							//16. <ASS> -> eps or 15. <ASS> -> ID =							
+		case IDENTIFIER:							//16. <ASS> -> eps or 15. <ASS> -> ID =										
 			get_next_token(next_token);
 			read_token = true;
 			if (next_token->type == EQUAL){
+				//variable initialization
+				create_node(&root_GTS, &token->string, 0, 0, NULL, false, true, false, true, NULL);
+				node = B_tree_search(root_GTS, token->string.str);
+    			if(node != NULL){
+			        //printf("FOUND: %s\n",node->data.name);
+			    } else{
+			        //printf("NOT FOUND: X\n");
+			    }
 				read_token = false;
 				get_next_token(token);
 				return SYNTAX_OK;
@@ -239,51 +299,70 @@ int ASS(){
 
 
 int VALUE(){
-	printf("VALUE\n");
-	print_token(token);
+	//printf("VALUE\n");
+	//print_token(token);
 	switch(token->type){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
 		case INTEGER_TYPE:
 		case NIL:
-		case NOT:									//17. <VALUE> -> <E>
-			//give next_token to E() as second token
+		case NOT:
+		case OPENNING_BRACKET:						//17. <VALUE> -> <E>
 			return E(); //precedencni
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
+			return FUNC_CALL();
 		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
-			//if ID in SYMTABLE_FUNC (check if it is a function)
-			if (token->string.str[0] == 97){	//for testing purpose "a" is function, else id
+			//check if it is a function
+			node = B_tree_search(root_GTS, token->string.str);
+			if (node != NULL && node->data.is_function == true)
 				return FUNC_CALL();
-			}else{
-				return E();	
-			}	
+			else
+				return E();		
 	}	
 	return SYNTAX_ERR;
 }
 
 int FUNC_CALL(){
-	printf("FUNC_CALL\n");
-	print_token(token);
-	if(token->type == IDENTIFIER){					//19.<FUNC_CALL> -> ID <INPUT_PARAMS>
-		if (read_token){
-			*token = *next_token;
-			read_token = false;
-		}
-		else
-			get_next_token(token);
-		return INPUT_PARAMS();
-	} else
-		return SYNTAX_ERR;
+	//printf("FUNC_CALL\n");
+	//print_token(token);
+	switch(token->type){
+		case INPUTS:
+		case INPUTI:
+		case INPUTF:
+		case PRINT:
+		case LENGTH:
+		case SUBSTR:
+		case ORD:
+		case CHR:
+		case IDENTIFIER:				//19.<FUNC_CALL> -> ID <INPUT_PARAMS>
+			if (read_token){
+				*token = *next_token;	//token after function ID
+				read_token = false;
+			}else
+				get_next_token(token);
+			
+			return INPUT_PARAMS();
+	}
+	return SYNTAX_ERR;
 }
 
 int INPUT_PARAMS(){
-	printf("INPUT_PARAMS\n");
-	print_token(token);
+	//printf("INPUT_PARAMS\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case IF:
 		case WHILE:
 		case EOL:
-		case ENDOFFILE:								//21. <INPUT_PARAMS> -> eps
+		case ENDOFFILE:
+		case CLOSING_BRACKET:						//21. <INPUT_PARAMS> -> eps
 			return SYNTAX_OK;
 		case IDENTIFIER:
 		case STRING_TYPE:
@@ -308,8 +387,8 @@ int INPUT_PARAMS(){
 }
 
 int TERM(){
-	printf("TERM\n");
-	print_token(token);
+	//printf("TERM\n");
+	//print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 		case STRING_TYPE:
@@ -324,8 +403,8 @@ int TERM(){
 }
 
 int NEXT_TERM(){
-	printf("NEXT_TERM\n");
-	print_token(token);
+	//printf("NEXT_TERM\n");
+	//print_token(token);
 	int result;
 	switch(token->type){
 		case IF:
@@ -352,15 +431,13 @@ int NEXT_TERM(){
 }
 
 int E(){
-	printf("E\n");
-	print_token(token);
-	//zpracuj token, dalsi token neni treba volat pokud je v next_token
-	if (read_token){
-		*token = *next_token;
-		read_token = false;
-	}
-	else
-		get_next_token(token);
+	//printf("E\n");
+	//print_token(token);
+	int result;
+	result = precedence();
+	if(result != SYNTAX_OK)
+		return SYNTAX_ERR;
+
 	return SYNTAX_OK;
 }
 

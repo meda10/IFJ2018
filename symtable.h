@@ -16,11 +16,11 @@ typedef union val{
 }U_value;
 
 typedef struct Values {
-    string *name;
+    char *name;
     //char *value;
     int type;
     int params_number;
-    string** params;      //kde bude ulozen typ parametru?
+    char **params;      //kde bude ulozen typ parametru?
     bool defined;
     bool initialized;
     bool is_function; // pozname jestli je to funkce nebo promena
@@ -42,6 +42,6 @@ BTNode B_tree_search(BTNode root, char* name);
 int B_tree_insert(BTNode *root, struct Values data);
 void B_tree_walk(BTNode root);
 void B_tree_free(BTNode root);
-int create_node(BTNode *table, string *name, int type, int params_number, string** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table);
+int create_node(BTNode *table, string *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table);
 
 #endif //TREE_BT_H
