@@ -45,12 +45,12 @@ item_stack_t* stackTop (stack_t* s) {
 item_stack_t* stackTopTerm (stack_t* s) {
 	if(s->top == NULL)
 		return NULL;
-	else if (s->top->token.type < EXP)
+	else if (s->top->token.type < EXP_IDENTIFIER)
 		return s->top;
 
 	item_stack_t* actual = s->top->next;
 
-	while (actual != NULL && actual->token.type >= EXP )
+	while (actual != NULL && actual->token.type >= EXP_IDENTIFIER )
 		actual = actual->next;
 
 	if (actual == NULL)
@@ -58,6 +58,7 @@ item_stack_t* stackTopTerm (stack_t* s) {
 
 	return actual;
 }
+
 
 
 /*
@@ -70,6 +71,11 @@ void stackPop (stack_t* s) {
 		s->top = s->top->next;
 		if(s->top != NULL)
 			s->top->previous = NULL;
+		//pokud je to promena nebo konstanta tak musim odstranit string
+		if( temp->token.type == IDENTIFIER || temp->token.type == STRING_TYPE || temp->token.type == INTEGER_TYPE || 
+				temp->token.type == DOUBLE_TYPE || (temp->token.type >= EXP_IDENTIFIER && temp->token.type <= EXP_STRING) )
+			delete_string(&temp->token.string);
+
 		free(temp);
 	}	
 }
@@ -87,6 +93,12 @@ int stackPush (stack_t* s, token_t token) {
 		else{
 			
 			new->token = token;
+			//pokud je to promena nebo konstanta tak musim zkopirovat token.string
+			if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
+				(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
+				strInit(&new->token.string);
+    			strCopyString(&new->token.string, &token.string);
+			}
 			new->next = s->top;
 			new->previous = NULL;
 			if (s->top != NULL)
@@ -135,6 +147,10 @@ void stackFree (stack_t* s){
 	while (!stackEmpty(s)){
 		temp = s->top; 
 		s->top = s->top->next;
+		//pokud je to promena nebo konstanta tak musim odstranit string
+		if( temp->token.type == IDENTIFIER || temp->token.type == STRING_TYPE || temp->token.type == INTEGER_TYPE || 
+				temp->token.type == DOUBLE_TYPE || (temp->token.type >= EXP_IDENTIFIER && temp->token.type <= EXP_STRING))
+			delete_string(&temp->token.string);
 		free(temp);
 	}
 		free(s);
@@ -168,4 +184,4 @@ void printStack(stack_t* s){
         last = last->previous; 
     } 
     printf("\n");
-} 
+}
