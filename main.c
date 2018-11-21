@@ -136,7 +136,7 @@ int main() {
     FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     result = parse();
     //printf("%d\n", result);
-
+/*
     printf("GTS :\n");
     B_tree_walk(root_GTS);
     printf("\n");
@@ -154,7 +154,7 @@ int main() {
 
 
     B_tree_free(root_GTS);
-
+*/
 
     
     /**
@@ -204,25 +204,26 @@ int main() {
      * Generator
      */
 
-    // BTNode root_ptr;
-    // BTNode n;
 
-    // string s;
-    // strInit(&s);
+    //start generatoru
+    generate_start();
+    generate_main();
 
-    // s.str = "a";
+    //deklarace promene a prirayeni hodnoty
+    variable_declare(INTEGER_TYPE,"a");
+    generate_variable_assign(INT_E,"a","87");
 
-    // startGenerating();
+    //push hodnot na zasobnik a secteni
+    generate_push(IDENTIFIER,"a");
+    generate_push(DOUBLE_TYPE,"55.5");
+    generate_mathemeatical_operations(G_TYPE_PLUS);
 
-    // variable_declare(INTEGER_TYPE,&s,true);
-    // generate_print(IDENTIFIER,&s);
+    //vypis hodnoty
+    gensr("");
+    generate_print_result();
 
-    // node = B_tree_search(root_GTS,"inputs");
-    // if(node != NULL){
-    //     printf("FOUND: %s\n",node->data.name->str);
-    // } else{
-    //     printf("NOT FOUND: X\n");
-    // }
+    //konec
+    generate_main_end();
 
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));

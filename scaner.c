@@ -115,8 +115,8 @@ int is_key_word(string *s) {
     return IDENTIFIER;
 }
 
-int string_To_Int(string *s) {
-    const char *string = s->str;
+int string_To_Int(char *s) {
+    const char *string = s;
     char *endptr;
     int n = strtol(string, &endptr, 10);
     if (endptr == string) {
@@ -127,8 +127,8 @@ int string_To_Int(string *s) {
     return n;
 }
 
-double string_to_Double(string *s){
-    const char *string = s->str;
+double string_to_Double(char *s){
+    const char *string = s;
     char *stopstring = NULL;
     double n = strtod(string, &stopstring);
     if(stopstring == string){

@@ -65,12 +65,12 @@ int is_key_word(string *s);
 /*
  * Function convert string to integer
  */
-int string_To_Int(string *s);
+int string_To_Int(char *s);
 
 /*
  * Function convert string to double
  */
-double string_to_Double(string *s);
+double string_to_Double(char *s);
 
 /*
  * Function create new token and initialize token->type to -1
