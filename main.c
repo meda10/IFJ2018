@@ -213,11 +213,21 @@ int main() {
      b = 15;
 
      if(5 > 3){
-        result = a + b;
-        printf(result);
+        if(a == 50){
+            result = a + b;
+            printf(result);
+        }else{
+            result = "FAIL";
+            printf(result);
+        }
      }else {
-        result = a - b;
-        printf(result);
+        if(b != 15){
+            result = a - b;
+            printf(result);
+        }else{
+            result = "SUCCESS";
+            printf(result);
+        }
      }
 
      */
@@ -237,31 +247,54 @@ int main() {
 
     //push hodnot co se maji porovnat
     generate_push(INTEGER_TYPE,"5");
-    generate_push(INTEGER_TYPE,"3");
+    generate_push(INTEGER_TYPE,"10");
 
     //porovnani hodnot
     generate_comparative_operations(G_TYPE_GREATER);
 
     //pop hodnoty a test IF podminky
     generate_pop_to_result();
-    generate_if();
-        //push hodnot na zasobnik a provedeni matematicke operace
+    generate_if(1);
+        //push hodnot na zasobnik a test IF podminky
         generate_push(IDENTIFIER,"a");
-        generate_push(IDENTIFIER,"b");
-        generate_mathemeatical_operations(G_TYPE_PLUS);
-        //vypis
+        generate_push(INTEGER_TYPE,"50");
+        generate_comparative_operations(G_TYPE_EQUAL);
         generate_pop_to_result();
-        generate_print_result();
+        //vnorent IF
+        generate_if(2);
+            generate_push(IDENTIFIER,"a");
+            generate_push(IDENTIFIER,"b");
+            generate_mathemeatical_operations(G_TYPE_PLUS);
+            //vypis
+            generate_pop_to_result();
+            generate_print_result();
+        generate_else(2,true);
+            generate_push(STRING_TYPE,"FAIL");
+            generate_pop_to_result();
+            generate_print_result();
+        generate_if_else_end(2);
 
     //ELSE
-    generate_else(true);
-        generate_push(IDENTIFIER,"a");
+    generate_else(1,true);
+        //push hodnot na zasobnik a test IF podminky
         generate_push(IDENTIFIER,"b");
-        generate_mathemeatical_operations(G_TYPE_MINUS);
-        //vypis
+        generate_push(INTEGER_TYPE,"16");
+        generate_comparative_operations(G_TYPE_NOT_EQUAL);
         generate_pop_to_result();
-        generate_print_result();
-        generate_if_else_end();
+        //vnorent IF
+        generate_if(3);
+            generate_push(IDENTIFIER,"a");
+            generate_push(IDENTIFIER,"b");
+            generate_mathemeatical_operations(G_TYPE_MINUS);
+            //vypis
+            generate_pop_to_result();
+            generate_print_result();
+        generate_else(3,true);
+            generate_push(STRING_TYPE,"SUCCESS");
+            generate_pop_to_result();
+            generate_print_result();
+        generate_if_else_end(3);
+    generate_if_else_end(1);
 
     //vypis hodnoty
     //generate_pop_to_result();

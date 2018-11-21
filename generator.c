@@ -65,7 +65,9 @@ void variable_declare(int type, char *name) {
 
 void generate_start(){
     label_number = 0;
-    if_number = 0;
+    if_num = 0;
+    if_else_num = 0;
+    if_end_num = 0;
     inScope = false;
 
     printf(".IFJcode18\n");
@@ -109,11 +111,11 @@ void data_conversion() {
     char *label = get_new_label();
 
     printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
-    printf("JUMPIFEQ %sv1_not GF@$$var_1 string@float\n", label);
+    printf("JUMPIFEQ %sV1_NOT GF@$$var_1 string@float\n", label);
 
     printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
 
-    printf("LABEL %sv1_not\n", label);
+    printf("LABEL %sV1_NOT\n", label);
     printf("JUMPIFEQ %s GF@$$var_2 string@float\n", label);
     printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
 
@@ -132,17 +134,17 @@ void data_conversion_to_float() {
 
     char *label = get_new_label();
 
-    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@float\n", label);
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", label);
+    printf("JUMPIFNEQ %sV1_NOT GF@$$var_1 string@float\n", label);
+    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@float\n", label);
     printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
 
-    printf("LABEL %sv1_not\n", label);
+    printf("LABEL %sV1_NOT\n", label);
     printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@float\n", label);
+    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@float\n", label);
     printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
-    printf("LABEL %sv2_not\n", label);
+    printf("LABEL %sV2_NOT\n", label);
     printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
     printf("JUMP %s\n", label);
 
@@ -161,17 +163,17 @@ void data_conversion_to_int() {
 
     char *label = get_new_label();
 
-    printf("JUMPIFNEQ %sv1_not GF@$$var_1 string@int\n", label);
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", label);
+    printf("JUMPIFNEQ %sV1_NOT GF@$$var_1 string@int\n", label);
+    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@int\n", label);
     printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
 
-    printf("LABEL %sv1_not\n", label);
+    printf("LABEL %sV1_NOT\n", label);
     printf("FLOAT2INT GF@$$var_3 GF@$$var_3\n");
-    printf("JUMPIFNEQ %sv2_not GF@$$var_1 string@int\n", label);
+    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@int\n", label);
     printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
 
-    printf("LABEL %sv2_not\n", label);
+    printf("LABEL %sV2_NOT\n", label);
     printf("FLOAT2INT GF@$$var_4 GF@$$var_4\n");
     printf("JUMP %s\n", label);
 
@@ -276,7 +278,8 @@ void generate_comparative_operations(int type){
             printf("EQS\n");
             break;
         case G_TYPE_NOT_EQUAL:
-            printf("\n");
+            printf("EQS\n");
+            printf("NOTS\n");
             break;
         default:
             //todo
@@ -314,30 +317,29 @@ void generate_print_result(){
 
 }
 
-void generate_if() {
-    if_number++;
+void generate_if(int num) {
     printf("# If start \n");
-    printf("JUMPIFEQ if_%d_ELSE GF@$$result bool@false\n",if_number);
+    printf("JUMPIFEQ IF_%d_ELSE GF@$$result bool@false\n",num);
 }
 
 /**
  * Musi se vydy volat!! Kdyz neexistuje else vola se s false
  * @param else_statment - true pokud existuje else statment, false pokud ne
  */
-void generate_else(bool else_statment) {
+void generate_else(int num, bool else_statment) {
     printf("# else \n");
-    printf("JUMP if_%d_END\n",if_number);
+    printf("JUMP IF_%d_END\n",num);
 
 
-    printf("LABEL if_%d_ELSE\n",if_number);
+    printf("LABEL IF_%d_ELSE\n",num);
     if(else_statment == false){
-        printf("JUMP if_%d_END\n",if_number);
+        printf("JUMP IF_%d_END\n",num);
     }
 }
 
 
-void generate_if_else_end() {
+void generate_if_else_end(int num) {
     printf("# End If\n");
-    printf("LABEL if_%d_END\n",if_number);
+    printf("LABEL IF_%d_END\n",num);
 }
 
