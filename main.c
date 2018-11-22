@@ -205,6 +205,7 @@ int main() {
      */
 
     /*
+     ---- Pseudo kod ----
      int result; //globalni promena
 
      int a = 0;
@@ -221,14 +222,18 @@ int main() {
             printf(result);
         }
      }else {
-        if(b != 15){
+        if(b >= 16){
             result = a - b;
             printf(result);
         }else{
-            result = "SUCCESS";
+            result = "SUCCESS" + " END!!";
             printf(result);
         }
      }
+
+     string str;
+     str = "Muj string\n +#-->\\"
+     printf(str)
 
      */
 
@@ -301,11 +306,9 @@ int main() {
     //test stringu
     variable_declare(STRING_TYPE,"str");
     generate_variable_assign(STRING_E,"str","Muj string\n +#-->\\");
-    generate_push(IDENTIFIER,"str");
 
-    //vypis hodnoty
-    generate_pop_to_result();
-    generate_print_result();
+    //vypis promene
+    generate_print(IDENTIFIER,"str");
 
     //konec
     generate_main_end();
