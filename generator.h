@@ -27,6 +27,12 @@
 #define G_TYPE_NOT_EQUAL 11
 
 
+#define MAX_INSTRUCTION_LEN 150
+
+string instrukce;
+
+char *arr_free[1] ;
+int arr_free_pos;
 
 int label_number;
 int if_num;
@@ -34,7 +40,7 @@ int if_else_num;
 int if_end_num;
 bool inScope;
 
-
+char free_labels();
 void startGenerating();
 void variable_declare(int type, char* name);
 char *get_new_label();
@@ -45,6 +51,7 @@ void generate_stack_2_to_float();
 void generate_stack_2_to_int();
 
 void generate_start();
+void generate_free_memory();
 void generate_main();
 void generate_main_end();
 void generate_push(int type, char* name);

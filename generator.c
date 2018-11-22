@@ -8,38 +8,33 @@
 #include "symtable.h"
 
 
+char free_labels(){
+    for (int i = 0; i < arr_free_pos; ++i) {
+        free(arr_free[i]);
+    }
+}
+
 char *get_new_label() {
+    char str[MAX_INSTRUCTION_LEN];
     char *reg = (char *) malloc(30 * sizeof(char));
+    arr_free[++arr_free_pos] = reg;
     sprintf(reg, "%%L_NUM_%d", label_number++);
     return reg; //todo malloc
+    //sprintf(str, "%%L_NUM_%d", label_number++);
+    //return str;
 }
 
-char *get_frame() {
-    char *frameTP = (char *) malloc(30 * sizeof(char));
+
+int get_new_label_number(){
+    return ++label_number;
+}
+
+char* get_frame() {
     if (inScope) {
-        strcpy(frameTP, "LF");
+        return "LF";
     } else {
-        strcpy(frameTP, "GF");
+        return "GF";
     }
-    return frameTP;
-}
-
-char *get_type(int type) {
-    char *t = (char *) malloc(10 * sizeof(char));
-    switch (type) {
-        case INTEGER_TYPE:
-            strcpy(t, "int");
-            break;
-        case DOUBLE_TYPE:
-            strcpy(t, "float");
-            break;
-        case STRING_TYPE:
-            strcpy(t, "string");
-            break;
-        default:
-            break;
-    }
-    return t;
 }
 
 /**
@@ -48,139 +43,197 @@ char *get_type(int type) {
  * @param name - jmeno promene
  */
 void variable_declare(int type, char *name) {
-    printf("# Variable declare\n");
-    printf("DEFVAR %s@%s\n", get_frame(), name);
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# Variable declare\n");
+    sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
+    strAddCharArray(&instrukce,str);
     double a = 0;
     switch (type) {
         case INTEGER_TYPE:
-            printf("MOVE %s@%s int@0\n", get_frame(), name);
+            sprintf(str,"MOVE %s@%s int@0\n", get_frame(), name);
+            strAddCharArray(&instrukce,str);
             break;
         case DOUBLE_TYPE:
-            printf("MOVE %s@%s float@%a\n", get_frame(), name, a);
+            sprintf(str,"MOVE %s@%s float@%a\n", get_frame(), name, a);
+            strAddCharArray(&instrukce,str);
             break;
         case STRING_TYPE:
-            printf("MOVE %s@%s string@\n", get_frame(), name);
+            sprintf(str,"MOVE %s@%s string@\n", get_frame(), name);
+            strAddCharArray(&instrukce,str);
+            break;
+        default:
+            //todo
             break;
     }
 }
 
 //todo Neni funkcni
 void generate_inputs() {
-    printf("LABEL %%INPUTS\n");
-    printf("PUSHFRAME\n");
-    printf("DEFVAR LF@$$result_inputs\n");
-    printf("MOVE LF@$$result_inputs string@\n");
+    strAddCharArray(&instrukce,"LABEL %%INPUTS\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$result_inputs\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$result_inputs string@\n");
 
 
-    printf("READ LF@$$result_inputs string\n");
+    strAddCharArray(&instrukce,"READ LF@$$result_inputs string\n");
 
-    printf("POPFRAME\n");
-    printf("RETURN\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
 }
 
 /**
  * Zacatek programu
  */
 void generate_start(){
+    strInit(&instrukce);
     label_number = 0;
     if_num = 0;
     if_else_num = 0;
     if_end_num = 0;
+    arr_free_pos = 0;
     inScope = false;
 
-    printf(".IFJcode18\n");
 
-    printf("DEFVAR GF@$$input\n");
-    //printf("MOVE GF@$$input string@?\\032\n");
+    //char tmp[3];
+    //sprintf(tmp, "\\%03d", c);
 
-    printf("DEFVAR GF@$$var_1\n");
-    printf("DEFVAR GF@$$var_2\n");
-    printf("DEFVAR GF@$$var_3\n");
-    printf("DEFVAR GF@$$var_4\n");
+    /*
+    strAddCharArray(&instrukce,)(".IFJcode18\n");
 
-    printf("DEFVAR GF@$$result\n");
+    strAddCharArray(&instrukce,)("DEFVAR GF@$$input\n");
+    //strAddCharArray(&instrukce,)("MOVE GF@$$input string@?\\032\n");
 
-    printf("JUMP $$main\n");
+    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_1\n");
+    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_2\n");
+    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_3\n");
+    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_4\n");
+
+    strAddCharArray(&instrukce,)("DEFVAR GF@$$result\n");
+
+    strAddCharArray(&instrukce,)("JUMP $$main\n");
+    */
+
+    strAddCharArray(&instrukce,".IFJcode18\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_2\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_3\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_4\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$result\n");
+    strAddCharArray(&instrukce,"JUMP $$main\n");
 }
 
 /**
- * LAbel main
+ * Uvolni alokovanou pamet
+ */
+void generate_free_memory(){
+    delete_string(&instrukce);
+}
+
+/**
+ * Label main
  */
 void generate_main(){
-    printf("\n# Main\n");
+/*
+    strAddCharArray(&instrukce,)("\n# Main\n");
 
-    printf("LABEL $$main\n");
-    printf("CREATEFRAME\n");
-    printf("PUSHFRAME\n");
+    strAddCharArray(&instrukce,)("LABEL $$main\n");
+    strAddCharArray(&instrukce,)("CREATEFRAME\n");
+    strAddCharArray(&instrukce,)("PUSHFRAME\n");
+*/
+    strAddCharArray(&instrukce,"\n# Main\n");
+    strAddCharArray(&instrukce,"LABEL $$main\n");
+    strAddCharArray(&instrukce,"CREATEFRAME\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
 }
 
 /**
  * Konec main
  */
 void generate_main_end(){
-    printf("\n#Main end\n");
+/*
+    strAddCharArray(&instrukce,)("\n#Main end\n");
 
-    printf("POPFRAME\n");
-    printf("CLEARS\n");
+    strAddCharArray(&instrukce,)("POPFRAME\n");
+    strAddCharArray(&instrukce,)("CLEARS\n");
+*/
+    strAddCharArray(&instrukce,"\n#Main end\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"CLEARS\n");
 }
 
 /**
  * Zkontroluje že vrchní dvě hodnoty na zásobníku jsou stejného typu,pokud ne převede je na float
  */
 void data_conversion() {
-    printf("# Data Conversion\n");
-    printf("POPS GF@$$var_3\n");
-    printf("POPS GF@$$var_4\n");
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# Data Conversion\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
 
-    printf("TYPE GF@$$var_1 GF@$$var_3\n");
-    printf("TYPE GF@$$var_2 GF@$$var_4\n");
+    strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
+    strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
 
-    char *label = get_new_label();
+    int current_number = get_new_label_number();
 
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
-    printf("JUMPIFEQ %sV1_NOT GF@$$var_1 string@float\n", label);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_number);
+    strAddCharArray(&instrukce, str);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%dV1_NOT GF@$$var_1 string@float\n", current_number);
+    strAddCharArray(&instrukce, str);
 
-    printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
+    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_3 GF@$$var_3\n");
 
-    printf("LABEL %sV1_NOT\n", label);
-    printf("JUMPIFEQ %s GF@$$var_2 string@float\n", label);
-    printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
+    sprintf(str, "LABEL %%L_NUM_%dV1_NOT\n", current_number);
+    strAddCharArray(&instrukce, str);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_2 string@float\n", current_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_4 GF@$$var_4\n");
 
-    printf("LABEL %s\n", label);
-    printf("PUSHS GF@$$var_4\n");
-    printf("PUSHS GF@$$var_3\n");
+    sprintf(str, "LABEL %%L_NUM_%d\n", current_number);
+    strAddCharArray(&instrukce, str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 }
 
 /**
  * Převede vrchní dvě hodnoty na zásobníku na float
  */
 void data_conversion_to_float() {
-    printf("# Data Conversion to float\n");
-    printf("POPS GF@$$var_3\n");
-    printf("POPS GF@$$var_4\n");
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# Data Conversion to float\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
 
-    printf("TYPE GF@$$var_1 GF@$$var_3\n");
-    printf("TYPE GF@$$var_2 GF@$$var_4\n");
+    strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
+    strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
 
-    char *label = get_new_label();
+    int current_label_number = get_new_label_number();
 
-    printf("JUMPIFNEQ %sV1_NOT GF@$$var_1 string@float\n", label);
-    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@float\n", label);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
+    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV1_NOT GF@$$var_1 string@float\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@float\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
+    strAddCharArray(&instrukce,str);
 
+    sprintf(str, "LABEL %%L_NUM_%dV1_NOT\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_3 GF@$$var_3\n");
+    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@float\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
+    strAddCharArray(&instrukce,str);
 
-    printf("LABEL %sV1_NOT\n", label);
-    printf("INT2FLOAT GF@$$var_3 GF@$$var_3\n");
-    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@float\n", label);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
+    sprintf(str, "LABEL %%L_NUM_%dV2_NOT\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_4 GF@$$var_4\n");
+    sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number);
+    strAddCharArray(&instrukce,str);
 
-    printf("LABEL %sV2_NOT\n", label);
-    printf("INT2FLOAT GF@$$var_4 GF@$$var_4\n");
-    printf("JUMP %s\n", label);
-
-    printf("LABEL %s\n", label);
-    printf("PUSHS GF@$$var_4\n");
-    printf("PUSHS GF@$$var_3\n");
+    sprintf(str, "LABEL %%L_NUM_%d\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 }
 
 
@@ -188,64 +241,73 @@ void data_conversion_to_float() {
  * Převede vrchní dvě hodnoty na zásobníku na int
  */
 void data_conversion_to_int() {
-    printf("# Data Conversion to float\n");
-    printf("POPS GF@$$var_3\n");
-    printf("POPS GF@$$var_4\n");
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# Data Conversion to float\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
 
-    printf("TYPE GF@$$var_1 GF@$$var_3\n");
-    printf("TYPE GF@$$var_2 GF@$$var_4\n");
+    strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
+    strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
 
-    char *label = get_new_label();
+    int current_label_number = get_new_label_number();
 
-    printf("JUMPIFNEQ %sV1_NOT GF@$$var_1 string@int\n", label);
-    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@int\n", label);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
+    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV1_NOT GF@$$var_1 string@int\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@int\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
+    strAddCharArray(&instrukce,str);
 
+    sprintf(str, "LABEL %%L_NUM_%dV1_NOT\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"FLOAT2INT GF@$$var_3 GF@$$var_3\n");
+    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@int\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
+    strAddCharArray(&instrukce,str);
 
-    printf("LABEL %sV1_NOT\n", label);
-    printf("FLOAT2INT GF@$$var_3 GF@$$var_3\n");
-    printf("JUMPIFNEQ %sV2_NOT GF@$$var_1 string@int\n", label);
-    printf("JUMPIFEQ %s GF@$$var_1 GF@$$var_2\n", label);
+    sprintf(str, "LABEL %%L_NUM_%dV2_NOT\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"FLOAT2INT GF@$$var_4 GF@$$var_4\n");
+    sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number);
+    strAddCharArray(&instrukce,str);
 
-    printf("LABEL %sV2_NOT\n", label);
-    printf("FLOAT2INT GF@$$var_4 GF@$$var_4\n");
-    printf("JUMP %s\n", label);
-
-    printf("LABEL %s\n", label);
-    printf("PUSHS GF@$$var_4\n");
-    printf("PUSHS GF@$$var_3\n");
+    sprintf(str, "LABEL %%L_NUM_%d\n", current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 }
 
 /**
  * Převede prvni hodnotu na zasobniku na float
  */
 void generate_stack_1_to_float(){
-    printf("INT2FLOATS\n");
+    strAddCharArray(&instrukce,"INT2FLOATS\n");
 }
 
 /**
  * Převede prvni hodnotu na zasobniku na int
  */
 void generate_stack_1_to_int(){
-    printf("FLOAT2INTS\n");
+    strAddCharArray(&instrukce,"FLOAT2INTS\n");
 }
 
 /**
  * Převede druhou hodnotu na zasobniku na float
  */
 void generate_stack_2_to_float(){
-    printf("POPS GF@$$var_4\n");
-    printf("INT2FLOATS\n");
-    printf("PUSHS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"INT2FLOATS\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
 }
 
 /**
  * Převede druhou hodnotu na zasobniku na int
  */
 void generate_stack_2_to_int(){
-    printf("POPS GF@$$var_4\n");
-    printf("FLOAT2INTS\n");
-    printf("PUSHS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"FLOAT2INTS\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
 }
 
 /**
@@ -255,15 +317,18 @@ void generate_stack_2_to_int(){
  * @param variable_value - hodnota proměnné (pokud jde o VARIABLE_E tak je zde jmeno druhé proměnné)
  */
 void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value) {
-    printf("# Variable assign\n");
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# Variable assign\n");
     string s;
     switch (expresion_type) {
         case INT_E: {
-            printf("MOVE %s@%s int@%d\n", get_frame(), variable_name, string_To_Int(variable_value)); //todo %d
+            sprintf(str, "MOVE %s@%s int@%d\n", get_frame(), variable_name, string_To_Int(variable_value));
+            strAddCharArray(&instrukce,str); //todo %d
             break;
         }
         case DOUBLE_E: {
-            printf("MOVE %s@%s float@%a\n", get_frame(), variable_name, string_to_Double(variable_value));
+            sprintf(str, "MOVE %s@%s float@%a\n", get_frame(), variable_name, string_to_Double(variable_value));
+            strAddCharArray(&instrukce,str);
             break;
         }
         case STRING_E:
@@ -282,11 +347,13 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
                     strAddChar(&s,c);
                 }
             }
-            printf("MOVE %s@%s string@%s\n", get_frame(), variable_name, s.str);
+            sprintf(str, "MOVE %s@%s string@%s\n", get_frame(), variable_name, s.str);
+            strAddCharArray(&instrukce,str);
             free(s.str);
             break;
         case VARIABLE_E:
-            printf("MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
+            sprintf(str, "MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
+            strAddCharArray(&instrukce,str);
             break;
 
         default:
@@ -299,10 +366,10 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
  * Spoji 2 stringy na vrcholu zasobniku, vysledek da na zasobnik
  */
 void generate_concat(){
-    printf("POPS GF@$$var_4\n");
-    printf("POPS GF@$$var_3\n");
-    printf("CONCAT GF@$$var_1 GF@$$var_3 GF@$$var_4\n");
-    printf("PUSHS GF@$$var_1\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+    strAddCharArray(&instrukce,"CONCAT GF@$$var_1 GF@$$var_3 GF@$$var_4\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
 }
 
 /**
@@ -310,7 +377,9 @@ void generate_concat(){
  * @param name - nazev promene
  */
 void generate_pop_to_variable(char* name){
-    printf("POPS %s@%s\n",get_frame(),name);
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "POPS %s@%s\n",get_frame(),name);
+    strAddCharArray(&instrukce,str);
 }
 
 /**
@@ -319,16 +388,19 @@ void generate_pop_to_variable(char* name){
  * @param name - hodnota (v případě identifikátoru je zde jeho název)
  */
 void generate_push(int type, char* name) {
-    printf("# Push\n");
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# Push\n");
     double a = 0;
     string s;
     switch(type){
         case INTEGER_TYPE:
-            printf("PUSHS int@%d\n",string_To_Int(name));
+            sprintf(str, "PUSHS int@%d\n",string_To_Int(name));
+            strAddCharArray(&instrukce,str);
             break;
         case DOUBLE_TYPE:
             a = string_to_Double(name);
-            printf("PUSHS float@%a\n",a);
+            sprintf(str, "PUSHS float@%a\n",a);
+            strAddCharArray(&instrukce,str);
             break;
         case STRING_TYPE:
             strInit(&s);
@@ -346,11 +418,13 @@ void generate_push(int type, char* name) {
                     strAddChar(&s,c);
                 }
             }
-            printf("PUSHS string@%s\n",s.str); //todo
+            sprintf(str, "PUSHS string@%s\n",s.str);
+            strAddCharArray(&instrukce,str); //todo
             free(s.str);
             break;
         case IDENTIFIER:
-            printf("PUSHS %s@%s\n",get_frame(),name);
+            sprintf(str, "PUSHS %s@%s\n",get_frame(),name);
+            strAddCharArray(&instrukce,str);
             break;
         default:
             //todo
@@ -364,24 +438,24 @@ void generate_push(int type, char* name) {
  */
 void generate_mathemeatical_operations(int type){
     data_conversion();
-    printf("# Mathematical operations\n");
+    strAddCharArray(&instrukce,"# Mathematical operations\n");
     switch (type){
         case G_TYPE_PLUS:
-            printf("ADDS\n");
+            strAddCharArray(&instrukce,"ADDS\n");
             break;
         case G_TYPE_DIV:
             data_conversion_to_float();
-            printf("DIVS\n");
+            strAddCharArray(&instrukce,"DIVS\n");
             break;
         case G_TYPE_IDIV:
             data_conversion_to_int();
-            printf("IDIVS\n");
+            strAddCharArray(&instrukce,"IDIVS\n");
             break;
         case G_TYPE_MINUS:
-            printf("SUBS\n");
+            strAddCharArray(&instrukce,"SUBS\n");
             break;
         case G_TYPE_MUL:
-            printf("MULS\n");
+            strAddCharArray(&instrukce,"MULS\n");
             break;
         default:
             //todo
@@ -395,87 +469,104 @@ void generate_mathemeatical_operations(int type){
  *                            G_TYPE_GREATER_OR_EQUAL,G_TYPE_NOT_EQUAL,G_TYPE_EQUAL)
  */
 void generate_comparative_operations(int type){
+    char str[MAX_INSTRUCTION_LEN];
     data_conversion();
-    printf("# Comparative operations\n");
+    strAddCharArray(&instrukce,"# Comparative operations\n");
     switch (type){
         case G_TYPE_LESS:
-            printf("LTS\n");
+            strAddCharArray(&instrukce,"LTS\n");
             break;
         case G_TYPE_LESS_OR_EQUAL:
 
-            printf("POPS GF@$$var_3\n");
-            printf("POPS GF@$$var_4\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
 
-            printf("PUSHS GF@$$var_4\n");
-            printf("PUSHS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 
-            printf("LTS\n");
-            printf("POPS GF@$$var_1\n");
+            strAddCharArray(&instrukce,"LTS\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
 
-            printf("PUSHS GF@$$var_4\n");
-            printf("PUSHS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 
-            printf("EQS\n");
-            printf("POPS GF@$$var_2\n");
+            strAddCharArray(&instrukce,"EQS\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_2\n");
 
-            char *label = get_new_label();
+            int current_label_number = get_new_label_number();
 
-            printf("JUMPIFEQ %s_YES GF@$$var_1 bool@true\n", label);
-            printf("JUMPIFEQ %s_YES GF@$$var_2 bool@true\n", label);
-            printf("JUMP %s_NOT\n", label);
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_YES GF@$$var_1 bool@true\n", current_label_number);
+            strAddCharArray(&instrukce,str);
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_YES GF@$$var_2 bool@true\n", current_label_number);
+            strAddCharArray(&instrukce,str);
+            sprintf(str, "JUMP %%L_NUM_%d_NOT\n", current_label_number);
+            strAddCharArray(&instrukce,str);
             //false
-            printf("LABEL %s_NOT\n", label);
-            printf("PUSHS bool@false\n");
-            printf("JUMP %s\n", label);
+            sprintf(str, "LABEL %%L_NUM_%d_NOT\n", current_label_number);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS bool@false\n");
+            sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number);
+            strAddCharArray(&instrukce,str);
             //true
-            printf("LABEL %s_YES\n", label);
-            printf("PUSHS bool@true\n");
-            printf("JUMP %s\n", label);
+            sprintf(str, "LABEL %%L_NUM_%d_YES\n", current_label_number);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS bool@true\n");
+            sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number);
+            strAddCharArray(&instrukce,str);
             //end
-            printf("LABEL %s\n", label);
+            sprintf(str, "LABEL %%L_NUM_%d\n", current_label_number);
+            strAddCharArray(&instrukce,str);
 
             break;
         case G_TYPE_GREATER:
-            printf("GTS\n");
+            strAddCharArray(&instrukce,"GTS\n");
             break;
         case G_TYPE_GREATER_OR_EQUAL:
-            printf("POPS GF@$$var_3\n");
-            printf("POPS GF@$$var_4\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
 
-            printf("PUSHS GF@$$var_4\n");
-            printf("PUSHS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 
-            printf("GTS\n");
-            printf("POPS GF@$$var_1\n");
+            strAddCharArray(&instrukce,"GTS\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
 
-            printf("PUSHS GF@$$var_4\n");
-            printf("PUSHS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 
-            printf("EQS\n");
-            printf("POPS GF@$$var_2\n");
+            strAddCharArray(&instrukce,"EQS\n");
+            strAddCharArray(&instrukce,"POPS GF@$$var_2\n");
 
-            char *l = get_new_label();
+            int current_label_number_g = get_new_label_number();
 
-            printf("JUMPIFEQ %s_YES GF@$$var_1 bool@true\n", l);
-            printf("JUMPIFEQ %s_YES GF@$$var_2 bool@true\n", l);
-            printf("JUMP %s_NOT\n", l);
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_YES GF@$$var_1 bool@true\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_YES GF@$$var_2 bool@true\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
+            sprintf(str, "JUMP %%L_NUM_%d_NOT\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
             //false
-            printf("LABEL %s_NOT\n", l);
-            printf("PUSHS bool@false\n");
-            printf("JUMP %s\n", l);
+            sprintf(str, "LABEL %%L_NUM_%d_NOT\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS bool@false\n");
+            sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
             //true
-            printf("LABEL %s_YES\n", l);
-            printf("PUSHS bool@true\n");
-            printf("JUMP %s\n", l);
+            sprintf(str, "LABEL %%L_NUM_%d_YES\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS bool@true\n");
+            sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
             //end
-            printf("LABEL %s\n", l);
+            sprintf(str, "LABEL %%L_NUM_%d\n", current_label_number_g);
+            strAddCharArray(&instrukce,str);
             break;
         case G_TYPE_EQUAL:
-            printf("EQS\n");
+            strAddCharArray(&instrukce,"EQS\n");
             break;
         case G_TYPE_NOT_EQUAL:
-            printf("EQS\n");
-            printf("NOTS\n");
+            strAddCharArray(&instrukce,"EQS\n");
+            strAddCharArray(&instrukce,"NOTS\n");
             break;
         default:
             //todo
@@ -489,13 +580,16 @@ void generate_comparative_operations(int type){
  * @param name - hodnota (pokud jde o IDENTIFIER tak je zde jeho nazev)
  */
 void generate_print(int type, char* name) {
+    char str[MAX_INSTRUCTION_LEN];
     string s;
     switch (type) {
         case INTEGER_TYPE:
-            printf("WRITE int@%d\n", string_To_Int(name));
+            sprintf(str, "WRITE int@%d\n", string_To_Int(name));
+            strAddCharArray(&instrukce,str);
             break;
         case DOUBLE_TYPE:
-            printf("WRITE float@%a\n", string_to_Double(name));
+            sprintf(str, "WRITE float@%a\n", string_to_Double(name));
+            strAddCharArray(&instrukce,str);
             break;
         case STRING_TYPE:
             strInit(&s);
@@ -513,11 +607,13 @@ void generate_print(int type, char* name) {
                     strAddChar(&s,c);
                 }
             }
-            printf("WRITE string@%s\n", s.str);
+            sprintf(str, "WRITE string@%s\n", s.str);
+            strAddCharArray(&instrukce,str);
             free(s.str);
             break;
         case IDENTIFIER:
-            printf("WRITE %s@%s\n", get_frame(), name);
+            sprintf(str, "WRITE %s@%s\n", get_frame(), name);
+            strAddCharArray(&instrukce,str);
             break;
         default:
             break;
@@ -528,15 +624,15 @@ void generate_print(int type, char* name) {
  * Uloží hodnotu ze zasobnikuna globalni promene result
  */
 void generate_pop_to_result(){
-    printf("# Pop \n");
-    printf("POPS GF@$$result\n");
+    strAddCharArray(&instrukce,"# Pop \n");
+    strAddCharArray(&instrukce,"POPS GF@$$result\n");
 }
 
 /**
  * Print hodnoty v globalni promene result
  */
 void generate_print_result(){
-    printf("WRITE GF@$$result\n");
+    strAddCharArray(&instrukce,"WRITE GF@$$result\n");
 
 }
 
@@ -545,8 +641,10 @@ void generate_print_result(){
  * @param num - číslo IF
  */
 void generate_if(int num) {
-    printf("# If start \n");
-    printf("JUMPIFEQ IF_%d_ELSE GF@$$result bool@false\n",num);
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# If start \n");
+    sprintf(str, "JUMPIFEQ IF_%d_ELSE GF@$$result bool@false\n",num);
+    strAddCharArray(&instrukce,str);
 }
 
 /**
@@ -555,12 +653,16 @@ void generate_if(int num) {
  * @param else_statment - true pokud existuje else statment, false pokud ne
  */
 void generate_else(int num, bool else_statment) {
-    printf("# else \n");
-    printf("JUMP IF_%d_END\n",num);
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# else \n");
+    sprintf(str, "JUMP IF_%d_END\n",num);
+    strAddCharArray(&instrukce,str);
 
-    printf("LABEL IF_%d_ELSE\n",num);
+    sprintf(str, "LABEL IF_%d_ELSE\n",num);
+    strAddCharArray(&instrukce,str);
     if(else_statment == false){
-        printf("JUMP IF_%d_END\n",num);
+        sprintf(str, "JUMP IF_%d_END\n",num);
+        strAddCharArray(&instrukce,str);
     }
 }
 
@@ -570,8 +672,10 @@ void generate_else(int num, bool else_statment) {
  * @param num - číslo IF
  */
 void generate_if_else_end(int num) {
-    printf("# End If\n");
-    printf("LABEL IF_%d_END\n",num);
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# End If\n");
+    sprintf(str, "LABEL IF_%d_END\n",num);
+    strAddCharArray(&instrukce,str);
 }
 
 
@@ -580,8 +684,10 @@ void generate_if_else_end(int num) {
  * @param num - číslo WHILE
  */
 void generate_while_condition_check(int num) {
-    printf("# While condition\n");
-    printf("LABEL WHILE_%d_CONDITION\n",num);
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# While condition\n");
+    sprintf(str, "LABEL WHILE_%d_CONDITION\n",num);
+    strAddCharArray(&instrukce,str);
 }
 
 /**
@@ -589,8 +695,10 @@ void generate_while_condition_check(int num) {
  * @param num - číslo WHILE
  */
 void generate_while_start(int num) {
-    printf("# While start\n");
-    printf("JUMPIFEQ WHILE_%d_END GF@$$result bool@false\n",num);
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"# While start\n");
+    sprintf(str, "JUMPIFEQ WHILE_%d_END GF@$$result bool@false\n",num);
+    strAddCharArray(&instrukce,str);
 }
 
 /**
@@ -598,7 +706,10 @@ void generate_while_start(int num) {
  * @param num - číslo WHILE
  */
 void generate_while_end(int num){
-    printf("JUMP WHILE_%d_CONDITION\n",num);
-    printf("# While end\n");
-    printf("LABEL WHILE_%d_END\n",num);
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "JUMP WHILE_%d_CONDITION\n",num);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"# While end\n");
+    sprintf(str,"LABEL WHILE_%d_END\n",num);
+    strAddCharArray(&instrukce,str);
 }

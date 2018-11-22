@@ -128,13 +128,14 @@ int fill_TS(){
 }
 
 int main() {
-    B_tree_init(&root_GTS);
+    B_tree_init(&root_GTS); //todo B_tree_free(root_GTS)
     int result;
     result = fill_TS();
     if (result != SEM_OK) return SEM_ERR;
 
     FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     result = parse();
+    ///B_tree_free(root_GTS); //todo B_tree_free(root_GTS)
     //printf("%d\n", result);
 /*
     printf("GTS :\n");
@@ -203,7 +204,6 @@ int main() {
     /**
      * Generator
      */
-
     //--------------------------------------------------
     //                   Priklad 1
     //--------------------------------------------------
@@ -308,13 +308,17 @@ int main() {
 
     //test stringu
     variable_declare(STRING_TYPE,"str");
-    generate_variable_assign(STRING_E,"str","Muj string\n +#-->\\");
+    generate_variable_assign(STRING_E,"str","\nMuj string\n +#-->\\\n");
 
     //vypis promene
     generate_print(IDENTIFIER,"str");
 
     //konec
     generate_main_end();
+
+    printf("%s",instrukce.str);
+
+    generate_free_memory();
     */
     //--------------------------------------------------
 
@@ -336,11 +340,13 @@ int main() {
      }
 
      */
+
+
     generate_start();
     generate_main();
 
     variable_declare(INTEGER_TYPE,"a");
-    generate_variable_assign(INT_E,"a","5");
+    generate_variable_assign(INT_E,"a","0");
     variable_declare(INTEGER_TYPE,"b");
     generate_variable_assign(INT_E,"b","10");
 
@@ -363,8 +369,18 @@ int main() {
 
 
     generate_main_end();
+
+    printf("%s",instrukce.str);
+
+    generate_free_memory();
+
     //--------------------------------------------------
 
+
+
+
+
+    //free_labels();
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;
