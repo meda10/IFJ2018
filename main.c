@@ -341,7 +341,7 @@ int main() {
 
      */
 
-
+    /*
     generate_start();
     generate_main();
 
@@ -373,14 +373,59 @@ int main() {
     printf("%s",instrukce.str);
 
     generate_free_memory();
-
+    */
     //--------------------------------------------------
 
+    //--------------------------------------------------
+    //                   Priklad 3
+    //--------------------------------------------------
+    /*
+     int result; //globalni promena
+
+     function HELL(a,b){
+        return a * b
+     }
+
+     main{
+        int x;
+        x = HELL(10,5);
+        printf(x);
+     }
+
+     */
+    generate_start();
+
+    //funkce
+    generate_function_start("HELL");
+        generate_read_function_params(1, "a");
+        generate_read_function_params(2, "b");
+        generate_push(IDENTIFIER,"a");
+        generate_push(IDENTIFIER,"b");
+        generate_mathemeatical_operations(G_TYPE_MUL);
+        generate_function_return("HELL");
+    generate_function_end("HELL");
+
+    //Main
+    generate_main();
+
+    variable_declare(INTEGER_TYPE,"x");
+
+    //předání parametrů funkce
+    generate_TF_for_function_args();
+    generate_assign_arguments_to_function(INT_E, 1, "10");
+    generate_assign_arguments_to_function(INT_E, 2, "5");
+    //volani funkce
+    generate_function_call("HELL");
+    //Přiřazení návratové hodnoty funkce do c
+    generate_function_return_value_assign_to_var("x");
+    generate_print(IDENTIFIER,"x");
+    generate_main_end();
 
 
+    printf("%s",instrukce.str);
 
+    generate_free_memory();
 
-    //free_labels();
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;

@@ -77,5 +77,15 @@ void generate_while_start(int num);
 void generate_while_end(int num);
 void generate_pop_to_variable(char* name);
 
+
+void generate_assign_arguments_to_function(int expresion_type, int num, char *value);
+void generate_read_function_params(int num, char *name);
+void generate_function_call(char* name);
+void generate_TF_for_function_args();
+void generate_function_return_value_assign_to_var(char *name);
+void generate_function_start(char *name);
+void generate_function_end(char *name);
+void generate_function_return(char *name);
+
 #endif //SCANNER_GENERATOR_H
 

@@ -50,15 +50,15 @@ void variable_declare(int type, char *name) {
     double a = 0;
     switch (type) {
         case INTEGER_TYPE:
-            sprintf(str,"MOVE %s@%s int@0\n", get_frame(), name);
+            sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
             strAddCharArray(&instrukce,str);
             break;
         case DOUBLE_TYPE:
-            sprintf(str,"MOVE %s@%s float@%a\n", get_frame(), name, a);
+            sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
             strAddCharArray(&instrukce,str);
             break;
         case STRING_TYPE:
-            sprintf(str,"MOVE %s@%s string@\n", get_frame(), name);
+            sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
             strAddCharArray(&instrukce,str);
             break;
         default:
@@ -93,26 +93,6 @@ void generate_start(){
     arr_free_pos = 0;
     inScope = false;
 
-
-    //char tmp[3];
-    //sprintf(tmp, "\\%03d", c);
-
-    /*
-    strAddCharArray(&instrukce,)(".IFJcode18\n");
-
-    strAddCharArray(&instrukce,)("DEFVAR GF@$$input\n");
-    //strAddCharArray(&instrukce,)("MOVE GF@$$input string@?\\032\n");
-
-    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_1\n");
-    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_2\n");
-    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_3\n");
-    strAddCharArray(&instrukce,)("DEFVAR GF@$$var_4\n");
-
-    strAddCharArray(&instrukce,)("DEFVAR GF@$$result\n");
-
-    strAddCharArray(&instrukce,)("JUMP $$main\n");
-    */
-
     strAddCharArray(&instrukce,".IFJcode18\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
@@ -134,13 +114,6 @@ void generate_free_memory(){
  * Label main
  */
 void generate_main(){
-/*
-    strAddCharArray(&instrukce,)("\n# Main\n");
-
-    strAddCharArray(&instrukce,)("LABEL $$main\n");
-    strAddCharArray(&instrukce,)("CREATEFRAME\n");
-    strAddCharArray(&instrukce,)("PUSHFRAME\n");
-*/
     strAddCharArray(&instrukce,"\n# Main\n");
     strAddCharArray(&instrukce,"LABEL $$main\n");
     strAddCharArray(&instrukce,"CREATEFRAME\n");
@@ -151,12 +124,6 @@ void generate_main(){
  * Konec main
  */
 void generate_main_end(){
-/*
-    strAddCharArray(&instrukce,)("\n#Main end\n");
-
-    strAddCharArray(&instrukce,)("POPFRAME\n");
-    strAddCharArray(&instrukce,)("CLEARS\n");
-*/
     strAddCharArray(&instrukce,"\n#Main end\n");
     strAddCharArray(&instrukce,"POPFRAME\n");
     strAddCharArray(&instrukce,"CLEARS\n");
@@ -712,4 +679,133 @@ void generate_while_end(int num){
     strAddCharArray(&instrukce,"# While end\n");
     sprintf(str,"LABEL WHILE_%d_END\n",num);
     strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Používá se před voláním funkce
+ * Vytvoří proměnou v TF a přidá do ní hodnotu, TF se pak předává funkci jako její parametry
+ * @param expresion_type - typ přiřazení (INT_E,DOUBLE_E,STRING_E,VARIABLE_E)
+ * @param num - pořadí parametru (1,2,3,4...)
+ * @param value - hodnota
+ */
+void generate_assign_arguments_to_function(int expresion_type, int num, char *value){
+    char str[MAX_INSTRUCTION_LEN];
+    string s;
+    sprintf(str, "DEFVAR TF@V_%d\n",num);
+    strAddCharArray(&instrukce,str);
+    switch (expresion_type) {
+        case INT_E: {
+            sprintf(str, "MOVE TF@V_%d int@%d\n", num, string_To_Int(value));
+            strAddCharArray(&instrukce,str); //todo %d
+            break;
+        }
+        case DOUBLE_E: {
+            sprintf(str, "MOVE TF@V_%d float@%a\n", num, string_to_Double(value));
+            strAddCharArray(&instrukce,str);
+            break;
+        }
+        case STRING_E:
+            strInit(&s);
+            for (int i = 0; i < strlen(value); ++i) {
+                char c = value[i];
+                if(c == '#'){
+                    strAddCharArray(&s,"\\035");
+                } else if (c == '\\'){
+                    strAddCharArray(&s,"\\092");
+                } else if(c <= 32){
+                    char tmp[3];
+                    sprintf(tmp, "\\%03d", c);
+                    strAddCharArray(&s,tmp);
+                } else{
+                    strAddChar(&s,c);
+                }
+            }
+            sprintf(str, "MOVE TF@V_%d string@%s\n", num, s.str);
+            strAddCharArray(&instrukce,str);
+            free(s.str);
+            break;
+        default:
+            break;
+    }
+}
+
+
+/**
+ * Používá se ve funkci k načtení parametrů
+ * @param num - pořadí parametru (1,2,3,4...)
+ * @param name - název parametru
+ */
+void generate_read_function_params(int num, char *name){
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "DEFVAR LF@%s\n",name);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "MOVE LF@%s LF@V_%d\n",name,num);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Volání funkce
+ * @param name - název funkce
+ */
+void generate_function_call(char* name){
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "CALL $$FUN_%s_START\n", name);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ *
+ */
+void generate_TF_for_function_args(){
+    strAddCharArray(&instrukce,"CREATEFRAME\n");
+}
+
+/**
+ * Přiřadí návratovou hodnotu funkce do proměnné
+ * @param name - název funkce
+ */
+void generate_function_return_value_assign_to_var(char *name){
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "MOVE %s@%s TF@$$FUN_RET\n", get_frame(),name);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Začátek funkce
+ * @param name - název funkce
+ */
+void generate_function_start(char *name){
+    inScope = true;
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "LABEL $$FUN_%s_START\n",name);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    variable_declare(INTEGER_TYPE,"$$FUN_RET");
+
+    //strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+}
+
+/**
+ * Return z funkce, vezme poslední hodnotu z zásobníku a uloží ji jako výsledek funkce
+ * @param name - název funkce
+ */
+void generate_function_return(char *name){
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"POPS LF@$$FUN_RET\n");
+    //strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET GF@%exp_result\n");
+    sprintf(str, "JUMP $$FUN_%s_END\n",name);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Ukončení funkce
+ * @param name - název funkce
+ */
+void generate_function_end(char *name){
+    inScope = false;
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "LABEL $$FUN_%s_END\n",name);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
 }
