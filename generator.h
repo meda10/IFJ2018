@@ -52,11 +52,15 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
 void generate_pop_to_result();
 void data_conversion();
 
+void generate_concat();
+
 void generate_if(int num);
 void generate_else(int num, bool else_statment);
 void generate_if_else_end(int num);
 
 void generate_comparative_operations(int type);
+
+char* change_string(char *str);
 
 #endif //SCANNER_GENERATOR_H
 

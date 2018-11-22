@@ -185,6 +185,7 @@ void data_conversion_to_int() {
 
 void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value) {
     printf("# Variable assign\n");
+    string s;
     switch (expresion_type) {
         case INT_E: {
             printf("MOVE %s@%s int@%d\n", get_frame(), variable_name, string_To_Int(variable_value)); //todo %d
@@ -195,7 +196,23 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
             break;
         }
         case STRING_E:
-            printf("MOVE %s@%s string@%s\n", get_frame(), variable_name, variable_value);
+            strInit(&s);
+            for (int i = 0; i < strlen(variable_value); ++i) {
+                char c = variable_value[i];
+                if(c == '#'){
+                    strAddCharArray(&s,"\\035");
+                } else if (c == '\\'){
+                    strAddCharArray(&s,"\\092");
+                } else if(c <= 32){
+                    char tmp[3];
+                    sprintf(tmp, "\\%03d", c);
+                    strAddCharArray(&s,tmp);
+                } else{
+                    strAddChar(&s,c);
+                }
+            }
+            printf("MOVE %s@%s string@%s\n", get_frame(), variable_name, s.str);
+            free(s.str);
             break;
         case VARIABLE_E:
             printf("MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
@@ -207,19 +224,70 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
 
 }
 
+char* change_string(char *str){
+    string s;
+    strInit(&s);
+    for (int i = 0; i < strlen(str); ++i) {
+        char c = str[i];
+        if(c == '#'){
+            strAddCharArray(&s,"\\035");
+        } else if (c == '\\'){
+            strAddCharArray(&s,"\\092");
+        } else if(c <= 32){
+            char tmp[3];
+            sprintf(tmp, "\\%03d", c);
+            strAddCharArray(&s,tmp);
+        } else{
+            strAddChar(&s,c);
+        }
+    }
+    char result[s.length];
+    strcpy(result,s.str);
+    free(s.str);
+    //return s.str;
+    //return result;
+}
+
+
+
+
+void generate_concat(){
+    printf("POPS GF@$$var_4\n");
+    printf("POPS GF@$$var_3\n");
+    printf("CONCAT GF@$$var_1 GF@$$var_3 GF@$$var_4\n");
+    printf("PUSHS GF@$$var_1\n");
+}
+
 void generate_push(int type, char* name) {
     printf("# Push\n");
     double a = 0;
+    string s;
     switch(type){
         case INTEGER_TYPE:
-            printf("PUSHS int@%s\n", name);
+            printf("PUSHS int@%d\n",string_To_Int(name));
             break;
         case DOUBLE_TYPE:
             a = string_to_Double(name);
             printf("PUSHS float@%a\n",a);
             break;
         case STRING_TYPE:
-            printf("PUSHS string@%s\n",name); //todo
+            strInit(&s);
+            for (int i = 0; i < strlen(name); ++i) {
+                char c = name[i];
+                if(c == '#'){
+                    strAddCharArray(&s,"\\035");
+                } else if (c == '\\'){
+                    strAddCharArray(&s,"\\092");
+                } else if(c <= 32){
+                    char tmp[3];
+                    sprintf(tmp, "\\%03d", c);
+                    strAddCharArray(&s,tmp);
+                } else{
+                    strAddChar(&s,c);
+                }
+            }
+            printf("PUSHS string@%s\n",s.str); //todo
+            free(s.str);
             break;
         case IDENTIFIER:
             printf("PUSHS %s@%s\n",get_frame(),name);
@@ -260,19 +328,79 @@ void generate_mathemeatical_operations(int type){
 
 void generate_comparative_operations(int type){
     data_conversion();
-    printf("# Mathematical operations\n");
+    printf("# Comparative operations\n");
     switch (type){
         case G_TYPE_LESS:
             printf("LTS\n");
             break;
         case G_TYPE_LESS_OR_EQUAL:
-            printf("\n");
+
+            printf("POPS GF@$$var_3\n");
+            printf("POPS GF@$$var_4\n");
+
+            printf("PUSHS GF@$$var_4\n");
+            printf("PUSHS GF@$$var_3\n");
+
+            printf("LTS\n");
+            printf("POPS GF@$$var_1\n");
+
+            printf("PUSHS GF@$$var_4\n");
+            printf("PUSHS GF@$$var_3\n");
+
+            printf("EQS\n");
+            printf("POPS GF@$$var_2\n");
+
+            char *label = get_new_label();
+
+            printf("JUMPIFEQ %s_YES GF@$$var_1 bool@true\n", label);
+            printf("JUMPIFEQ %s_YES GF@$$var_2 bool@true\n", label);
+            printf("JUMP %s_NOT\n", label);
+            //false
+            printf("LABEL %s_NOT\n", label);
+            printf("PUSHS bool@false\n");
+            printf("JUMP %s\n", label);
+            //true
+            printf("LABEL %s_YES\n", label);
+            printf("PUSHS bool@true\n");
+            printf("JUMP %s\n", label);
+            //end
+            printf("LABEL %s\n", label);
+
             break;
         case G_TYPE_GREATER:
             printf("GTS\n");
             break;
         case G_TYPE_GREATER_OR_EQUAL:
-            printf("\n");
+            printf("POPS GF@$$var_3\n");
+            printf("POPS GF@$$var_4\n");
+
+            printf("PUSHS GF@$$var_4\n");
+            printf("PUSHS GF@$$var_3\n");
+
+            printf("GTS\n");
+            printf("POPS GF@$$var_1\n");
+
+            printf("PUSHS GF@$$var_4\n");
+            printf("PUSHS GF@$$var_3\n");
+
+            printf("EQS\n");
+            printf("POPS GF@$$var_2\n");
+
+            char *l = get_new_label();
+
+            printf("JUMPIFEQ %s_YES GF@$$var_1 bool@true\n", l);
+            printf("JUMPIFEQ %s_YES GF@$$var_2 bool@true\n", l);
+            printf("JUMP %s_NOT\n", l);
+            //false
+            printf("LABEL %s_NOT\n", l);
+            printf("PUSHS bool@false\n");
+            printf("JUMP %s\n", l);
+            //true
+            printf("LABEL %s_YES\n", l);
+            printf("PUSHS bool@true\n");
+            printf("JUMP %s\n", l);
+            //end
+            printf("LABEL %s\n", l);
             break;
         case G_TYPE_EQUAL:
             printf("EQS\n");

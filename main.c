@@ -279,7 +279,7 @@ int main() {
         //push hodnot na zasobnik a test IF podminky
         generate_push(IDENTIFIER,"b");
         generate_push(INTEGER_TYPE,"16");
-        generate_comparative_operations(G_TYPE_NOT_EQUAL);
+        generate_comparative_operations(G_TYPE_GREATER_OR_EQUAL);
         generate_pop_to_result();
         //vnorent IF
         generate_if(3);
@@ -291,20 +291,24 @@ int main() {
             generate_print_result();
         generate_else(3,true);
             generate_push(STRING_TYPE,"SUCCESS");
+            generate_push(STRING_TYPE," END!!");
+            generate_concat();
             generate_pop_to_result();
             generate_print_result();
         generate_if_else_end(3);
     generate_if_else_end(1);
 
+    //test stringu
+    variable_declare(STRING_TYPE,"str");
+    generate_variable_assign(STRING_E,"str","Muj string\n +#-->\\");
+    generate_push(IDENTIFIER,"str");
+
     //vypis hodnoty
-    //generate_pop_to_result();
-    //generate_print_result();
+    generate_pop_to_result();
+    generate_print_result();
 
     //konec
     generate_main_end();
-
-    double a = 90 / 10;
-    //printf("--> %a\n",a);
 
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
