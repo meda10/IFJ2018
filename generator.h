@@ -39,7 +39,10 @@ void startGenerating();
 void variable_declare(int type, char* name);
 char *get_new_label();
 
-
+void generate_stack_1_to_float();
+void generate_stack_1_to_int();
+void generate_stack_2_to_float();
+void generate_stack_2_to_int();
 
 void generate_start();
 void generate_main();
@@ -60,7 +63,12 @@ void generate_if_else_end(int num);
 
 void generate_comparative_operations(int type);
 
-char* change_string(char *str);
+void generate_inputs();
+
+void generate_while_condition_check(int num);
+void generate_while_start(int num);
+void generate_while_end(int num);
+void generate_pop_to_variable(char* name);
 
 #endif //SCANNER_GENERATOR_H
 

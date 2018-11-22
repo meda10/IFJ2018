@@ -204,6 +204,9 @@ int main() {
      * Generator
      */
 
+    //--------------------------------------------------
+    //                   Priklad 1
+    //--------------------------------------------------
     /*
      ---- Pseudo kod ----
      int result; //globalni promena
@@ -237,7 +240,7 @@ int main() {
 
      */
 
-
+    /*
     //start generatoru
     generate_start();
     generate_main();
@@ -312,6 +315,55 @@ int main() {
 
     //konec
     generate_main_end();
+    */
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    //                   Priklad 2
+    //--------------------------------------------------
+    /*
+     int result; //globalni promena
+
+     int a = 0;
+     a = 5;
+     int b = 0;
+     b = 10;
+
+     while(a != b){
+        a = a + 1;
+        printf(a);
+        printf(\n);
+     }
+
+     */
+    generate_start();
+    generate_main();
+
+    variable_declare(INTEGER_TYPE,"a");
+    generate_variable_assign(INT_E,"a","5");
+    variable_declare(INTEGER_TYPE,"b");
+    generate_variable_assign(INT_E,"b","10");
+
+    //podminka while
+    generate_while_condition_check(1);
+    generate_push(IDENTIFIER,"a");
+    generate_push(INTEGER_TYPE,"10");
+    generate_comparative_operations(G_TYPE_NOT_EQUAL);
+    generate_pop_to_result();
+
+    //telo while
+    generate_while_start(1);
+        generate_push(IDENTIFIER,"a");
+        generate_push(INTEGER_TYPE,"1");
+        generate_mathemeatical_operations(G_TYPE_PLUS);
+        generate_pop_to_variable("a");
+        generate_print(IDENTIFIER,"a");
+        generate_print(STRING_TYPE,"\n");
+    generate_while_end(1);
+
+
+    generate_main_end();
+    //--------------------------------------------------
 
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
