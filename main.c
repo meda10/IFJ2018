@@ -181,7 +181,7 @@ int main() {
     strClear(&tmp);
 
 
-    //TAB_2 = NULL;
+    free(local_table);
     local_table = make_new_table();
 
     //Dalsi lokalni tabulka
@@ -228,6 +228,8 @@ int main() {
     B_tree_walk(z);
     printf("\n");
 
+    free(local_table);
+    B_tree_free(z);
     B_tree_free(i);
     B_tree_free(*ROOT);
     delete_string(&tmp);
