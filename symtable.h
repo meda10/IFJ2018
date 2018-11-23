@@ -45,5 +45,6 @@ int B_tree_insert(BTNode *root, struct Values data);
 void B_tree_walk(BTNode root);
 void B_tree_free(BTNode root);
 int create_node(BTNode *table, string *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table);
+BTNode B_tree_search_local_table(BTNode root, char *name);
 
 #endif //TREE_BT_H

@@ -202,29 +202,21 @@ int main() {
     printf("\n");
 
     //nalezeni lokalni tabulky
-    BTNode i;
-    BTNode g;
-
-    g = B_tree_search(*ROOT,"FUNKCE");
-    i = g->data.local_sym_table;
-
+    BTNode local_table_1;
+    local_table_1 = B_tree_search_local_table(*ROOT,"FUNKCE");
     //walk local table
-    B_tree_walk(i);
-    printf("\n");
+    B_tree_walk(local_table_1);printf("\n");
 
     //nalezeni lokalni tabulky
-    BTNode x;
-    BTNode z;
-    x = B_tree_search(*ROOT,"FUNKCE_2");
-    z = x->data.local_sym_table;
-
+    BTNode local_table_2;
+    local_table_2 = B_tree_search_local_table(*ROOT,"FUNKCE_2");
     //walk local table
-    B_tree_walk(z);
-    printf("\n");
+    B_tree_walk(local_table_2);printf("\n");
+
 
     free(local_table);
-    B_tree_free(z);
-    B_tree_free(i);
+    B_tree_free(local_table_1);
+    B_tree_free(local_table_2);
     B_tree_free(*ROOT);
     delete_string(&tmp);
 

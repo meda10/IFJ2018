@@ -30,9 +30,6 @@ TValues init_val(char *name, int len) {
 BTNode* make_new_table(){
     BTNode *b = malloc(sizeof(BTNode));
     memset(b,0,sizeof(BTNode));
-    //b->data = NULL;
-    //b->L_ptr = NULL;
-    //b->R_ptr = NULL;
     return b;
 }
 
@@ -47,6 +44,24 @@ BTNode B_tree_search(BTNode root, char *name){
         }
         if(strcmp(root->data.name,name) == 0){ //todo cmp
             return root;
+        }
+
+        if(strcmp(root->data.name,name) > 0){ //todo cmp
+            root = root->L_ptr;
+        }else{
+            root = root->R_ptr;
+        }
+    }
+    return NULL;
+}
+
+BTNode B_tree_search_local_table(BTNode root, char *name){
+    while(root != NULL){
+        if(name == NULL){
+            return NULL;
+        }
+        if(strcmp(root->data.name,name) == 0){ //todo cmp
+            return root->data.local_sym_table;
         }
 
         if(strcmp(root->data.name,name) > 0){ //todo cmp
