@@ -142,11 +142,11 @@ void B_tree_free(BTNode root){
     }
 }
 
-int create_node(BTNode *table, string *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
-    BTNode node = B_tree_search(*table, name->str);
+int create_node(BTNode *table, char *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
+    BTNode node = B_tree_search(*table, name);
 
-    if(node == NULL && name->str != NULL) {
-        TValues val = init_val(name->str, name->length);
+    if(node == NULL && name != NULL) {
+        TValues val = init_val(name, (int)strlen(name) + 1);
         //val.value = value;
         val.type = type;
         val.params_number = params_number;

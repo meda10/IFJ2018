@@ -1,2 +1,13 @@
-def long_identifier ()
+def p1 (b,c,d)
+b = 6
+a = 4
+g = 3
+c = 54
+d = 5
+ff = 5
+def p2 ()
+end
+def help (adwa)
+end
+
 end
