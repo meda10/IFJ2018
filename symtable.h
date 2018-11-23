@@ -37,6 +37,8 @@ typedef struct node {
     struct node *R_ptr;
 } *BTNode;
 
+
+BTNode* make_new_table();
 void B_tree_init(BTNode *root);
 BTNode B_tree_search(BTNode root, char* name);
 int B_tree_insert(BTNode *root, struct Values data);

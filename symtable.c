@@ -27,6 +27,12 @@ TValues init_val(char *name, int len) {
     }
 }
 
+BTNode* make_new_table(){
+    BTNode *b = malloc(sizeof(BTNode));
+    memset(b,0,sizeof(BTNode));
+    //BTNode->data = NULL;
+    return b;
+}
 
 void B_tree_init(BTNode *root) {
     *root = NULL;

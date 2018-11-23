@@ -133,65 +133,104 @@ int fill_TS(){
 
 int main() {
     B_tree_init(&root_GTS);
-    int result;
-    result = fill_TS();
-    if (result != SEM_OK) return SEM_ERR;
+    //int result;
+    //result = fill_TS();
+    //if (result != SEM_OK) return SEM_ERR;
+
+    //B_tree_walk(root_GTS);
+
 
     string tmp;
     strInit(&tmp);
 
-    BTNode ROOT;     B_tree_init(&ROOT);
+    BTNode *ROOT;
+    ROOT = make_new_table();
+
     BTNode NEMA_LOCALNI_TABULKU = NULL;
-    BTNode TAB_2;    B_tree_init(&TAB_2);
+    BTNode *local_table;
+    local_table = make_new_table();
 
     //lokalni tabulka - prvni prvak
     strAddCharArray(&tmp,"Local_1");
-    create_node(&TAB_2, &tmp, 5, 80, NULL, true, false, true, false, &TAB_2);
+    create_node(local_table, &tmp, 5, 80, NULL, true, false, true, false, local_table);
     strClear(&tmp);
 
     //globalni tabulka
     strAddCharArray(&tmp,"GLOBAL_A");
-    create_node(&ROOT, &tmp, -1, 2, NULL, true, false, true, false, &NEMA_LOCALNI_TABULKU);
+    create_node(ROOT, &tmp, -1, 2, NULL, true, false, true, false, ROOT);
     strClear(&tmp);
 
     //globalni tabulka - odkaz na LOKALNI TABULKU
-    strAddCharArray(&tmp,"GLOBAL_B");
-    create_node(&ROOT, &tmp, -1, 3, NULL, true, false, true, false, &TAB_2);
+    strAddCharArray(&tmp,"FUNKCE");
+    create_node(ROOT, &tmp, -1, 3, NULL, true, false, true, false, local_table);
     strClear(&tmp);
 
     //globalni tabulka
     strAddCharArray(&tmp,"GLOBAL_C");
-    create_node(&ROOT, &tmp, -1, 4, NULL, true, false, true, false, &NEMA_LOCALNI_TABULKU);
+    create_node(ROOT, &tmp, -1, 4, NULL, true, false, true, false, ROOT);
     strClear(&tmp);
 
     //globalni tabulka
     strAddCharArray(&tmp,"GLOBAL_D");
-    create_node(&ROOT, &tmp, -1, 5, NULL, true, false, true, false, &NEMA_LOCALNI_TABULKU);
+    create_node(ROOT, &tmp, -1, 5, NULL, true, false, true, false, ROOT);
     strClear(&tmp);
 
     //lokalni tabulka dalsi prvek
     strAddCharArray(&tmp,"Local_2");
-    create_node(&TAB_2, &tmp, 5, 80, NULL, true, false, true, false, &TAB_2);
+    create_node(local_table, &tmp, 5, 80, NULL, true, false, true, false, local_table);
     strClear(&tmp);
-    delete_string(&tmp);
 
-    BTNode i;
-    BTNode g;
+
+    //TAB_2 = NULL;
+    local_table = make_new_table();
+
+    //Dalsi lokalni tabulka
+    strAddCharArray(&tmp,"Another_Local_1");
+    create_node(local_table, &tmp, 5, 14, NULL, true, false, true, false, local_table);
+    strClear(&tmp);
+
+    strAddCharArray(&tmp,"Another_Local_2");
+    create_node(local_table, &tmp, 5, 14, NULL, true, false, true, false, local_table);
+    strClear(&tmp);
+
+
+    //globalni tabulka
+    strAddCharArray(&tmp,"FUNKCE_2");
+    create_node(ROOT, &tmp, -1, 5, NULL, true, false, true, false, local_table);
+    strClear(&tmp);
+
+
+
 
     // walk ROOOT
-    B_tree_walk(ROOT);
+    B_tree_walk(*ROOT);
     printf("\n");
 
     //nalezeni lokalni tabulky
-    g = B_tree_search(ROOT,"GLOBAL_B");
+    BTNode i;
+    BTNode g;
+
+    g = B_tree_search(*ROOT,"FUNKCE");
     i = g->data.local_sym_table;
 
     //walk local table
     B_tree_walk(i);
     printf("\n");
 
+    //nalezeni lokalni tabulky
+    BTNode x;
+    BTNode z;
+
+    x = B_tree_search(*ROOT,"FUNKCE_2");
+    z = x->data.local_sym_table;
+
+    //walk local table
+    B_tree_walk(z);
+    printf("\n");
+
     B_tree_free(i);
-    B_tree_free(ROOT);
+    B_tree_free(*ROOT);
+    delete_string(&tmp);
 
 
 
