@@ -13,9 +13,10 @@
 
 BTNode *local_TS;
 BTNode root_GTS;
+BTNode current_LTS;
 BTNode node;
 int number_of_func;
-int ts_number;
+int lts_counter = 0;
 
 void built_in_functions(){
     string tmp;
@@ -57,11 +58,10 @@ void built_in_functions(){
 }
 
 int fill_TS(){
-    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
+    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/program1");
     string function_id;
     int params_number = 0;
     int initial_size = 5;
-    ts_number = 5; 
     int result;
     number_of_func = 0;
     string **params;
@@ -82,8 +82,7 @@ int fill_TS(){
         if (token->type == DEF){
             number_of_func++;
             get_next_token(token);  //function id
-            strCopyString(&function_id, &token->string);
-
+            strAddCharArray(&function_id, token->string.str);
             get_next_token(token); // OPENINGBRACKET
             while(true){
                 get_next_token(token);  //parameter
@@ -94,9 +93,8 @@ int fill_TS(){
                     initial_size *= 2;
                     params = realloc(params, sizeof(string*) * initial_size);
                 }
-                //TODO params
-                params[params_number] = &token->string;
-                //printf("%s\n", token->string.str);
+                strInit(&params[params_number]);
+                strCopyString(params[params_number], &token->string);
                 params_number++;
 
                 get_next_token(token);  //comma or closing bracket
@@ -105,14 +103,19 @@ int fill_TS(){
                 else if (token->type == CLOSING_BRACKET)
                     break;
             }
-            // params[0]->str = "afaff";
-            // printf("params[0] :%s\n", params[0]->str);
+            // for (int i = 0; i < params_number; ++i){
+            //     printf("params[%d] :%s\n",i, params[i]->str);
+            // }
             result = create_node(&root_GTS, &function_id, -1, params_number, params, true, false, true, false, NULL);
+
             if (result != 0){
-                //TODO if it should be an error
-                printf("Warning: Multiple function definition!\n");
+                fprintf(stderr, "Error: Multiple function definition!\n");
                 return SEM_ERR;
             }
+            for (int i = 1; i < params_number; ++i){    //check later if it's needed
+                strFree(&params[i]);
+            }
+            params_number = 0;
         }
         get_next_token(token);
     }
@@ -128,34 +131,27 @@ int fill_TS(){
 }
 
 int main() {
-    B_tree_init(&root_GTS); //todo B_tree_free(root_GTS)
+    B_tree_init(&root_GTS);
     int result;
     result = fill_TS();
     if (result != SEM_OK) return SEM_ERR;
 
-    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
+    //--------- Implementing array of localsymtables-------------\\
+    // local_TS = malloc(sizeof(BTNode) * (number_of_func + 1));    //1 == main function
+    // memcpy(local_TS[lts_counter], root_GTS, sizeof(BTNode));
+    // current_LTS = local_TS[lts_counter];    //set current_LTS
+    
+    // B_tree_walk(local_TS[lts_counter]);   //prints only last(inputs), why?
+    // lts_counter++;
+
+    //-----------------------------------------------------------
+
+    
+    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/program1");
     result = parse();
-    ///B_tree_free(root_GTS); //todo B_tree_free(root_GTS)
-    //printf("%d\n", result);
-/*
-    printf("GTS :\n");
-    B_tree_walk(root_GTS);
-    printf("\n");
-
-    BTNode n;
-    char *c= "inputi";
-    node = B_tree_search(root_GTS,c);
-    if(node != NULL){
-        printf("FOUND: %s\n",node->data.name);
-    } else{
-        printf("NOT FOUND: %s\n",c);
-    }
-    printf("\n");
-
-
+    printf("%d\n", result);
 
     B_tree_free(root_GTS);
-*/
 
     
     /**
@@ -341,91 +337,44 @@ int main() {
 
      */
 
-    /*
-    generate_start();
-    generate_main();
 
-    variable_declare(INTEGER_TYPE,"a");
-    generate_variable_assign(INT_E,"a","0");
-    variable_declare(INTEGER_TYPE,"b");
-    generate_variable_assign(INT_E,"b","10");
+    // generate_start();
+    // generate_main();
 
-    //podminka while
-    generate_while_condition_check(1);
-    generate_push(IDENTIFIER,"a");
-    generate_push(INTEGER_TYPE,"10");
-    generate_comparative_operations(G_TYPE_NOT_EQUAL);
-    generate_pop_to_result();
+    // variable_declare(INTEGER_TYPE,"a");
+    // generate_variable_assign(INT_E,"a","0");
+    // variable_declare(INTEGER_TYPE,"b");
+    // generate_variable_assign(INT_E,"b","10");
 
-    //telo while
-    generate_while_start(1);
-        generate_push(IDENTIFIER,"a");
-        generate_push(INTEGER_TYPE,"1");
-        generate_mathemeatical_operations(G_TYPE_PLUS);
-        generate_pop_to_variable("a");
-        generate_print(IDENTIFIER,"a");
-        generate_print(STRING_TYPE,"\n");
-    generate_while_end(1);
+    // //podminka while
+    // generate_while_condition_check(1);
+    // generate_push(IDENTIFIER,"a");
+    // generate_push(INTEGER_TYPE,"10");
+    // generate_comparative_operations(G_TYPE_NOT_EQUAL);
+    // generate_pop_to_result();
+
+    // //telo while
+    // generate_while_start(1);
+    //     generate_push(IDENTIFIER,"a");
+    //     generate_push(INTEGER_TYPE,"1");
+    //     generate_mathemeatical_operations(G_TYPE_PLUS);
+    //     generate_pop_to_variable("a");
+    //     generate_print(IDENTIFIER,"a");
+    //     generate_print(STRING_TYPE,"\n");
+    // generate_while_end(1);
 
 
-    generate_main_end();
+    // generate_main_end();
 
-    printf("%s",instrukce.str);
+    // printf("%s",instrukce.str);
 
-    generate_free_memory();
-    */
-    //--------------------------------------------------
+    // generate_free_memory();
 
     //--------------------------------------------------
-    //                   Priklad 3
-    //--------------------------------------------------
-    /*
-     int result; //globalni promena
-
-     function HELL(a,b){
-        return a * b
-     }
-
-     main{
-        int x;
-        x = HELL(10,5);
-        printf(x);
-     }
-
-     */
-    generate_start();
-
-    //funkce
-    generate_function_start("HELL");
-        generate_read_function_params(1, "a");
-        generate_read_function_params(2, "b");
-        generate_push(IDENTIFIER,"a");
-        generate_push(IDENTIFIER,"b");
-        generate_mathemeatical_operations(G_TYPE_MUL);
-        generate_function_return("HELL");
-    generate_function_end("HELL");
-
-    //Main
-    generate_main();
-
-    variable_declare(INTEGER_TYPE,"x");
-
-    //předání parametrů funkce
-    generate_TF_for_function_args();
-    generate_assign_arguments_to_function(INT_E, 1, "10");
-    generate_assign_arguments_to_function(INT_E, 2, "5");
-    //volani funkce
-    generate_function_call("HELL");
-    //Přiřazení návratové hodnoty funkce do c
-    generate_function_return_value_assign_to_var("x");
-    generate_print(IDENTIFIER,"x");
-    generate_main_end();
 
 
-    printf("%s",instrukce.str);
 
-    generate_free_memory();
-
+    //free_labels();
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;
