@@ -58,7 +58,7 @@ void built_in_functions(){
 }
 
 int fill_TS(){
-    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/program1");
+    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     string function_id;
     int params_number = 0;
     int initial_size = 5;
@@ -106,7 +106,7 @@ int fill_TS(){
             // for (int i = 0; i < params_number; ++i){
             //     printf("params[%d] :%s\n",i, params[i]->str);
             // }
-            result = create_node(&root_GTS, &function_id, -1, params_number, params, true, false, true, false, NULL);
+            ///result = create_node(&root_GTS, &function_id, -1, params_number, params, true, false, true, false, NULL);
 
             if (result != 0){
                 fprintf(stderr, "Error: Multiple function definition!\n");
@@ -136,7 +136,65 @@ int main() {
     result = fill_TS();
     if (result != SEM_OK) return SEM_ERR;
 
-    //--------- Implementing array of localsymtables-------------\\
+    string tmp;
+    strInit(&tmp);
+
+    BTNode ROOT;     B_tree_init(&ROOT);
+    BTNode NEMA_LOCALNI_TABULKU = NULL;
+    BTNode TAB_2;    B_tree_init(&TAB_2);
+
+    //lokalni tabulka - prvni prvak
+    strAddCharArray(&tmp,"Local_1");
+    create_node(&TAB_2, &tmp, 5, 80, NULL, true, false, true, false, &TAB_2);
+    strClear(&tmp);
+
+    //globalni tabulka
+    strAddCharArray(&tmp,"GLOBAL_A");
+    create_node(&ROOT, &tmp, -1, 2, NULL, true, false, true, false, &NEMA_LOCALNI_TABULKU);
+    strClear(&tmp);
+
+    //globalni tabulka - odkaz na LOKALNI TABULKU
+    strAddCharArray(&tmp,"GLOBAL_B");
+    create_node(&ROOT, &tmp, -1, 3, NULL, true, false, true, false, &TAB_2);
+    strClear(&tmp);
+
+    //globalni tabulka
+    strAddCharArray(&tmp,"GLOBAL_C");
+    create_node(&ROOT, &tmp, -1, 4, NULL, true, false, true, false, &NEMA_LOCALNI_TABULKU);
+    strClear(&tmp);
+
+    //globalni tabulka
+    strAddCharArray(&tmp,"GLOBAL_D");
+    create_node(&ROOT, &tmp, -1, 5, NULL, true, false, true, false, &NEMA_LOCALNI_TABULKU);
+    strClear(&tmp);
+
+    //lokalni tabulka dalsi prvek
+    strAddCharArray(&tmp,"Local_2");
+    create_node(&TAB_2, &tmp, 5, 80, NULL, true, false, true, false, &TAB_2);
+    strClear(&tmp);
+    delete_string(&tmp);
+
+    BTNode i;
+    BTNode g;
+
+    // walk ROOOT
+    B_tree_walk(ROOT);
+    printf("\n");
+
+    //nalezeni lokalni tabulky
+    g = B_tree_search(ROOT,"GLOBAL_B");
+    i = g->data.local_sym_table;
+
+    //walk local table
+    B_tree_walk(i);
+    printf("\n");
+
+    B_tree_free(i);
+    B_tree_free(ROOT);
+
+
+
+        //--------- Implementing array of localsymtables-------------\\
     // local_TS = malloc(sizeof(BTNode) * (number_of_func + 1));    //1 == main function
     // memcpy(local_TS[lts_counter], root_GTS, sizeof(BTNode));
     // current_LTS = local_TS[lts_counter];    //set current_LTS
@@ -147,11 +205,11 @@ int main() {
     //-----------------------------------------------------------
 
     
-    FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/program1");
-    result = parse();
-    printf("%d\n", result);
+    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
+    //result = parse();
+    //printf("%d\n", result);
 
-    B_tree_free(root_GTS);
+    //B_tree_free(root_GTS);
 
     
     /**

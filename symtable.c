@@ -128,7 +128,8 @@ int create_node(BTNode *table, string *name, int type, int params_number, char**
         val.initialized = initialized;
         val.is_function = is_function;
         val.used = used;
-        val.local_sym_table = local_sym_table;
+        val.local_sym_table = *local_sym_table;
+        //printf("LOCAL %p\n",*local_sym_table);
 
         B_tree_insert(table, val);
         //printf("ADD: %s -> %p %d\n",val.name,val.name,val.params_number);
