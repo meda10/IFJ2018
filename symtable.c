@@ -56,15 +56,19 @@ BTNode B_tree_search(BTNode root, char *name){
 }
 
 BTNode B_tree_search_local_table(BTNode root, char *name){
+    BTNode old_root = root;
     while(root != NULL){
         if(name == NULL){
             return NULL;
         }
-        if(strcmp(root->data.name,name) == 0){ //todo cmp
-            return root->data.local_sym_table;
+        if(strcmp(root->data.name,name) == 0){
+            if(old_root != root->data.local_sym_table){
+                return root->data.local_sym_table;
+            } else{
+                return NULL;
+            }
         }
-
-        if(strcmp(root->data.name,name) > 0){ //todo cmp
+        if(strcmp(root->data.name,name) > 0){
             root = root->L_ptr;
         }else{
             root = root->R_ptr;
