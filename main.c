@@ -118,6 +118,7 @@ int fill_TS(){
             }
             params_number = 0;
         }
+        strClear(&function_id);
         get_next_token(token);
     }
 
