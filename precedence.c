@@ -11,6 +11,7 @@
 #include "stack.h"
 #include "string.h"
 #include "precedence.h"
+#include "generator.h"
 
 extern token_t *token;
 extern bool read_token;
@@ -145,49 +146,157 @@ tPrec_op token_to_prec(token_t t){
 	}
 }
 
+
+
+/*
+ * Funkce na kontrolu semantiky a generovani kodu
+ */
+int semantic(token_t op1, token_t op2, int operator, int* result_type){
+
+	int type_operation;
+
+	switch(operator){
+		case MUL_S:
+			type_operation = G_TYPE_MUL;
+			break;
+		case DIV_S:
+			type_operation = G_TYPE_IDIV;
+			break;
+		case PLUS_S:
+			type_operation = G_TYPE_PLUS;
+			break;
+		case MINUS_S:		
+			type_operation = G_TYPE_MINUS;
+			break;
+		}
+	
+	if(op1.type == EXP_INTEGER && op2.type == EXP_INTEGER){
+		
+		if((type_operation == G_TYPE_IDIV) && (strcmp(op2.string.str, "0") == 0))
+			return ZERO_DIV_ERR;
+		
+		generate_mathemeatical_operations(type_operation);
+
+		*result_type = EXP_INTEGER;
+
+	}
+
+	else if(op1.type == EXP_DOUBLE && op2.type == EXP_INTEGER){
+		
+		if (type_operation == G_TYPE_IDIV){
+
+			if(strcmp(op2.string.str, "0") == 0)
+				return ZERO_DIV_ERR;
+
+			type_operation = G_TYPE_DIV;
+		}
+
+		generate_stack_1_to_float();
+		generate_mathemeatical_operations(type_operation);
+
+		*result_type = EXP_DOUBLE;
+	}
+
+	else if(op1.type == EXP_INTEGER && op2.type == EXP_DOUBLE){
+		
+		if (type_operation == G_TYPE_IDIV){
+			
+			if(strcmp(op2.string.str, "0.0") == 0)
+				return ZERO_DIV_ERR;
+			
+			type_operation = G_TYPE_DIV;
+		}
+		
+		generate_stack_2_to_float();
+		generate_mathemeatical_operations(type_operation);
+
+		*result_type = EXP_DOUBLE;
+	}
+
+	else if (op1.type == EXP_DOUBLE && op2.type == EXP_DOUBLE){
+
+		if (type_operation == G_TYPE_IDIV){
+			
+			if(strcmp(op2.string.str, "0.0") == 0)
+				return ZERO_DIV_ERR;
+			
+			type_operation = G_TYPE_DIV;
+		}
+
+		generate_mathemeatical_operations(type_operation);
+		*result_type = EXP_DOUBLE;
+	}
+
+	else if(op1.type == EXP_STRING && op2.type == EXP_STRING){
+		generate_concat();
+		*result_type = EXP_STRING;
+	}
+	else
+		return SEM_RUNTIME_ERR;
+
+	return SEM_OK;
+
+}
+
+
 /*
  * Funkce vymaze zasobnik od zacatku po znak < (start of rule) a vlozi <E> na zasobnik 
  */
-void delete_rule(stack_t* s, item_stack_t* start_rule, token_t token){
+void delete_rule(stack_t* s, item_stack_t* start_rule, token_t token , int* result_type){
+	
 	token_t t;
+	
 	if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
 		(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
 		
-		switch(token.type){
-			case IDENTIFIER:
-			case EXP_IDENTIFIER:
-				t.type = EXP_IDENTIFIER;
-				break;
-			case INTEGER_TYPE:
-			case EXP_INTEGER:
-				t.type = EXP_INTEGER;
-				break;
-			case STRING_TYPE:
-			case EXP_STRING:
-				t.type = EXP_STRING;
-				break;
-			case DOUBLE_TYPE:
-			case EXP_DOUBLE:
-				t.type = EXP_DOUBLE;
-				break;
-		}
+		if(result_type == NULL){
+
+			switch(token.type){
+				case IDENTIFIER:
+				case EXP_IDENTIFIER:
+					t.type = EXP_IDENTIFIER;
+					break;
+				case INTEGER_TYPE:
+				case EXP_INTEGER:
+					t.type = EXP_INTEGER;
+					break;
+				case STRING_TYPE:
+				case EXP_STRING:
+					t.type = EXP_STRING;
+					break;
+				case DOUBLE_TYPE:
+				case EXP_DOUBLE:
+					t.type = EXP_DOUBLE;
+					break;
+			}
+
+		}else
+			t.type = *result_type;
+			
 	    t.line = token.line;
 	    strInit(&t.string);
 	    strCopyString(&t.string, &token.string);
+	
 	}
 
 
 	item_stack_t* actual = s->top;
+	
 	while (actual != start_rule){
+		
 		stackPop(s);
 		actual = s->top;
+	
 	}
+
 	stackPop(s);
 
 	if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
 		(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
+
 		stackPush (s, t);
 		delete_string(&t.string);
+	
 	}
 		
 }
@@ -200,6 +309,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 
 	item_stack_t* rule = start_rule->previous;
 	int operator;
+	int err_sem;
 
 	switch(rule->token.type){
 		// pokud pravidlo zacina ID
@@ -208,29 +318,38 @@ int rule(stack_t* s, item_stack_t* start_rule){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
 
-			delete_rule(s, start_rule, rule->token);
+			delete_rule(s, start_rule, rule->token, NULL);
 			//push_E(s, E_rule.token);
-			return 12;				// 12. <E> -> ID
+			//return 12;				// 12. <E> -> ID
+			return SYNTAX_OK;
 
 		// pokud pravidlo zacina (	
 		case OPENNING_BRACKET:
+			
 			if (rule->previous == NULL)
-				return 0; // error
+				return SYNTAX_ERR; // error
+			
 			rule = rule->previous;
+			
 			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
+				
 				if (rule->previous == NULL)
-					return 0; // error
+					return SYNTAX_ERR; // error
+				
 				rule = rule->previous;
+				
 				if(rule->token.type == CLOSING_BRACKET){
-					delete_rule(s, start_rule, rule->next->token);
+					
+					delete_rule(s, start_rule, rule->next->token, NULL);
 					//push_E(s, E_rule.token);
-					return 11;			//11. <E> -> (<E>)
+					//return 11;			//11. <E> -> (<E>)
+					return SYNTAX_OK;
 				}
 				else 
-					return 0; //error
+					return SYNTAX_ERR; //error
 			}
 			else
-				return 0; //error
+				return SYNTAX_ERR; //error
 
 		// pokud pravidlo zacina <E>
 		case EXP_IDENTIFIER:
@@ -238,73 +357,82 @@ int rule(stack_t* s, item_stack_t* start_rule){
 		case EXP_DOUBLE:
 		case EXP_STRING:
 
-
 			if (rule->previous == NULL)
-				return 0;
+				return SYNTAX_ERR;
 			rule = rule->previous;
 			switch(rule->token.type){
 				//1.  <E> -> <E> * <E>
 				case ASTERISK:
-					operator = 1;
+					operator = MUL_S;
 					break;
 				//2.  <E> -> <E> / <E>
 				case DIVISION:
-					operator = 2;
+					operator = DIV_S;
 					break;
 				//3.  <E> -> <E> + <E>
 				case PLUS:
-					operator = 3;
+					operator = PLUS_S;
 					break;
 				//4.  <E> -> <E> - <E>
 				case MINUS:
-					operator = 4;
+					operator = MINUS_S;
 					break;
 				//5.  <E> -> <E> < <E>
 				case LESS:
-					operator = 5;
+					operator = LESS_S;
 					break;
 				//6.  <E> -> <E> <= <E>
 				case LESS_OR_EQUAL:
-					operator = 6;
+					operator = LE_S;
 					break;				
 				//7.  <E> -> <E> > <E>
 				case GREATER:
-					operator = 7;
+					operator = GREATER_S;
 					break;
 				//8.  <E> -> <E> >= <E>
 				case GREATER_OR_EQUAL:
-					operator = 8;
+					operator = GE_S;
 					break;
 				//9.  <E> -> <E> == <E>
 				case DOUBLE_EQUAL:
-					operator = 9;
+					operator = EQUAL_S;
 					break;
 				//10. <E> -> <E> != <E>
 				case NOT_EQUAL:
-					operator = 10;
+					operator = NOT_EQUAL_S;
 					break;
 				default:
 					operator = 0; //error
 					break;
 			}
 			if (rule->previous == NULL)
-				return 0;
+				return SYNTAX_ERR;
 			
 			rule = rule->previous;
 			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
-				delete_rule(s, start_rule, rule->token);
+
+				int result_type;
+				if ((err_sem =semantic(rule->next->next->token, rule->token, operator, &result_type)) != SEM_OK ){
+					return err_sem;
+				}
+
+				delete_rule(s, start_rule, rule->token, &result_type);
 				//push_E(s, E_rule.token);
-				return operator;
+				//return operator;
+				return SYNTAX_OK;
 			}
 			else 
-				return 0; //error
+				return SYNTAX_ERR; //error
 
 		default:
-			return 0; //error
+			return SYNTAX_ERR; //error
 	}
 }
 
-// Funkce vola get_next_token pokud uz neni novy token v next_token
+
+/*
+ * Funkce vola get_next_token pokud uz neni novy token v next_token
+ */
 void get_next_token_prec(){
 
 	if (read_token){
@@ -314,7 +442,6 @@ void get_next_token_prec(){
 	get_next_token(token);
 }
 
-//void semantic()
 
 
 /*
@@ -364,7 +491,8 @@ int precedence(){
 			// pokud je v precedencni tabulce =
 			case E_P:
 						/*// jen na testovani	
-						printf("=\n");*/			
+						printf("=\n");*/
+		
 				stackPush(s, *token);
 				get_next_token_prec();
 				break;
@@ -375,6 +503,11 @@ int precedence(){
 						printf("<\n");*/
 				stackPushBeforeTerm(s, stackTopTerm (s));
 				stackPush (s, *token);
+				
+				// generuje code push
+				if (token->type == IDENTIFIER || token->type == STRING_TYPE || token->type == INTEGER_TYPE || token->type == DOUBLE_TYPE)
+					generate_push(token->type, token->string.str);
+				
 				get_next_token_prec();
 				break;
 
@@ -386,11 +519,10 @@ int precedence(){
 					stackFree(s);
 					return SYNTAX_ERR;
 				}
-				if ((use_rule = rule(s, start_rule)) == 0){
+				if ((use_rule = rule(s, start_rule)) != 0){
 					stackFree(s);
-					return SYNTAX_ERR;
+					return use_rule;
 				}
-				//printf(" Pouzito pravidlo: %d\n", use_rule);
 				break;
 
 			// pokud je v tabulce prazdne policko -> chyba

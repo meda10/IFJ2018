@@ -404,18 +404,18 @@ void generate_push(int type, char* name) {
  * @param type - typ operace (G_TYPE_PLUS,G_TYPE_DIV,G_TYPE_MINUS,G_TYPE_MUL)
  */
 void generate_mathemeatical_operations(int type){
-    data_conversion();
+    //data_conversion();
     strAddCharArray(&instrukce,"# Mathematical operations\n");
     switch (type){
         case G_TYPE_PLUS:
             strAddCharArray(&instrukce,"ADDS\n");
             break;
         case G_TYPE_DIV:
-            data_conversion_to_float();
+            //data_conversion_to_float();
             strAddCharArray(&instrukce,"DIVS\n");
             break;
         case G_TYPE_IDIV:
-            data_conversion_to_int();
+           // data_conversion_to_int();
             strAddCharArray(&instrukce,"IDIVS\n");
             break;
         case G_TYPE_MINUS:
