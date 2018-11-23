@@ -106,7 +106,8 @@ int fill_TS(){
             // for (int i = 0; i < params_number; ++i){
             //     printf("params[%d] :%s\n",i, params[i]->str);
             // }
-            ///result = create_node(&root_GTS, &function_id, -1, params_number, params, true, false, true, false, NULL);
+            BTNode NO_LOCAL_SYM_TABLE = NULL;
+            result = create_node(&root_GTS, &function_id, -1, params_number, params, true, false, true, false, &NO_LOCAL_SYM_TABLE);
 
             if (result != 0){
                 fprintf(stderr, "Error: Multiple function definition!\n");
