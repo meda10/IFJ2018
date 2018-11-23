@@ -143,44 +143,41 @@ int main() {
     string tmp;
     strInit(&tmp);
 
+    ///vytvoření globální tabulky
     BTNode *ROOT;
     ROOT = make_new_table();
 
-    BTNode NEMA_LOCALNI_TABULKU = NULL;
+    ///vztvoření lokální tabulky
     BTNode *local_table;
     local_table = make_new_table();
 
-    //lokalni tabulka - prvni prvak
+    //lokalni tabulka - paramater 1
     strAddCharArray(&tmp,"Local_1");
     create_node(local_table, &tmp, 5, 80, NULL, true, false, true, false, local_table);
     strClear(&tmp);
 
-    //globalni tabulka
-    strAddCharArray(&tmp,"GLOBAL_A");
-    create_node(ROOT, &tmp, -1, 2, NULL, true, false, true, false, ROOT);
-    strClear(&tmp);
-
-    //globalni tabulka - odkaz na LOKALNI TABULKU
-    strAddCharArray(&tmp,"FUNKCE");
-    create_node(ROOT, &tmp, -1, 3, NULL, true, false, true, false, local_table);
-    strClear(&tmp);
-
-    //globalni tabulka
-    strAddCharArray(&tmp,"GLOBAL_C");
-    create_node(ROOT, &tmp, -1, 4, NULL, true, false, true, false, ROOT);
-    strClear(&tmp);
-
-    //globalni tabulka
-    strAddCharArray(&tmp,"GLOBAL_D");
-    create_node(ROOT, &tmp, -1, 5, NULL, true, false, true, false, ROOT);
-    strClear(&tmp);
-
-    //lokalni tabulka dalsi prvek
+    //lokalni tabulka - parametr 2
     strAddCharArray(&tmp,"Local_2");
     create_node(local_table, &tmp, 5, 80, NULL, true, false, true, false, local_table);
     strClear(&tmp);
 
 
+
+    //globalni tabulka - FUNKCE = odkaz na LOKALNI TABULKU ktera obsahuje parametry funkce
+    strAddCharArray(&tmp,"FUNKCE");
+    create_node(ROOT, &tmp, -1, 3, NULL, true, false, true, false, local_table);
+    strClear(&tmp);
+
+    //globalni tabulka - GLOBALNI PROMENA
+    strAddCharArray(&tmp,"random_globalni_promena");
+    create_node(ROOT, &tmp, -1, 4, NULL, true, false, true, false, ROOT);
+    strClear(&tmp);
+
+    /*
+     * další funkce
+    */
+
+    //vytvoření nového ukazatekle na lokalni tabulku
     free(local_table);
     local_table = make_new_table();
 
@@ -193,13 +190,10 @@ int main() {
     create_node(local_table, &tmp, 5, 14, NULL, true, false, true, false, local_table);
     strClear(&tmp);
 
-
-    //globalni tabulka
+    //globalni tabulka - přidání FUNKCE_2 = obsahuje odkaz na lokalnitabulku naplněnou parametry
     strAddCharArray(&tmp,"FUNKCE_2");
     create_node(ROOT, &tmp, -1, 5, NULL, true, false, true, false, local_table);
     strClear(&tmp);
-
-
 
 
     // walk ROOOT
@@ -220,7 +214,6 @@ int main() {
     //nalezeni lokalni tabulky
     BTNode x;
     BTNode z;
-
     x = B_tree_search(*ROOT,"FUNKCE_2");
     z = x->data.local_sym_table;
 
