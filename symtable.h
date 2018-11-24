@@ -2,7 +2,8 @@
 #define TREE_BT_H
 
 #include <stdbool.h>
-#include "string.h"
+#include <string.h>
+#include "stringss.h"
 
 
 #define RET_OK 0

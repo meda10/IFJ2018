@@ -2,7 +2,7 @@
 #define SCANNER_GENERATOR_H
 
 #include <stdbool.h>
-#include "string.h"
+#include "stringss.h"
 #include "symtable.h"
 #include "scaner.h"
 

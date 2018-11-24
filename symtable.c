@@ -1,10 +1,10 @@
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <errno.h>
 #include "symtable.h"
-#include "string.h"
+#include "stringss.h"
 
 TValues init_val(char *name, int len) {
     TValues data;

@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <errno.h>
 
-#include "string.h"
+#include "stringss.h"
 
 
 const size_t ALOCATION_SIZE = 20;

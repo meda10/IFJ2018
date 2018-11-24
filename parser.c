@@ -365,7 +365,7 @@ int VALUE(){
 			return FUNC_CALL();
 		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
 			//check if it is a function
-			temp_node = B_tree_search(root_GTS, token->string.str);
+			temp_node = B_tree_search(*root_GTS, token->string.str);
 			if (temp_node != NULL && temp_node->data.is_function == true)
 				return FUNC_CALL();
 			else

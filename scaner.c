@@ -1,16 +1,17 @@
-#include <ctype.h>
-#include <errno.h>
-#include <malloc.h>
+#include <strings.h>
 #include <string.h>
+#include <ctype.h>
+#include <malloc.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
 #include "scaner.h"
 #include "tokens.h"
+#include "error.h"
 
 FILE *source_file = NULL;
 int line = 1;
-int internal_error = 0;
+//int internal_error = 0;
 char *content;
 int len = 0;
 int position = 0;
@@ -87,10 +88,10 @@ const char* names[] = {
 
 };
 
-void set_error(){
-    internal_error = INTERNAL_ERROR;
-}
-
+//void set_error(){
+//    internal_error = INTERNAL_ERROR;
+//}
+/*
 int return_code(){
     internal_error = return_code_string();
     if(internal_error == INTERNAL_ERROR){
@@ -99,6 +100,7 @@ int return_code(){
         return RET_OK;
     }
 }
+*/
 
 char get_next_char(){
     if(std){
@@ -132,8 +134,7 @@ void read_from_stdin(){
     size_t contentSize = 1;
     content = malloc(sizeof(char) * BUF_SIZE);
     if(content == NULL){
-        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-        exit(1); //todo error
+        errors_exit(INTERNAL_ERROR,"Internl Error\n");
     }
     content[0] = '\0';
     while(fgets(buffer, BUF_SIZE, stdin)) {
@@ -141,16 +142,14 @@ void read_from_stdin(){
         contentSize += strlen(buffer);
         content = realloc(content, contentSize);
         if(content == NULL){
-            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
             free(old);
-            exit(2); //todo return
+            errors_exit(INTERNAL_ERROR,"Internl Error\n");
         }
         strcat(content, buffer);
     }
     if(ferror(stdin)){
         free(content);
-        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-        exit(3); //todo return
+        errors_exit(INTERNAL_ERROR,"Internl Error\n");
     }
     len = (int)strlen(content);
 }
@@ -164,8 +163,7 @@ FILE *open_file(const char *name) {
     std = false;
     source_file = fopen(name, "r");
     if(source_file == NULL) {
-        fprintf(stderr, "Error opening file: %s\n", strerror(errno));
-        set_error(); //todo error
+        errors_exit(INTERNAL_ERROR,"Error: could not open file\n");
         return NULL;
     }
     return source_file;
@@ -185,8 +183,7 @@ int string_To_Int(char *s) {
     char *endptr;
     int n = (int)strtol(string, &endptr, 10);
     if (endptr == string) {
-        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-        set_error();
+        errors_exit(INTERNAL_ERROR,"Internl Error\n");
         return 0;
     }
     return n;
@@ -197,8 +194,7 @@ double string_to_Double(char *s){
     char *stopstring = NULL;
     double n = strtod(string, &stopstring);
     if(stopstring == string){
-        fprintf(stderr,"String to double error");
-        set_error();
+        errors_exit(INTERNAL_ERROR,"Internl Error");
         return 0.0;
     }
     return n;
@@ -206,6 +202,9 @@ double string_to_Double(char *s){
 
 token_t* make_new_token(){
     token_t *token = malloc(sizeof(token_t));
+    if(token == NULL){
+        errors_exit(INTERNAL_ERROR,"Internl Error\n");
+    }
     memset(token,0,sizeof(token_t));
     token->type = -1;
     return token;
@@ -275,7 +274,7 @@ int get_next_token(token_t *token) {
                         token->line = line;
                         token->type = EOL;
                         line++;
-                        return return_code();
+                        return SYNTAX_OK;
                     }
                     continue;
                 }
@@ -283,27 +282,27 @@ int get_next_token(token_t *token) {
                     case EOF :
                         token->line = line;
                         token->type = ENDOFFILE;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '(' :
                         token->type = OPENNING_BRACKET;
-                        return return_code();
+                        return SYNTAX_OK;
                     case ')' :
                         token->type = CLOSING_BRACKET;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '+' :
                         token->type = PLUS;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '-' :
                         token->type = MINUS;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '*' :
                         token->type = ASTERISK;
-                        return return_code();
+                        return SYNTAX_OK;
                     case ';' :
                         token->type = SEMICOLON;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '#' :
-                        state = STATE_COMMENT; //todo EOF
+                        state = STATE_COMMENT;
                         break;
                     case '"' :
                         strInit(s);
@@ -312,13 +311,13 @@ int get_next_token(token_t *token) {
                         break;
                     case '/' :
                         token->type = DIVISION;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '\\' :
                         token->type = INT_DIVISION;
-                        return return_code();
+                        return SYNTAX_OK;
                     case ',' :
                         token->type = COMMA;
-                        return return_code();
+                        return SYNTAX_OK;
                     case '<' :
                         state = STATE_LESS_OR_EQUAL;
                         break;
@@ -332,11 +331,9 @@ int get_next_token(token_t *token) {
                         c = get_next_char();
                         if(c == '='){
                             token->type = NOT_EQUAL;
-                            return return_code();
+                            return SYNTAX_OK;
                         } else{
-                            fprintf(stderr,"Unexpected char_%c_\n",c);
-                            exit(77);
-                            return RET_ERR;
+                            errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                         }
                     default:
                         if(isdigit(c)){
@@ -351,11 +348,8 @@ int get_next_token(token_t *token) {
                             state = STATE_IDENTIFIER;
                             break;
                         } else{
-                            printf("-->%d %d\n",position,len);
-                            fprintf(stderr, "Unexpected char_%c_\n",c);
                             delete_string(s);
-                            exit(77);
-                            return RET_ERR;
+                            errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                         }
                 }
                 break;
@@ -368,7 +362,7 @@ int get_next_token(token_t *token) {
                     c = get_next_char();
                     if(isspace(c)){
                         token->type = is_key_word(s);
-                        return return_code();
+                        return SYNTAX_OK;
                     }
                 }else if(c != EOF) { //
                     token->type = is_key_word(s);
@@ -378,13 +372,13 @@ int get_next_token(token_t *token) {
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
                             delete_string(s);
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
-                    return return_code();
+                    return SYNTAX_OK;
                 } else{
                     token->type = is_key_word(s);
-                    return return_code();
+                    return SYNTAX_OK;
                 }
             case (STATE_INTEGER_TYPE):
                 if(isdigit(c)){
@@ -399,9 +393,7 @@ int get_next_token(token_t *token) {
                         break;
                     }else{
                         delete_string(s);
-                        fprintf(stderr, "Unexpected char_%c_ After . have to be sequence of digits\n",c);
-                        exit(77);
-                        return RET_ERR;
+                        errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                     }
                 } else if(c == 'e' || c == 'E'){
                     strAddChar(s,c);
@@ -415,10 +407,7 @@ int get_next_token(token_t *token) {
                             break;
                         }else{
                             delete_string(s);
-                            fprintf(stderr, "Unexpected char_%c_ After +/- have to be sequence of digits",c);
-                            exit(77);
-
-                            return RET_ERR;
+                            errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                         }
                     } else if(isdigit(c)){
                         strAddChar(s, c);
@@ -426,10 +415,7 @@ int get_next_token(token_t *token) {
                         break;
                     }else{
                         delete_string(s);
-                        fprintf(stderr, "Unexpected char_%c_ After e have to be +/- or sequence of digits\n",c);
-                        exit(77);
-
-                        return RET_ERR;
+                        errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                     }
                 } else if(c != EOF){
                     if(std){
@@ -438,20 +424,14 @@ int get_next_token(token_t *token) {
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
                             delete_string(s);
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
-                    //int n = string_To_Int(s);
-                    //delete_string(s);
-                    //token->data_t.integer_data = n;
                     token->type = INTEGER_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else{
-                    //int n = string_To_Int(s);
-                    //delete_string(s);
-                    //token->data_t.integer_data = n;
                     token->type = INTEGER_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 }
             case (STATE_DOUBLE_TYPE):
                 if(isdigit(c)){
@@ -468,30 +448,20 @@ int get_next_token(token_t *token) {
                             state = STATE_DOUBLE_TYPE_EXPONENT;
                             break;
                         } else{
-                            fprintf(stderr, "Unexpected char_%c_ After +/- have to be sequence of digits",c);
-
                             delete_string(s);
-                            exit(77);
-
-                            return RET_ERR;
+                            errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                         }
                     } else if(isdigit(c)){
                         strAddChar(s,c);
                         state = STATE_DOUBLE_TYPE_EXPONENT;
                         break;
                     } else{
-                        fprintf(stderr, "Unexpected char_%c_ After e have to be +/- or sequence of digits\n",c);
                         delete_string(s);
-                        exit(77);
-
-                        return RET_ERR;
+                        errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                     }
                 }else if(isalpha(c)){
-                    fprintf(stderr, "Unexpected char %c\n",c);
                     delete_string(s);
-                    exit(77);
-
-                    return RET_ERR;
+                    errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                 } else if(c != EOF){
                     if(std){
                         position--;
@@ -499,21 +469,14 @@ int get_next_token(token_t *token) {
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
                             delete_string(s);
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
-                    //double n = string_to_Double(s);
-                    //delete_string(s);
-                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 }else{
-                    //double n = string_to_Double(s);
-                    //delete_string(s);
-
-                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 }
 
             case (STATE_DOUBLE_TYPE_EXPONENT):
@@ -521,11 +484,8 @@ int get_next_token(token_t *token) {
                     strAddChar(s,c);
                     break;
                 }else if(isalpha(c)){
-                    fprintf(stderr, "Unexpected char %c\n",c);
                     delete_string(s);
-                    exit(77);
-
-                    return RET_ERR;
+                    errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                 } else if(c != EOF){
                     if(std){
                         position--;
@@ -533,61 +493,54 @@ int get_next_token(token_t *token) {
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
                             delete_string(s);
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
-                    //double n = string_to_Double(s);
-                    //delete_string(s);
-                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else{
-                    //double n = string_to_Double(s);
-                    //delete_string(s);
-                    //token->data_t.double_data = n;
                     token->type = DOUBLE_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 }
             case (STATE_LESS_OR_EQUAL):
                 if(c == '='){
                     token->type = LESS_OR_EQUAL;
-                    return return_code();
+                    return SYNTAX_OK;
                 }else if (c != EOF){
                     if(std){
                         position--;
                     } else{
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
                     token->type = LESS;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else{
                     token->type = LESS;
-                    return return_code();
+                    return SYNTAX_OK;
                 }
             case (STATE_GREATER_OR_EQUAL):
                 if(c == '='){
                     token->type = GREATER_OR_EQUAL;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else if (c != EOF){
                     if(std){
                         position--;
                     } else{
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
                     token->type = GREATER;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else{
                     token->type = GREATER;
-                    return return_code();
+                    return SYNTAX_OK;
                 }
             case (STATE_BLOCK_COMMENT):
-                //printf("AAAA= %d | char %c -> %d LINE = %d\n",state,c,c,line);
                 if(isspace(c)) {
                     if (c == 10) {
                         line++;
@@ -608,7 +561,7 @@ int get_next_token(token_t *token) {
                                                 if (c == EOF) {
                                                     token->line = line;
                                                     token->type = ENDOFFILE;
-                                                    return return_code();
+                                                    return SYNTAX_OK;
                                                 }
                                                 if(c == 10){
                                                     line++;
@@ -619,7 +572,7 @@ int get_next_token(token_t *token) {
                                         } else if (c == EOF) {
                                             token->line = line;
                                             token->type = ENDOFFILE;
-                                            return return_code();
+                                            return SYNTAX_OK;
                                         }
                                     }
                                 }
@@ -628,17 +581,16 @@ int get_next_token(token_t *token) {
                     }
                 }
                 if (c == EOF) {
-                    printf("COMMENT BLOCK FAIL\n"); //todo
                     token->line = line;
                     token->type = ENDOFFILE;
-                    return return_code();
+                    errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                 }
                 continue;
             case (STATE_STRING_TYPE):
                 if(c == '"') {
                     strAddChar(s,c);
                     token->type = STRING_TYPE;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else if(c == '\\'){
                     strAddChar(s,c);
                     c = get_next_char();
@@ -653,11 +605,8 @@ int get_next_token(token_t *token) {
                             break; //todo hex digit 2
                         }
                     }else{
-                        fprintf(stderr, "Unexpected string \\%c\n",c);
                         delete_string(s);
-                        exit(77);
-
-                        return RET_ERR;
+                        errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                     }
                 } else if(c >= 31){
                     strAddChar(s,c);
@@ -669,26 +618,20 @@ int get_next_token(token_t *token) {
                         if(ungetc(c,source_file) == EOF){
                             delete_string(s);
                             fprintf(stderr,"Internal error\n");
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
-                    fprintf(stderr, "Unexpected string_%c_\n",c);
                     delete_string(s);
-                    exit(77);
-
-                    return RET_ERR;             //error not a string
+                    errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                 } else{
-                    fprintf(stderr, "Unexpected string_%c_\n",c);
                     delete_string(s);
-                    exit(77);
-
-                    return RET_ERR;
+                    errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                 }
             case (STATE_BLOCK_COMMENT_OR_EQUAL):
                 //printf("STATE> %d | char %c",state,c);
                 if(c == '='){
                     token->type = DOUBLE_EQUAL;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else if(c == 'b'){
                     c = get_next_char();
                     if(c == 'e'){
@@ -713,28 +656,32 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = GREATER_OR_EQUAL;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else if (c != EOF){
                     if(std){
                         position--;
                     } else{
                         if(ungetc(c,source_file) == EOF){
                             fprintf(stderr,"Internal error\n");
-                            return INTERNAL_ERROR;
+                            errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
                     token->type = EQUAL;
-                    return return_code();
+                    return SYNTAX_OK;
                 } else{
                     token->type = EQUAL;
-                    return return_code();
+                    return SYNTAX_OK;
                 }
             case (STATE_COMMENT):
                 if(c == 10){
                     token->type = EOL;
                     line++;
-                    return return_code();
-                }else{
+                    return SYNTAX_OK;
+                }else if(c == EOF){
+                    token->type = ENDOFFILE;
+                    line++;
+                    return SYNTAX_OK;
+                } else{
                     continue;
                 }
         }

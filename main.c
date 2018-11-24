@@ -8,7 +8,7 @@
 #include "scaner.h"
 #include "symtable.h"
 #include "generator.h"
-#include "string.h"
+#include "stringss.h"
 #include "examples.h"
 #include "tokens.h"
 
@@ -43,7 +43,7 @@ char **make_array(){
 
 int fill_sym_table(){
     read_from_stdin();
-    //FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/source");
+    //FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     
     string function_name;
     strInit(&function_name);
@@ -130,8 +130,11 @@ int main() {
     result = fill_sym_table();  //naplneni globalni tabulki funkcemi
     if (result != SEM_OK) return SEM_ERR;
 
-    //FILE *source_file = open_file("/home/drankou/Desktop/IFJ/project/IFJ2018/source");
+    //FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     read_again();
+
+
+    example_scanner();
 
     result = parse();
     printf("SYNTAX: %d\n", result);
@@ -145,26 +148,6 @@ int main() {
     printf("MAIN BODY:\n");
     B_tree_walk(*main_local_TS);
     printf("\n");
-
-    // //nalezeni a vzpis loklani tabulky --> funkce vypada takto --> def p1 (b,c,d)
-    // BTNode local_table_1;
-    // local_table_1 = B_tree_search_local_table(*root_GTS,"p1");
-    // printf("\n");B_tree_walk(local_table_1);printf("\n");
-
-
-    // //nalezeni a vzpis loklani tabulky --> funkce vypada takto --> def p2 ()
-    // BTNode local_table_2;
-    // local_table_2 = B_tree_search_local_table(*root_GTS,"p2");
-    // printf("\n");B_tree_walk(local_table_2);printf("\n");
-
-    // //pridani uzlu do loklani tabulky + vypis
-    // create_node(&local_table_2, "hell", -1, 0, NULL, false, true, false, false, &local_table_2);
-    // create_node(&local_table_2, "AAAAA", -1, 0, NULL, false, true, false, false, &local_table_2);
-
-    // local_table_2 = B_tree_search_local_table(*root_GTS,"p2");
-    // printf("\n");B_tree_walk(local_table_2);printf("\n");
-
-    // B_tree_free(*root_GTS);
 
 /*
     if(fclose(source_file) == EOF){

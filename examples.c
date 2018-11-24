@@ -1,7 +1,7 @@
 #include <zconf.h>
 #include <malloc.h>
 #include <stdlib.h>
-#include "string.h"
+#include "stringss.h"
 #include "symtable.h"
 #include "scaner.h"
 #include "generator.h"

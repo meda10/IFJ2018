@@ -9,7 +9,7 @@
 #include "scaner.h"
 #include "parser.h"
 #include "stack.h"
-#include "string.h"
+#include "stringss.h"
 #include "precedence.h"
 #include "generator.h"
 
