@@ -12,12 +12,26 @@
 
 token_t *token, *next_token;
 bool read_token;
+BTNode current_LTS;
 extern BTNode *local_TS;
-extern BTNode root_GTS;
-extern BTNode node;
-extern BTNode current_LTS;
-extern int lts_counter;
-extern int number_of_func;
+extern BTNode *root_GTS;
+extern BTNode *main_local_TS;
+extern BTNode temp_node;
+
+
+int parse(){
+  int result;
+  token = make_new_token();
+  next_token = make_new_token();
+
+  current_LTS = *main_local_TS; //set current LTS to main body of program
+  
+  if (get_next_token(token) == RET_ERR)
+     result = RET_ERR;
+  else
+     result = PROGRAM();
+  return result;
+}
 
 int PROGRAM(){
 	int result;
@@ -67,8 +81,23 @@ int FUNC_DEF(){
 			get_next_token(token);
 			if (token->type != IDENTIFIER) return SYNTAX_ERR;
 			
-			// B_tree_init(&local_TS[lts_counter]); //create local symtable for function
-			// current_LTS = local_TS[lts_counter]; //make it current
+			current_LTS = B_tree_search_local_table(*root_GTS, token->string.str);
+			//B_tree_walk(current_LTS);
+
+			//check if function's name differ from variables' in main body
+			temp_node = B_tree_search(*main_local_TS, token->string.str);
+			if (temp_node != NULL){
+				printf("Main LTS content\n");
+				B_tree_walk(*main_local_TS);
+				printf("\n");
+				fprintf(stderr, "SEM_ERR: function name colision with variable.\n");
+				return SEM_ERR;
+			}
+
+			//get function node in global TS and set initialized to true
+			//indicating that parser already pass this function's definition
+			temp_node = B_tree_search(*root_GTS, token->string.str);
+			temp_node->data.initialized = true;
 
 			get_next_token(token);
 			if (token->type != OPENNING_BRACKET) return SYNTAX_ERR;
@@ -87,9 +116,8 @@ int FUNC_DEF(){
 			if (result != SYNTAX_OK) return result;
 			
 			if (token->type != END) return SYNTAX_ERR;
-			//change context to main function(first local_TS)
-			// lts_counter++;
-			// current_LTS = local_TS[0];
+			//change context to main function local table
+			current_LTS = *main_local_TS;
 
 			get_next_token(token);
 			return SYNTAX_OK;
@@ -284,9 +312,26 @@ int ASS(){
 		case IDENTIFIER:							//16. <ASS> -> eps or 15. <ASS> -> ID =										
 			get_next_token(next_token);
 			read_token = true;
-			if (next_token->type == EQUAL){
-				//variable initialization
-				//create_node(&current_LTS, &token->string, 0, 0, NULL, false, true, false, true, NULL);
+			if (next_token->type == EQUAL){	//variable initialization/assignment
+
+				//check if variable's name not function's
+				temp_node = B_tree_search(*root_GTS, token->string.str);
+				//"initialized" checked to be sure that function is located 
+				//before variable in the source code.
+				if (temp_node != NULL && temp_node->data.initialized){
+					fprintf(stderr, "SEM_ERR: variable name collision with function.\n");
+					return SEM_ERR;
+				}
+
+				//check if variable is already in function's local TS
+				temp_node = B_tree_search(current_LTS, token->string.str);
+				//if not, insert it to current function LTS 
+				if (temp_node == NULL){
+					create_node(&current_LTS, token->string.str, 0, 0, NULL, false, true, false, true, &current_LTS);
+					printf("Current LTS content:\n");
+					B_tree_walk(current_LTS);
+					printf("\n");
+				}
 
 				read_token = false;
 				get_next_token(token);
@@ -320,8 +365,8 @@ int VALUE(){
 			return FUNC_CALL();
 		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
 			//check if it is a function
-			node = B_tree_search(root_GTS, token->string.str);
-			if (node != NULL && node->data.is_function == true)
+			temp_node = B_tree_search(root_GTS, token->string.str);
+			if (temp_node != NULL && temp_node->data.is_function == true)
 				return FUNC_CALL();
 			else
 				return E();		
@@ -439,15 +484,4 @@ int E(){
 		return SYNTAX_ERR;
 
 	return SYNTAX_OK;
-}
-
-int parse(){
-  int result;
-  token = make_new_token();
-  next_token = make_new_token();
-  if (get_next_token(token) == RET_ERR)
-     result = RET_ERR;
-  else
-     result = PROGRAM();
-  return result;
 }
