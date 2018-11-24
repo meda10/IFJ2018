@@ -28,8 +28,12 @@ TValues init_val(char *name, int len) {
 }
 
 BTNode* make_new_table(){
-    BTNode *b = malloc(sizeof(BTNode));
+    //BTNode *b = malloc(sizeof(BTNode));
+    BTNode *b = (BTNode*) malloc(sizeof(struct node));
+
     memset(b,0,sizeof(BTNode));
+    BTNode tmp_root = *b;
+    //tmp_root->L_ptr = NULL;
     return b;
 }
 
@@ -135,6 +139,13 @@ void B_tree_free(BTNode root){
     if(root != NULL){
         B_tree_free(root->L_ptr);
         B_tree_free(root->R_ptr);
+        if(root->data.is_function && root->data.params != NULL){
+            for (int i =1; i <= root->data.params_number; i++) {
+                free(root->data.params[i]);
+            }
+            free(root->data.params);
+            B_tree_free(root->data.local_sym_table);
+        }
         free(root->data.name);
         //delete_string(root->data.name);
         //delete_string(&root->data.name);
@@ -144,6 +155,27 @@ void B_tree_free(BTNode root){
 
 int create_node(BTNode *table, char *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
     BTNode node = B_tree_search(*table, name);
+
+    BTNode no = B_tree_search(*table, "$$<&FUNKCE_NEMA_PARAMETRY&>$$");
+    if(no != NULL){
+        free(no->data.name);
+        if ((no->data.name = (char*) malloc(strlen(name) + 1)) == NULL){
+            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+            //todo set_error_string();
+        }
+        strcpy(no->data.name, name);
+        no->data.type = type;
+        no->data.params_number = params_number;
+        no->data.params = params;
+        no->data.defined = defined;
+        no->data.initialized = initialized;
+        no->data.is_function = is_function;
+        no->data.used = used;
+        no->data.local_sym_table = *local_sym_table;
+
+        return RET_OK;
+    }
+
 
     if(node == NULL && name != NULL) {
         TValues val = init_val(name, (int)strlen(name) + 1);

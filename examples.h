@@ -6,6 +6,7 @@
 #define SCANNER_EXAMPLES_H
 
 void example_generator_2 ();
+void example_generator_3 ();
 void example_generator_1 ();
 void example_lolalni_tabulky();
 
