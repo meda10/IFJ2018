@@ -315,3 +315,42 @@ void example_generator_3(){
 
     generate_free_memory();
 };
+
+void example_scanner(){
+
+    token_t *token = make_new_token();
+    for (int i = 0; i < 500; ++i) {
+        get_next_token(token);
+        if(token->type == ENDOFFILE){
+            print_token(token);
+            break;
+        } else{
+            //if(token->type != EOL)
+            print_token(token);
+        }
+    }
+    free_token(token);
+}
+
+void example_sym_table_fill(BTNode *root_GTS,char *f_1_name,char *f_2_name){
+    //globalni tabulka
+    B_tree_walk(*root_GTS);
+
+    //nalezeni a vzpis loklani tabulky --> funkce vypada takto --> def p1 (b,c,d)
+    BTNode local_table_1;
+    local_table_1 = B_tree_search_local_table(*root_GTS,f_1_name);
+    printf("\n");B_tree_walk(local_table_1);printf("\n");
+
+
+    //nalezeni a vzpis loklani tabulky --> funkce vypada takto --> def p2 ()
+    BTNode local_table_2;
+    local_table_2 = B_tree_search_local_table(*root_GTS,f_2_name);
+    printf("\n");B_tree_walk(local_table_2);printf("\n");
+
+    //pridani uzlu do loklani tabulky + vypis
+    create_node(&local_table_2, "Test_param_1", -1, 0, NULL, false, true, false, false, &local_table_2);
+    create_node(&local_table_2, "Test_param_2", -1, 0, NULL, false, true, false, false, &local_table_2);
+
+    local_table_2 = B_tree_search_local_table(*root_GTS,f_2_name);
+    printf("\n");B_tree_walk(local_table_2);printf("\n");
+}

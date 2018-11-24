@@ -3,9 +3,18 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "scaner.h"
 #include "tokens.h"
+
+FILE *source_file = NULL;
+int line = 1;
+int internal_error = 0;
+char *content;
+int len = 0;
+int position = 0;
+bool std = true;
 
 const char* reservedWords[] = {
         "def",
@@ -78,10 +87,6 @@ const char* names[] = {
 
 };
 
-FILE *source_file = NULL;
-int line = 1;
-int internal_error = 0;
-
 void set_error(){
     internal_error = INTERNAL_ERROR;
 }
@@ -95,16 +100,73 @@ int return_code(){
     }
 }
 
-FILE *open_file(const char *name) {
-    if(strcasecmp("stdin",name) == 0){
-        source_file = stdin;
-        return source_file;
+char get_next_char(){
+    if(std){
+        if(position == len){
+            return EOF;
+        }
+        char c = content[position];
+        position++;
+        return c;
+    } else{
+        char c = (char) fgetc(source_file);
+
+        return c;
     }
+}
+
+void free_buffer(){
+    free(content);
+}
+
+/**
+ * @author - oneself, Matthew Flaschen
+ * https://stackoverflow.com/questions/2496668/how-to-read-the-standard-input-into-string-variable-until-eof-in-c
+ * @param name
+ * @return
+ */
+void read_from_stdin(){
+    std = true;
+
+    char buffer[BUF_SIZE];
+    size_t contentSize = 1;
+    content = malloc(sizeof(char) * BUF_SIZE);
+    if(content == NULL){
+        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+        exit(1); //todo error
+    }
+    content[0] = '\0';
+    while(fgets(buffer, BUF_SIZE, stdin)) {
+        char *old = content;
+        contentSize += strlen(buffer);
+        content = realloc(content, contentSize);
+        if(content == NULL){
+            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+            free(old);
+            exit(2); //todo return
+        }
+        strcat(content, buffer);
+    }
+    if(ferror(stdin)){
+        free(content);
+        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+        exit(3); //todo return
+    }
+    len = (int)strlen(content);
+}
+
+void read_again(){
+    position = 0;
+}
+
+
+FILE *open_file(const char *name) {
+    std = false;
     source_file = fopen(name, "r");
     if(source_file == NULL) {
         fprintf(stderr, "Error opening file: %s\n", strerror(errno));
-        set_error();
-        return source_file;
+        set_error(); //todo error
+        return NULL;
     }
     return source_file;
 }
@@ -121,7 +183,7 @@ int is_key_word(string *s) {
 int string_To_Int(char *s) {
     const char *string = s;
     char *endptr;
-    int n = strtol(string, &endptr, 10);
+    int n = (int)strtol(string, &endptr, 10);
     if (endptr == string) {
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         set_error();
@@ -205,7 +267,7 @@ int get_next_token(token_t *token) {
 
     while (1) {
         //printf("STATE> %d | char %c\n",state,c);
-        c = (char) fgetc(source_file);
+        c = get_next_char();
         switch (state) {
             case (STATE_START) :
                 if (isspace(c)) {
@@ -267,12 +329,13 @@ int get_next_token(token_t *token) {
                         state = STATE_BLOCK_COMMENT_OR_EQUAL;
                         break;
                     case '!' :;
-                        c = (char) fgetc(source_file);
+                        c = get_next_char();
                         if(c == '='){
                             token->type = NOT_EQUAL;
                             return return_code();
                         } else{
                             fprintf(stderr,"Unexpected char_%c_\n",c);
+                            exit(77);
                             return RET_ERR;
                         }
                     default:
@@ -288,8 +351,10 @@ int get_next_token(token_t *token) {
                             state = STATE_IDENTIFIER;
                             break;
                         } else{
+                            printf("-->%d %d\n",position,len);
                             fprintf(stderr, "Unexpected char_%c_\n",c);
                             delete_string(s);
+                            exit(77);
                             return RET_ERR;
                         }
                 }
@@ -300,17 +365,21 @@ int get_next_token(token_t *token) {
                     break;
                 }else if(c == '!' || c == '?') {
                     strAddChar(s,c);
-                    c = (char) fgetc(source_file);
+                    c = get_next_char();
                     if(isspace(c)){
                         token->type = is_key_word(s);
                         return return_code();
                     }
                 }else if(c != EOF) { //
                     token->type = is_key_word(s);
-                    if(ungetc(c,source_file) == EOF){
-                        fprintf(stderr,"Internal error\n");
-                        delete_string(s);
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            delete_string(s);
+                            return INTERNAL_ERROR;
+                        }
                     }
                     return return_code();
                 } else{
@@ -323,7 +392,7 @@ int get_next_token(token_t *token) {
                     break;
                 } else if(c == '.'){
                     strAddChar(s,c);
-                    c = (char) fgetc(source_file);
+                    c = get_next_char();
                     if(isdigit(c)) {
                         strAddChar(s, c);
                         state = STATE_DOUBLE_TYPE;
@@ -331,14 +400,15 @@ int get_next_token(token_t *token) {
                     }else{
                         delete_string(s);
                         fprintf(stderr, "Unexpected char_%c_ After . have to be sequence of digits\n",c);
+                        exit(77);
                         return RET_ERR;
                     }
                 } else if(c == 'e' || c == 'E'){
                     strAddChar(s,c);
-                    c = (char) fgetc(source_file);
+                    c = get_next_char();
                     if(c == '+' || c == '-' ) {
                         strAddChar(s, c);
-                        c = (char) fgetc(source_file);
+                        c = get_next_char();
                         if(isdigit(c)){
                             strAddChar(s, c);
                             state = STATE_DOUBLE_TYPE_EXPONENT;
@@ -346,6 +416,8 @@ int get_next_token(token_t *token) {
                         }else{
                             delete_string(s);
                             fprintf(stderr, "Unexpected char_%c_ After +/- have to be sequence of digits",c);
+                            exit(77);
+
                             return RET_ERR;
                         }
                     } else if(isdigit(c)){
@@ -355,13 +427,19 @@ int get_next_token(token_t *token) {
                     }else{
                         delete_string(s);
                         fprintf(stderr, "Unexpected char_%c_ After e have to be +/- or sequence of digits\n",c);
+                        exit(77);
+
                         return RET_ERR;
                     }
                 } else if(c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        delete_string(s);
-                        fprintf(stderr,"Internal error\n");
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            delete_string(s);
+                            return INTERNAL_ERROR;
+                        }
                     }
                     //int n = string_To_Int(s);
                     //delete_string(s);
@@ -381,17 +459,20 @@ int get_next_token(token_t *token) {
                     break;
                 } else if(c == 'e' || c == 'E'){
                     strAddChar(s,c);
-                    c = (char) fgetc(source_file);
+                    c = get_next_char();
                     if(c == '+' || c == '-'){
                         strAddChar(s,c);
-                        c = (char) fgetc(source_file);
+                        c = get_next_char();
                         if(isdigit(c)){
                             strAddChar(s,c);
                             state = STATE_DOUBLE_TYPE_EXPONENT;
                             break;
                         } else{
                             fprintf(stderr, "Unexpected char_%c_ After +/- have to be sequence of digits",c);
+
                             delete_string(s);
+                            exit(77);
+
                             return RET_ERR;
                         }
                     } else if(isdigit(c)){
@@ -401,17 +482,25 @@ int get_next_token(token_t *token) {
                     } else{
                         fprintf(stderr, "Unexpected char_%c_ After e have to be +/- or sequence of digits\n",c);
                         delete_string(s);
+                        exit(77);
+
                         return RET_ERR;
                     }
                 }else if(isalpha(c)){
                     fprintf(stderr, "Unexpected char %c\n",c);
                     delete_string(s);
+                    exit(77);
+
                     return RET_ERR;
                 } else if(c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        fprintf(stderr,"Internal error\n");
-                        delete_string(s);
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            delete_string(s);
+                            return INTERNAL_ERROR;
+                        }
                     }
                     //double n = string_to_Double(s);
                     //delete_string(s);
@@ -434,12 +523,18 @@ int get_next_token(token_t *token) {
                 }else if(isalpha(c)){
                     fprintf(stderr, "Unexpected char %c\n",c);
                     delete_string(s);
+                    exit(77);
+
                     return RET_ERR;
                 } else if(c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        fprintf(stderr,"Internal error\n");
-                        delete_string(s);
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            delete_string(s);
+                            return INTERNAL_ERROR;
+                        }
                     }
                     //double n = string_to_Double(s);
                     //delete_string(s);
@@ -458,9 +553,13 @@ int get_next_token(token_t *token) {
                     token->type = LESS_OR_EQUAL;
                     return return_code();
                 }else if (c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        fprintf(stderr,"Internal error");
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            return INTERNAL_ERROR;
+                        }
                     }
                     token->type = LESS;
                     return return_code();
@@ -473,9 +572,13 @@ int get_next_token(token_t *token) {
                     token->type = GREATER_OR_EQUAL;
                     return return_code();
                 } else if (c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        fprintf(stderr,"Internal error");
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            return INTERNAL_ERROR;
+                        }
                     }
                     token->type = GREATER;
                     return return_code();
@@ -488,19 +591,19 @@ int get_next_token(token_t *token) {
                 if(isspace(c)) {
                     if (c == 10) {
                         line++;
-                        c = (char) fgetc(source_file); //todo line count
+                        c = get_next_char();; //todo line count
                         if (c == '=') {
-                            c = (char) fgetc(source_file);
+                            c = get_next_char();
                             if (c == 'e') {
-                                c = (char) fgetc(source_file);
+                                c = get_next_char();
                                 if (c == 'n') {
-                                    c = (char) fgetc(source_file);
+                                    c = get_next_char();
                                     if (c == 'd') {
-                                        c = (char) fgetc(source_file);
+                                        c = get_next_char();
                                         if (isspace(c)) {
                                             //printf("BCCC= %d | char %c -> %d\n",state,c,c);
                                             while (c != 10) {
-                                                c = (char) fgetc(source_file);
+                                                c = get_next_char();
                                                 //printf("BC= %d | char %c\n",state,c);
                                                 if (c == EOF) {
                                                     token->line = line;
@@ -538,13 +641,13 @@ int get_next_token(token_t *token) {
                     return return_code();
                 } else if(c == '\\'){
                     strAddChar(s,c);
-                    c = (char) fgetc(source_file);
+                    c = get_next_char();
                     if(c == 'n' || c == 's' || c == 't' || c == '"' || c == '\\'){          //if(c == 'n' | c == '"' | c == 't' | c == '\\'){
                         strAddChar(s, c);
                         break;
                     }else if(c == 'x'){
                         strAddChar(s,c);
-                        c = (char) fgetc(source_file);
+                        c = get_next_char();
                         if(isxdigit(c)){
                             strAddChar(s, c);
                             break; //todo hex digit 2
@@ -552,23 +655,33 @@ int get_next_token(token_t *token) {
                     }else{
                         fprintf(stderr, "Unexpected string \\%c\n",c);
                         delete_string(s);
+                        exit(77);
+
                         return RET_ERR;
                     }
                 } else if(c >= 31){
                     strAddChar(s,c);
                     break;
                 } else if(c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        delete_string(s);
-                        fprintf(stderr,"Internal error\n");
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            delete_string(s);
+                            fprintf(stderr,"Internal error\n");
+                            return INTERNAL_ERROR;
+                        }
                     }
                     fprintf(stderr, "Unexpected string_%c_\n",c);
                     delete_string(s);
+                    exit(77);
+
                     return RET_ERR;             //error not a string
                 } else{
                     fprintf(stderr, "Unexpected string_%c_\n",c);
                     delete_string(s);
+                    exit(77);
+
                     return RET_ERR;
                 }
             case (STATE_BLOCK_COMMENT_OR_EQUAL):
@@ -577,15 +690,15 @@ int get_next_token(token_t *token) {
                     token->type = DOUBLE_EQUAL;
                     return return_code();
                 } else if(c == 'b'){
-                    c = (char) fgetc(source_file);
+                    c = get_next_char();
                     if(c == 'e'){
-                        c = (char) fgetc(source_file);
+                        c = get_next_char();
                         if(c == 'g'){
-                            c = (char) fgetc(source_file);
+                            c = get_next_char();
                             if(c == 'i'){
-                                c = (char) fgetc(source_file);
+                                c = get_next_char();
                                 if(c == 'n'){
-                                    c = (char) fgetc(source_file);
+                                    c = get_next_char();
                                     if(isspace(c)){
                                         //printf("GGGGGG\n");
                                         if(c == 10){
@@ -602,9 +715,13 @@ int get_next_token(token_t *token) {
                     token->type = GREATER_OR_EQUAL;
                     return return_code();
                 } else if (c != EOF){
-                    if(ungetc(c,source_file) == EOF){
-                        fprintf(stderr,"Internal error\n");
-                        return INTERNAL_ERROR;
+                    if(std){
+                        position--;
+                    } else{
+                        if(ungetc(c,source_file) == EOF){
+                            fprintf(stderr,"Internal error\n");
+                            return INTERNAL_ERROR;
+                        }
                     }
                     token->type = EQUAL;
                     return return_code();

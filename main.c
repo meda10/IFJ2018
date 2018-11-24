@@ -63,7 +63,9 @@ char **make_array(){
 }
 
 int fill_sym_table(){
-    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
+    //FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
+    read_from_stdin();
+
     string function_name;
     strInit(&function_name);
 
@@ -79,13 +81,19 @@ int fill_sym_table(){
 
             char **pvowels = make_array();
 
+            get_next_token(token);
+            if(token->type == IDENTIFIER){
+                strFree(&function_name);
+                strInit(&function_name);
+                strAddCharArray(&function_name,token->string.str);
+            } else{
+                exit(77);
+            }
 
             get_next_token(token);
-            strFree(&function_name);
-            strInit(&function_name);
-            strAddCharArray(&function_name,token->string.str);
-
-            get_next_token(token);
+            if(token->type != OPENNING_BRACKET){
+                exit(77);
+            }
             while(token->type != CLOSING_BRACKET){
                 get_next_token(token);
                 if(token->type != IDENTIFIER){
@@ -118,6 +126,12 @@ int fill_sym_table(){
 
     free_token(token);
     strFree(&function_name);
+/*
+    if(fclose(source_file) == EOF){
+        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
+        return INTERNAL_ERROR;
+    }
+*/
     return SEM_OK;
 }
 
@@ -133,34 +147,24 @@ int main() {
     result = fill_sym_table();
     if (result != SEM_OK) return SEM_ERR;
 
-    //globalni tabulka
-    B_tree_walk(*root_GTS);
+    read_again();
+    parse();
 
-    //nalezeni a vzpis loklani tabulky --> funkce vypada takto --> def p1 (b,c,d)
-    BTNode local_table_1;
-    local_table_1 = B_tree_search_local_table(*root_GTS,"p1");
-    printf("\n");B_tree_walk(local_table_1);printf("\n");
-
-
-    //nalezeni a vzpis loklani tabulky --> funkce vypada takto --> def p2 ()
-    BTNode local_table_2;
-    local_table_2 = B_tree_search_local_table(*root_GTS,"p2");
-    printf("\n");B_tree_walk(local_table_2);printf("\n");
-
-    //pridani uzlu do loklani tabulky + vypis
-    create_node(&local_table_2, "hell", -1, 0, NULL, false, true, false, false, &local_table_2);
-    create_node(&local_table_2, "AAAAA", -1, 0, NULL, false, true, false, false, &local_table_2);
-
-    local_table_2 = B_tree_search_local_table(*root_GTS,"p2");
-    printf("\n");B_tree_walk(local_table_2);printf("\n");
-
-    B_tree_free(*root_GTS);
-
-
-/*
+    /*
+    FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     if(fclose(source_file) == EOF){
         fprintf(stderr, "Internl Error: %s\n", strerror(errno));
         return INTERNAL_ERROR;
     }
 */
+    B_tree_walk(*root_GTS);
+
+
+
+    //FREE MEMORY
+    B_tree_free(*root_GTS);
+    free(root_GTS);
+    free(local_TS);
+    //only when reading from stdin
+    free_buffer();
 }

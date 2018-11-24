@@ -1,12 +1,12 @@
 #ifndef scaner_H
 #define scaner_H
-
 #include "string.h"
 
 #define RET_OK 0
 #define RET_ERR 1
 #define INTERNAL_ERROR 99
 #define KEY_WORDS_END 18
+#define BUF_SIZE 1024
 
 /*
  * Token
@@ -34,6 +34,14 @@ typedef enum state{
     STATE_BLOCK_COMMENT
 }tState;
 
+void free_buffer();
+char get_next_char();
+void read_again();
+
+/*
+ * Function will set STDIN as input
+ */
+void read_from_stdin();
 
 /*
  * Function sets global variable internal_error
