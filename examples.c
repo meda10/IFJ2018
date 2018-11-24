@@ -351,3 +351,75 @@ void example_sym_table_fill(BTNode *root_GTS,char *f_1_name,char *f_2_name){
     local_table_2 = B_tree_search_local_table(*root_GTS,f_2_name);
     printf("\n");B_tree_walk(local_table_2);printf("\n");
 }
+
+void example_generator_4(){
+    //Funkce inputs
+
+    generate_start();
+    generate_inputs();
+    //generate_inputi();
+    //generate_inputfi();
+
+
+    generate_main();
+    variable_declare(INTEGER_TYPE,"x");
+    generate_TF_for_function_args();
+    generate_function_call("INPUTS");
+    generate_function_return_value_assign_to_var("x");
+    generate_print(IDENTIFIER,"x");
+    generate_main_end();
+
+
+    printf("%s",instrukce.str);
+    generate_free_memory();
+
+}
+
+void example_generator_5(){
+    //Funkce nacte string z stdin a vypise jeho delku
+
+    generate_start();
+    generate_inputs();
+    generate_length();
+
+    generate_main();
+    variable_declare(INTEGER_TYPE,"x");
+
+    generate_TF_for_function_args();
+    generate_function_call("INPUTS");
+    generate_function_return_value_assign_to_var("x");
+
+    generate_TF_for_function_args();
+    generate_assign_arguments_to_function(VARIABLE_E,0,"x");
+    generate_function_call("LENGTH");
+    generate_function_return_value_assign_to_var("x");
+    generate_print(IDENTIFIER,"x");
+    generate_main_end();
+
+    printf("%s",instrukce.str);
+    generate_free_memory();
+
+}
+
+void example_generator_6(){
+
+
+    generate_start();
+    generate_ord();
+
+
+    generate_main();
+    variable_declare(INTEGER_TYPE,"x");
+
+    generate_TF_for_function_args();
+    generate_assign_arguments_to_function(STRING_E,0,"HELLO");
+    generate_assign_arguments_to_function(INT_E,1,"1");
+    generate_function_call("ORD");
+    generate_function_return_value_assign_to_var("x");
+    generate_print(IDENTIFIER,"x");
+    generate_main_end();
+
+    printf("%s",instrukce.str);
+    generate_free_memory();
+
+}

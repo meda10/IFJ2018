@@ -7,6 +7,9 @@
 
 void example_generator_2 ();
 void example_generator_3 ();
+void example_generator_4();
+void example_generator_5();
+void example_generator_6();
 void example_generator_1 ();
 void example_scanner();
 void example_sym_table_fill(BTNode *root_GTS,char *f_1_name,char *f_2_name);
