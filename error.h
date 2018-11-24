@@ -3,7 +3,7 @@
 
 
 
-#define SYNTAX_OK 0
+#define RETURN_OK 0
 #define LEXYCAL_ERROR 1
 #define SYNTAX_ERROR 2
 #define SEMANTIC_ERROR_UNDEFINED_VARIABLE 3

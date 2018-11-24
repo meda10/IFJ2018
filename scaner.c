@@ -274,7 +274,7 @@ int get_next_token(token_t *token) {
                         token->line = line;
                         token->type = EOL;
                         line++;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     }
                     continue;
                 }
@@ -282,25 +282,25 @@ int get_next_token(token_t *token) {
                     case EOF :
                         token->line = line;
                         token->type = ENDOFFILE;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '(' :
                         token->type = OPENNING_BRACKET;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case ')' :
                         token->type = CLOSING_BRACKET;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '+' :
                         token->type = PLUS;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '-' :
                         token->type = MINUS;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '*' :
                         token->type = ASTERISK;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case ';' :
                         token->type = SEMICOLON;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '#' :
                         state = STATE_COMMENT;
                         break;
@@ -311,13 +311,13 @@ int get_next_token(token_t *token) {
                         break;
                     case '/' :
                         token->type = DIVISION;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '\\' :
                         token->type = INT_DIVISION;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case ',' :
                         token->type = COMMA;
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     case '<' :
                         state = STATE_LESS_OR_EQUAL;
                         break;
@@ -331,7 +331,7 @@ int get_next_token(token_t *token) {
                         c = get_next_char();
                         if(c == '='){
                             token->type = NOT_EQUAL;
-                            return SYNTAX_OK;
+                            return RETURN_OK;
                         } else{
                             errors_exit(LEXYCAL_ERROR,"Unexpected char\n");
                         }
@@ -362,7 +362,7 @@ int get_next_token(token_t *token) {
                     c = get_next_char();
                     if(isspace(c)){
                         token->type = is_key_word(s);
-                        return SYNTAX_OK;
+                        return RETURN_OK;
                     }
                 }else if(c != EOF) { //
                     token->type = is_key_word(s);
@@ -375,10 +375,10 @@ int get_next_token(token_t *token) {
                             errors_exit(INTERNAL_ERROR,"Internl Error\n");
                         }
                     }
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     token->type = is_key_word(s);
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
             case (STATE_INTEGER_TYPE):
                 if(isdigit(c)){
@@ -428,10 +428,10 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = INTEGER_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     token->type = INTEGER_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
             case (STATE_DOUBLE_TYPE):
                 if(isdigit(c)){
@@ -473,10 +473,10 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = DOUBLE_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }else{
                     token->type = DOUBLE_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
 
             case (STATE_DOUBLE_TYPE_EXPONENT):
@@ -497,15 +497,15 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = DOUBLE_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     token->type = DOUBLE_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
             case (STATE_LESS_OR_EQUAL):
                 if(c == '='){
                     token->type = LESS_OR_EQUAL;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }else if (c != EOF){
                     if(std){
                         position--;
@@ -516,15 +516,15 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = LESS;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     token->type = LESS;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
             case (STATE_GREATER_OR_EQUAL):
                 if(c == '='){
                     token->type = GREATER_OR_EQUAL;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else if (c != EOF){
                     if(std){
                         position--;
@@ -535,10 +535,10 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = GREATER;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     token->type = GREATER;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
             case (STATE_BLOCK_COMMENT):
                 if(isspace(c)) {
@@ -561,7 +561,7 @@ int get_next_token(token_t *token) {
                                                 if (c == EOF) {
                                                     token->line = line;
                                                     token->type = ENDOFFILE;
-                                                    return SYNTAX_OK;
+                                                    return RETURN_OK;
                                                 }
                                                 if(c == 10){
                                                     line++;
@@ -572,7 +572,7 @@ int get_next_token(token_t *token) {
                                         } else if (c == EOF) {
                                             token->line = line;
                                             token->type = ENDOFFILE;
-                                            return SYNTAX_OK;
+                                            return RETURN_OK;
                                         }
                                     }
                                 }
@@ -590,7 +590,7 @@ int get_next_token(token_t *token) {
                 if(c == '"') {
                     strAddChar(s,c);
                     token->type = STRING_TYPE;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else if(c == '\\'){
                     strAddChar(s,c);
                     c = get_next_char();
@@ -631,7 +631,7 @@ int get_next_token(token_t *token) {
                 //printf("STATE> %d | char %c",state,c);
                 if(c == '='){
                     token->type = DOUBLE_EQUAL;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else if(c == 'b'){
                     c = get_next_char();
                     if(c == 'e'){
@@ -656,7 +656,7 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = GREATER_OR_EQUAL;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else if (c != EOF){
                     if(std){
                         position--;
@@ -667,20 +667,20 @@ int get_next_token(token_t *token) {
                         }
                     }
                     token->type = EQUAL;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     token->type = EQUAL;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }
             case (STATE_COMMENT):
                 if(c == 10){
                     token->type = EOL;
                     line++;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 }else if(c == EOF){
                     token->type = ENDOFFILE;
                     line++;
-                    return SYNTAX_OK;
+                    return RETURN_OK;
                 } else{
                     continue;
                 }

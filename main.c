@@ -8,6 +8,7 @@
 #include "scaner.h"
 #include "symtable.h"
 #include "generator.h"
+#include "error.h"
 #include "stringss.h"
 #include "examples.h"
 #include "tokens.h"
@@ -66,12 +67,12 @@ int fill_sym_table(){
                 strInit(&function_name);
                 strAddCharArray(&function_name,token->string.str);
             } else{
-                exit(77);
+                errors_exit(SYNTAX_ERROR,"Syntax error\n");
             }
 
             get_next_token(token);
             if(token->type != OPENNING_BRACKET){
-                exit(77);
+                errors_exit(SYNTAX_ERROR,"Syntax error\n");
             }
             while(token->type != CLOSING_BRACKET){
                 get_next_token(token);
@@ -95,8 +96,7 @@ int fill_sym_table(){
 
             int result = create_node(root_GTS, function_name.str, -1, counter, params, true, false, true, false, local_TS);
             if (result != 0){
-                fprintf(stderr, "Error: Multiple function definition!\n");
-                return SEM_ERR;
+                errors_exit(SEMANTIC_ERROR_UNDEFINED_VARIABLE,"Error: Multiple function definition!\n");
             }
             counter = 0;
         }
@@ -111,7 +111,7 @@ int fill_sym_table(){
         return INTERNAL_ERROR;
     }
 */
-    return SEM_OK;
+    return RETURN_OK;
 }
 
 int main() {
@@ -128,17 +128,14 @@ int main() {
 
     int result;
     result = fill_sym_table();  //naplneni globalni tabulki funkcemi
-    if (result != SEM_OK) return SEM_ERR;
+    if (result != RETURN_OK) return SEM_ERR;
 
     //FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     read_again();
 
-
-    example_scanner();
-
     result = parse();
     printf("SYNTAX: %d\n", result);
-    if(result != SYNTAX_OK) return SYNTAX_ERR;
+    if(result != RETURN_OK) return SYNTAX_ERR;
 
     //globalni tabulka
     printf("Global Table:\n");
