@@ -44,8 +44,7 @@ char **make_array(){
 
 int fill_sym_table(){
     read_from_stdin();
-    //FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
-    
+
     string function_name;
     strInit(&function_name);
 
@@ -67,12 +66,12 @@ int fill_sym_table(){
                 strInit(&function_name);
                 strAddCharArray(&function_name,token->string.str);
             } else{
-                errors_exit(SYNTAX_ERROR,"Syntax error\n");
+                errors_exit(SYNTAX_ERROR,"Syntax error in function definition.\n");
             }
 
             get_next_token(token);
             if(token->type != OPENNING_BRACKET){
-                errors_exit(SYNTAX_ERROR,"Syntax error\n");
+                errors_exit(SYNTAX_ERROR,"Syntax error in function definition.\n");
             }
             while(token->type != CLOSING_BRACKET){
                 get_next_token(token);
@@ -96,7 +95,7 @@ int fill_sym_table(){
 
             int result = create_node(root_GTS, function_name.str, -1, counter, params, true, false, true, false, local_TS);
             if (result != 0){
-                errors_exit(SEMANTIC_ERROR_UNDEFINED_VARIABLE,"Error: Multiple function definition!\n");
+                errors_exit(SEMANTIC_ERROR_UNDEFINED_VARIABLE,"Multiple function definition!\n");
             }
             counter = 0;
         }
@@ -105,12 +104,7 @@ int fill_sym_table(){
 
     free_token(token);
     strFree(&function_name);
-/*
-    if(fclose(source_file) == EOF){
-        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-        return INTERNAL_ERROR;
-    }
-*/
+
     return RETURN_OK;
 }
 
@@ -124,34 +118,23 @@ int main() {
     main_local_TS = make_new_table();
     create_node(root_GTS, "$$main$$", -1, 1, NULL, true, false, true, false, main_local_TS);    
     create_node(main_local_TS, "$$<&FUNKCE_NEMA_PARAMETRY&>$$", -1, 0, NULL, false, true, false, false, main_local_TS);
-    //create_node(main_local_TS, "p1", -1, 0, NULL, false, true, false, false, main_local_TS);
 
     int result;
     result = fill_sym_table();  //naplneni globalni tabulki funkcemi
-    if (result != RETURN_OK) return SEM_ERR;
+    if (result != RETURN_OK)
+        errors_exit(INTERNAL_ERROR, "internal compiler error.\n");
 
-    //FILE *source_file = open_file("/home/petr/CLionProjects/IFJ2018/source");
     read_again();
 
+    generate_start();
+    generate_main();
     result = parse();
-    printf("SYNTAX: %d\n", result);
-    if(result != RETURN_OK) return SYNTAX_ERR;
+    if(result != RETURN_OK)
+        errors_exit(SYNTAX_ERROR, "syntax error.\n");
 
-    //globalni tabulka
-    printf("Global Table:\n");
-    B_tree_walk(*root_GTS);
-    printf("\n");
-    
-    printf("MAIN BODY:\n");
-    B_tree_walk(*main_local_TS);
-    printf("\n");
-
-/*
-    if(fclose(source_file) == EOF){
-        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-        return INTERNAL_ERROR;
-    }
-*/
+    generate_main_end();
+    printf("%s",instrukce.str);
+    generate_free_memory();
 
     //FREE MEMORY
     B_tree_free(*root_GTS);
