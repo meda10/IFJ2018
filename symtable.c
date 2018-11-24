@@ -4,14 +4,14 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "symtable.h"
+#include "error.h"
 #include "stringss.h"
 
 TValues init_val(char *name, int len) {
     TValues data;
     if(name != NULL){
         if ((data.name = (char*) malloc((size_t)len + 1)) == NULL){
-            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-            //todo set_error_string();
+            errors_exit(INTERNAL_ERROR,"Internl Error\n");
         }
         strcpy(data.name, name);
         //printf("CPY: %s -> %s FROM %p TO %p\n",name,data.name,name,data.name);
@@ -25,11 +25,14 @@ TValues init_val(char *name, int len) {
         B_tree_init(&data.local_sym_table);
         return data;
     }
+    return data;
 }
 
 BTNode* make_new_table(){
-    //BTNode *b = malloc(sizeof(BTNode));
     BTNode *b = (BTNode*) malloc(sizeof(struct node));
+    if(b == NULL){
+        errors_exit(INTERNAL_ERROR,"Internl Error\n");
+    }
     memset(b,0,sizeof(BTNode));
     return b;
 }
@@ -102,6 +105,7 @@ int B_tree_insert(BTNode *root, struct Values data){
     if(!found){
         BTNode new_node = (BTNode) malloc(sizeof(struct node));
         if(new_node == NULL){
+            errors_exit(INTERNAL_ERROR,"Internl Error\n");
             return INTERNAL_ERROR;
         }
         new_node->data = data;
@@ -120,7 +124,7 @@ int B_tree_insert(BTNode *root, struct Values data){
         }
         //printf("Created Node %s, Left: %s Right: %s\n", new_node->data.name,new_node->L_ptr, new_node->R_ptr);
     }
-    return RET_OK;
+    return RETURN_OK;
 }
 
 void B_tree_walk(BTNode root){
@@ -157,8 +161,7 @@ int create_node(BTNode *table, char *name, int type, int params_number, char** p
     if(no != NULL){
         free(no->data.name);
         if ((no->data.name = (char*) malloc(strlen(name) + 1)) == NULL){
-            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-            //todo set_error_string();
+            errors_exit(INTERNAL_ERROR,"Internl Error\n");
         }
         strcpy(no->data.name, name);
         no->data.type = type;
@@ -170,7 +173,7 @@ int create_node(BTNode *table, char *name, int type, int params_number, char** p
         no->data.used = used;
         no->data.local_sym_table = *local_sym_table;
 
-        return RET_OK;
+        return RETURN_OK;
     }
 
 
@@ -190,7 +193,7 @@ int create_node(BTNode *table, char *name, int type, int params_number, char** p
         B_tree_insert(table, val);
         //printf("ADD: %s -> %p %d\n",val.name,val.name,val.params_number);
 
-        return RET_OK;
+        return RETURN_OK;
     }else {
         return RET_ERR;
     }

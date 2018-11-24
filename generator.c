@@ -8,22 +8,6 @@
 #include "symtable.h"
 
 
-char free_labels(){
-    for (int i = 0; i < arr_free_pos; ++i) {
-        free(arr_free[i]);
-    }
-}
-
-char *get_new_label() {
-    char str[MAX_INSTRUCTION_LEN];
-    char *reg = (char *) malloc(30 * sizeof(char));
-    arr_free[++arr_free_pos] = reg;
-    sprintf(reg, "%%L_NUM_%d", label_number++);
-    return reg; //todo malloc
-    //sprintf(str, "%%L_NUM_%d", label_number++);
-    //return str;
-}
-
 
 int get_new_label_number(){
     return ++label_number;
@@ -47,7 +31,7 @@ void variable_declare(int type, char *name) {
     strAddCharArray(&instrukce,"# Variable declare\n");
     sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
     strAddCharArray(&instrukce,str);
-    double a = 0;
+    //double a = 0;
     switch (type) {
         case INTEGER_TYPE:
             sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
@@ -300,7 +284,7 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
         }
         case STRING_E:
             strInit(&s);
-            for (int i = 0; i < strlen(variable_value); ++i) {
+            for (int i = 0; i < (int)strlen(variable_value); ++i) {
                 char c = variable_value[i];
                 if(c == '#'){
                     strAddCharArray(&s,"\\035");
@@ -371,7 +355,7 @@ void generate_push(int type, char* name) {
             break;
         case STRING_TYPE:
             strInit(&s);
-            for (int i = 0; i < strlen(name); ++i) {
+            for (int i = 0; i < (int)strlen(name); ++i) {
                 char c = name[i];
                 if(c == '#'){
                     strAddCharArray(&s,"\\035");
@@ -560,7 +544,7 @@ void generate_print(int type, char* name) {
             break;
         case STRING_TYPE:
             strInit(&s);
-            for (int i = 0; i < strlen(name); ++i) {
+            for (int i = 0; i < (int)strlen(name); ++i) {
                 char c = name[i];
                 if(c == '#'){
                     strAddCharArray(&s,"\\035");
@@ -706,7 +690,7 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
         }
         case STRING_E:
             strInit(&s);
-            for (int i = 0; i < strlen(value); ++i) {
+            for (int i = 0; i < (int)strlen(value); ++i) {
                 char c = value[i];
                 if(c == '#'){
                     strAddCharArray(&s,"\\035");

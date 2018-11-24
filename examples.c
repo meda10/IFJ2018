@@ -86,8 +86,6 @@ void example_lolalni_tabulky(){
             printf("HELL\n");
         }
     */
-    BTNode r;
-    r = B_tree_search(*ROOT,"FUNKCE");
 
     free(ROOT);
     free(local_table);

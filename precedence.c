@@ -168,6 +168,9 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		case MINUS_S:		
 			type_operation = G_TYPE_MINUS;
 			break;
+		default:
+			//todo
+			break;
 		}
 	
 	if(op1.type == EXP_INTEGER && op2.type == EXP_INTEGER){

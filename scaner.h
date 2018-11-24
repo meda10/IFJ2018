@@ -41,11 +41,6 @@ void read_again();
 void read_from_stdin();
 
 /*
- * Function sets global variable internal_error
- */
-void set_error();
-
-/*
  * Function opens file
  */
 FILE *open_file(const char *name);

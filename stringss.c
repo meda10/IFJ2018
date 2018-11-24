@@ -3,27 +3,14 @@
 #include <errno.h>
 
 #include "stringss.h"
+#include "error.h"
 
 
 const size_t ALOCATION_SIZE = 20;
-int internal_error_string = 0;
-
-void set_error_string(){
-    internal_error_string = INTERNAL_ERROR;
-}
-
-int return_code_string(){
-    if(internal_error_string == INTERNAL_ERROR){
-        return INTERNAL_ERROR;
-    } else{
-        return RET_OK;
-    }
-}
 
 void strInit(string *s) {
     if ((s->str = (char*) malloc(ALOCATION_SIZE)) == NULL){
-        fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-        set_error_string();
+        errors_exit(INTERNAL_ERROR,"Internl Error\n");
         return;
     }
     s->str[0] = '\0';
@@ -58,8 +45,7 @@ void strAddCharArray(string *s1, char *arr){
 void strAddChar(string *s1, char c) {
     if (s1->length + 1 >= s1->allocSize){
         if ((s1->str = (char*) realloc(s1->str, s1->length + ALOCATION_SIZE)) == NULL){
-            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-            set_error_string();
+            errors_exit(INTERNAL_ERROR,"Internl Error\n");
             return;
         }
         s1->allocSize = s1->length + ALOCATION_SIZE;
@@ -73,8 +59,7 @@ void strCopyString(string *s1, string *s2){
     int newLength = s2->length;
     if (newLength >= s1->allocSize) {
         if ((s1->str = (char*) realloc(s1->str, (size_t)newLength + 1)) == NULL){
-            fprintf(stderr, "Internl Error: %s\n", strerror(errno));
-            set_error_string();
+            errors_exit(INTERNAL_ERROR,"Internl Error\n");
             return;
         }
         s1->allocSize = newLength + 1;

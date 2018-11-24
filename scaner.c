@@ -11,7 +11,6 @@
 
 FILE *source_file = NULL;
 int line = 1;
-//int internal_error = 0;
 char *content;
 int len = 0;
 int position = 0;
@@ -87,20 +86,6 @@ const char* names[] = {
         "START_OF_RULE" // pomocny token na precedencni analyzu, znaci < zacatek pravidla v zasobniku
 
 };
-
-//void set_error(){
-//    internal_error = INTERNAL_ERROR;
-//}
-/*
-int return_code(){
-    internal_error = return_code_string();
-    if(internal_error == INTERNAL_ERROR){
-        return INTERNAL_ERROR;
-    } else{
-        return RET_OK;
-    }
-}
-*/
 
 char get_next_char(){
     if(std){
@@ -211,12 +196,11 @@ token_t* make_new_token(){
 }
 
 void free_token(token_t *token){
-    if(&token != NULL){
+    if(token != NULL){
         if(token->type < KEY_WORDS_END || token->type == IDENTIFIER || token->type == STRING_TYPE || token->type == DOUBLE_TYPE || token->type == INTEGER_TYPE){
             delete_string(&token->string);
         }
         free(token);
-        token = NULL;
     }
 }
 

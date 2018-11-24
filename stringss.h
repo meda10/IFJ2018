@@ -11,8 +11,6 @@ typedef struct {
     int allocSize;	// velikost alokovane pameti
 } string;
 
-void set_error_string();
-int return_code_string();
 void strAddCharArray(string *s1, char *arr);
 void strInit(string *s);
 void strFree(string *s);

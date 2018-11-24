@@ -2,7 +2,7 @@ TARGET   = ifj2018
 SRCDIR   = .
 OBJDIR   = .
 CC       = gcc
-CFLAGS   = -std=c99 -I$(SRCDIR)/ -s -c -O3
+CFLAGS   = -std=c99 -I$(SRCDIR)/ -Wall -s -Wextra -c -O3
 LINKER   = gcc
 LFLAGS   = -Wall -s -I$(SRCDIR)/ -lm
 GREEN    = tput setaf 2
