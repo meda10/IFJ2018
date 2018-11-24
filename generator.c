@@ -22,6 +22,143 @@ char* get_frame() {
 }
 
 /**
+ * Generuje funkci inputs
+ */
+void generate_inputs() {
+    strAddCharArray(&instrukce,"\n#INPUTS\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTS_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+    strAddCharArray(&instrukce,"READ LF@$$FUN_RET string\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_1 LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTS_END GF@$$var_1 string@string\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTS_FAIL LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_INPUTS_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTS_FAIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_INPUTS_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTS_END\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+
+/**
+ * Generuje funkci inputi
+ */
+void generate_inputi() {
+
+    strAddCharArray(&instrukce,"\n#INPUTI\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTI_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+    strAddCharArray(&instrukce,"READ LF@$$FUN_RET int\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTI_FAIL LF@$$FUN_RET int@0\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_INPUTI_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTI_FAIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET int@0\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_INPUTI_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTI_END\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+/**
+ * Generuje funkci inputf
+ */
+void generate_inputf() {
+    strAddCharArray(&instrukce,"\n#INPUTF\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTF_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+    strAddCharArray(&instrukce,"READ LF@$$FUN_RET float\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTF_FAIL LF@$$FUN_RET float@0x0p+0\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_INPUTF_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTF_FAIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET float@0x0p+0\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_INPUTF_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTF_END\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+/**
+ * Generuje funkci length
+ */
+void generate_length() {
+    strAddCharArray(&instrukce,"\n#LENGTH\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_1 LF@V_0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@string\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@int\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@float\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_FAIL LF@V_0 nil@nil\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_B\n");
+    strAddCharArray(&instrukce,"STRLEN LF@$$FUN_RET LF@V_0\n"); //data musi byt na LF@V_0
+    strAddCharArray(&instrukce,"JUMP $$FUN_LENGTH_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_FAIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET int@0\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_END\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+
+
+void generate_ord(){
+    strAddCharArray(&instrukce,"LABEL $$FUN_ORD_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+    strAddCharArray(&instrukce,"STRLEN LF@$$FUN_RET LF@V_0\n");
+    strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_1 LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"LT GF@$$var_2 LF@V_1 int@1\n");
+
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_ORD_FAIL GF@$$var_1 bool@true\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_ORD_FAIL GF@$$var_2 bool@true\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_ORD_OK\n");
+    strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
+    strAddCharArray(&instrukce,"STRI2INT LF@$$FUN_RET LF@V_0 LF@V_1\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_ORD_END\n");
+
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_ORD_FAIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_ORD_END\n");
+
+
+}
+
+/**
  * Deklarace proměné
  * @param type - typ proměné (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE)
  * @param name - jmeno promene
@@ -51,19 +188,6 @@ void variable_declare(int type, char *name) {
     }
 }
 
-//todo Neni funkcni
-void generate_inputs() {
-    strAddCharArray(&instrukce,"LABEL %%INPUTS\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-    strAddCharArray(&instrukce,"DEFVAR LF@$$result_inputs\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$result_inputs string@\n");
-
-
-    strAddCharArray(&instrukce,"READ LF@$$result_inputs string\n");
-
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
-}
 
 /**
  * Zacatek programu
@@ -678,16 +802,14 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
     sprintf(str, "DEFVAR TF@V_%d\n",num);
     strAddCharArray(&instrukce,str);
     switch (expresion_type) {
-        case INT_E: {
+        case INT_E:
             sprintf(str, "MOVE TF@V_%d int@%d\n", num, string_To_Int(value));
             strAddCharArray(&instrukce,str); //todo %d
             break;
-        }
-        case DOUBLE_E: {
+        case DOUBLE_E:
             sprintf(str, "MOVE TF@V_%d float@%a\n", num, string_to_Double(value));
             strAddCharArray(&instrukce,str);
             break;
-        }
         case STRING_E:
             strInit(&s);
             for (int i = 0; i < (int)strlen(value); ++i) {
@@ -708,6 +830,48 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
             strAddCharArray(&instrukce,str);
             free(s.str);
             break;
+        case VARIABLE_E:
+            sprintf(str, "MOVE TF@V_%d %s@%s\n", num, get_frame(),value);
+            strAddCharArray(&instrukce,str);
+
+/*
+            sprintf(str, "PUSHS TF@V_%d\n",num);
+            strAddCharArray(&instrukce,str);
+
+            strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
+            strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
+
+            int current_number = get_new_label_number();
+
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_STR GF@$$var_1 string@string\n", current_number);
+            strAddCharArray(&instrukce, str);
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_INT GF@$$var_1 string@int\n", current_number);
+            strAddCharArray(&instrukce, str);
+            sprintf(str, "JUMPIFEQ %%L_NUM_%d_FLOAT GF@$$var_1 string@float\n", current_number);
+            strAddCharArray(&instrukce, str);
+            sprintf(str, "JUMP %%L_NUM_%d_END\n", current_number);
+            strAddCharArray(&instrukce, str);
+            //float
+            sprintf(str, "LABEL %%L_NUM_%d_FLOAT\n", current_number);
+            strAddCharArray(&instrukce, str);
+
+            sprintf(str, "JUMP %%L_NUM_%d_END\n", current_number);
+            strAddCharArray(&instrukce, str);
+
+            //int
+            sprintf(str, "LABEL %%L_NUM_%d_INT\n", current_number);
+            strAddCharArray(&instrukce, str);
+
+
+            //str
+            sprintf(str, "LABEL %%L_NUM_%d_STR\n", current_number);
+            strAddCharArray(&instrukce, str);
+
+
+            sprintf(str, "LABEL %%L_NUM_%d_END\n", current_number);
+            strAddCharArray(&instrukce, str);
+            strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
+*/
         default:
             break;
     }

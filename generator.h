@@ -45,6 +45,12 @@ void startGenerating();
 void variable_declare(int type, char* name);
 char *get_new_label();
 
+void generate_inputi();
+void generate_inputs();
+void generate_inputf();
+void generate_length();
+void generate_ord();
+
 void generate_stack_1_to_float();
 void generate_stack_1_to_int();
 void generate_stack_2_to_float();
@@ -70,7 +76,7 @@ void generate_if_else_end(int num);
 
 void generate_comparative_operations(int type);
 
-void generate_inputs();
+
 
 void generate_while_condition_check(int num);
 void generate_while_start(int num);

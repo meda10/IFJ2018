@@ -15,9 +15,6 @@ rm       = rm -rf
 
 all: $(TARGET) clean
 
-.PHONY: test
-test: $(TARGET) run_tests remove
-
 $(TARGET): $(OBJECTS)
 	
 	@$(LINKER) $(OBJECTS) $(LFLAGS) -o $@
