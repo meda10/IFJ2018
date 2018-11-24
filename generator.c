@@ -421,7 +421,7 @@ void generate_mathemeatical_operations(int type){
  */
 void generate_comparative_operations(int type){
     char str[MAX_INSTRUCTION_LEN];
-    data_conversion();
+    //data_conversion();
     strAddCharArray(&instrukce,"# Comparative operations\n");
     switch (type){
         case G_TYPE_LESS:

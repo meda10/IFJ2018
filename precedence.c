@@ -154,6 +154,7 @@ tPrec_op token_to_prec(token_t t){
 int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 	int type_operation;
+	bool relation_operator = false;
 
 	switch(operator){
 		case MUL_S:
@@ -168,8 +169,29 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		case MINUS_S:		
 			type_operation = G_TYPE_MINUS;
 			break;
-		default:
-			//todo
+		case LESS_S:
+			type_operation = G_TYPE_LESS;
+			relation_operator = true;
+			break;
+		case LE_S:
+			type_operation = G_TYPE_LESS_OR_EQUAL;
+			relation_operator = true;
+			break;
+		case GREATER_S:
+			type_operation = G_TYPE_GREATER;
+			relation_operator = true;
+			break;
+		case GE_S:
+			type_operation = G_TYPE_GREATER_OR_EQUAL;
+			relation_operator = true;
+			break;
+		case EQUAL_S:
+			type_operation = G_TYPE_EQUAL;
+			relation_operator = true;
+			break;
+		case NOT_EQUAL_S:
+			type_operation = G_TYPE_NOT_EQUAL;
+			relation_operator = true;
 			break;
 		}
 	
@@ -177,13 +199,17 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		
 		if((type_operation == G_TYPE_IDIV) && (strcmp(op2.string.str, "0") == 0))
 			return ZERO_DIV_ERR;
-		
-		generate_mathemeatical_operations(type_operation);
 
-		*result_type = EXP_INTEGER;
+		if(relation_operator){
+			generate_comparative_operations(type_operation);
+			*result_type = EXP_BOOLEAN;
+		}
+		else{
+			generate_mathemeatical_operations(type_operation);
+			*result_type = EXP_INTEGER;
+		}
 
 	}
-
 	else if(op1.type == EXP_DOUBLE && op2.type == EXP_INTEGER){
 		
 		if (type_operation == G_TYPE_IDIV){
@@ -195,9 +221,15 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		}
 
 		generate_stack_1_to_float();
-		generate_mathemeatical_operations(type_operation);
 
-		*result_type = EXP_DOUBLE;
+		if(relation_operator){
+			generate_comparative_operations(type_operation);
+			*result_type = EXP_BOOLEAN;
+		}
+		else{
+			generate_mathemeatical_operations(type_operation);
+			*result_type = EXP_DOUBLE;
+		}		
 	}
 
 	else if(op1.type == EXP_INTEGER && op2.type == EXP_DOUBLE){
@@ -211,9 +243,15 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		}
 		
 		generate_stack_2_to_float();
-		generate_mathemeatical_operations(type_operation);
 
-		*result_type = EXP_DOUBLE;
+		if(relation_operator){
+			generate_comparative_operations(type_operation);
+			*result_type = EXP_BOOLEAN;
+		}
+		else{
+			generate_mathemeatical_operations(type_operation);
+			*result_type = EXP_DOUBLE;
+		}	
 	}
 
 	else if (op1.type == EXP_DOUBLE && op2.type == EXP_DOUBLE){
@@ -226,13 +264,25 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			type_operation = G_TYPE_DIV;
 		}
 
-		generate_mathemeatical_operations(type_operation);
-		*result_type = EXP_DOUBLE;
+		if(relation_operator){
+			generate_comparative_operations(type_operation);
+			*result_type = EXP_BOOLEAN;
+		}
+		else{
+			generate_mathemeatical_operations(type_operation);
+			*result_type = EXP_DOUBLE;
+		}	
 	}
 
 	else if(op1.type == EXP_STRING && op2.type == EXP_STRING){
-		generate_concat();
-		*result_type = EXP_STRING;
+		if(relation_operator){
+			generate_comparative_operations(type_operation);
+			*result_type = EXP_BOOLEAN;
+		}
+		else{
+			generate_concat();
+			*result_type = EXP_STRING;
+		}
 	}
 	else
 		return SEM_RUNTIME_ERR;
@@ -250,7 +300,7 @@ void delete_rule(stack_t* s, item_stack_t* start_rule, token_t token , int* resu
 	token_t t;
 	
 	if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
-		(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
+		(token.type >= EXP_IDENTIFIER && token.type <= EXP_BOOLEAN )){
 		
 		if(result_type == NULL){
 
@@ -271,15 +321,21 @@ void delete_rule(stack_t* s, item_stack_t* start_rule, token_t token , int* resu
 				case EXP_DOUBLE:
 					t.type = EXP_DOUBLE;
 					break;
+				case EXP_BOOLEAN:
+					t.type = EXP_BOOLEAN;
+					break;
 			}
 
 		}else
 			t.type = *result_type;
 			
 	    t.line = token.line;
-	    strInit(&t.string);
-	    strCopyString(&t.string, &token.string);
 	
+	    if (t.type != EXP_BOOLEAN ){
+	    	strInit(&t.string);
+	    	strCopyString(&t.string, &token.string);
+	    }
+	    
 	}
 
 
@@ -295,11 +351,13 @@ void delete_rule(stack_t* s, item_stack_t* start_rule, token_t token , int* resu
 	stackPop(s);
 
 	if( token.type == IDENTIFIER || token.type == STRING_TYPE || token.type == INTEGER_TYPE || token.type == DOUBLE_TYPE ||
-		(token.type >= EXP_IDENTIFIER && token.type <= EXP_STRING )){
-
-		stackPush (s, t);
-		delete_string(&t.string);
+		(token.type >= EXP_IDENTIFIER && token.type <= EXP_BOOLEAN )){
 	
+	    stackPush (s, t);
+
+	    if (t.type != EXP_BOOLEAN ){
+			delete_string(&t.string);
+		}
 	}
 		
 }
@@ -334,7 +392,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 			
 			rule = rule->previous;
 			
-			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
+			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_BOOLEAN)){
 				
 				if (rule->previous == NULL)
 					return SYNTAX_ERR; // error
@@ -348,10 +406,10 @@ int rule(stack_t* s, item_stack_t* start_rule){
 					//return 11;			//11. <E> -> (<E>)
 					return SYNTAX_OK;
 				}
-				else 
+				else
 					return SYNTAX_ERR; //error
 			}
-			else
+			else printf("%d\n", rule->token.type );
 				return SYNTAX_ERR; //error
 
 		// pokud pravidlo zacina <E>
@@ -415,6 +473,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
 
 				int result_type;
+
 				if ((err_sem =semantic(rule->next->next->token, rule->token, operator, &result_type)) != SEM_OK ){
 					return err_sem;
 				}
