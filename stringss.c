@@ -50,7 +50,7 @@ void delete_string(string *s){
 }
 
 void strAddCharArray(string *s1, char *arr){
-    for(int i = 0; i < strlen(arr);i ++){
+    for(int i = 0; i < (int)strlen(arr);i ++){
         strAddChar(s1,arr[i]);
     }
 }

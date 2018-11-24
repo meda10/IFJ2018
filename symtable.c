@@ -30,10 +30,7 @@ TValues init_val(char *name, int len) {
 BTNode* make_new_table(){
     //BTNode *b = malloc(sizeof(BTNode));
     BTNode *b = (BTNode*) malloc(sizeof(struct node));
-
     memset(b,0,sizeof(BTNode));
-    BTNode tmp_root = *b;
-    //tmp_root->L_ptr = NULL;
     return b;
 }
 

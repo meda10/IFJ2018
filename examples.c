@@ -98,7 +98,6 @@ void example_lolalni_tabulky(){
     delete_string(&tmp);
 }
 
-
 void example_generator_1 (){
     /*
      ---- Pseudo kod ----
