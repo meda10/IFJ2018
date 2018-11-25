@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "error.h"
 #include "tokens.h"
 #include "scaner.h"
 #include "parser.h"
@@ -12,6 +13,7 @@
 #include "stringss.h"
 #include "precedence.h"
 #include "generator.h"
+
 
 extern token_t *token;
 extern bool read_token;
@@ -155,6 +157,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 	int type_operation;
 	bool relation_operator = false;
+	bool equal_notequal = false;
 
 	switch(operator){
 		case MUL_S:
@@ -187,10 +190,12 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			break;
 		case EQUAL_S:
 			type_operation = G_TYPE_EQUAL;
+			equal_notequal = true;
 			relation_operator = true;
 			break;
 		case NOT_EQUAL_S:
 			type_operation = G_TYPE_NOT_EQUAL;
+			equal_notequal = true;
 			relation_operator = true;
 			break;
 		}
@@ -285,7 +290,13 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		}
 	}
 	else
-		return SEM_RUNTIME_ERR;
+
+		if (equal_notequal){
+			generate_comparative_operations(type_operation);
+			*result_type = EXP_BOOLEAN;
+		}
+		else
+			return SEM_RUNTIME_ERR;
 
 	return SEM_OK;
 
@@ -409,7 +420,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 				else
 					return SYNTAX_ERR; //error
 			}
-			else printf("%d\n", rule->token.type );
+			else
 				return SYNTAX_ERR; //error
 
 		// pokud pravidlo zacina <E>
@@ -417,6 +428,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 		case EXP_INTEGER:
 		case EXP_DOUBLE:
 		case EXP_STRING:
+		case EXP_BOOLEAN:
 
 			if (rule->previous == NULL)
 				return SYNTAX_ERR;
@@ -470,7 +482,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 				return SYNTAX_ERR;
 			
 			rule = rule->previous;
-			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_STRING)){
+			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_BOOLEAN)){
 
 				int result_type;
 
@@ -483,7 +495,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 				//return operator;
 				return SYNTAX_OK;
 			}
-			else 
+			else
 				return SYNTAX_ERR; //error
 
 		default:
