@@ -353,20 +353,23 @@ void example_sym_table_fill(BTNode *root_GTS,char *f_1_name,char *f_2_name){
 }
 
 void example_generator_4(){
-    //Funkce inputs
 
     generate_start();
-    generate_inputs();
+    generate_print();
+
+    //generate_inputs();
     //generate_inputi();
     //generate_inputfi();
 
 
     generate_main();
-    variable_declare(INTEGER_TYPE,"x");
+
+    variable_declare(DOUBLE_E,"x");
+    generate_variable_assign(DOUBLE_E,"x","42.58EEW");
     generate_TF_for_function_args();
-    generate_function_call("INPUTS");
-    generate_function_return_value_assign_to_var("x");
-    generate_print(IDENTIFIER,"x");
+    generate_assign_arguments_to_function(VARIABLE_E,0,"x");
+    generate_function_call("PRINT");
+    //generate_function_return_value_assign_to_var("x");
     generate_main_end();
 
 

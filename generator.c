@@ -21,6 +21,24 @@ char* get_frame() {
     }
 }
 
+void generate_print(){
+    strAddCharArray(&instrukce,"\n#PRINT\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+    strAddCharArray(&instrukce,"WRITE LF@V_0\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_PRINT_END\n");
+
+    //end
+    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_END\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
 /**
  * Generuje funkci inputs
  */
@@ -649,12 +667,8 @@ void generate_comparative_operations(int type){
     }
 }
 
-/**
- * Print hodnoty
- * @param type - typ hodnoty (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE,IDENTIFIER)
- * @param name - hodnota (pokud jde o IDENTIFIER tak je zde jeho nazev)
- */
-void generate_print(int type, char* name) {
+/// Nepouzivat
+void generate_print_aaa(int type, char* name) {
     char str[MAX_INSTRUCTION_LEN];
     string s;
     switch (type) {

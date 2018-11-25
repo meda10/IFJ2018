@@ -62,7 +62,7 @@ void generate_main();
 void generate_main_end();
 void generate_push(int type, char* name);
 void generate_mathemeatical_operations(int type);
-void generate_print(int type, char* name);
+void generate_print();
 void generate_print_result();
 void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value);
 void generate_pop_to_result();
