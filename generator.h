@@ -42,7 +42,7 @@ bool inScope;
 
 char free_labels();
 void startGenerating();
-void variable_declare(int type, char* name);
+void variable_declare(char* name);
 char *get_new_label();
 
 void generate_inputi();
