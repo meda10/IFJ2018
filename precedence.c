@@ -18,6 +18,7 @@
 extern token_t *token;
 extern bool read_token;
 extern token_t *next_token;
+extern string actual_variable;
 
 
 tPrec prec_table[ PREC_TABE_SIZE ][ PREC_TABE_SIZE ] = 
@@ -298,6 +299,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		else
 			return SEM_RUNTIME_ERR;
 
+	generate_pop_to_variable(actual_variable.str);
 	return SEM_OK;
 
 }

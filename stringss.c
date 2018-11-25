@@ -8,6 +8,11 @@
 
 const size_t ALOCATION_SIZE = 20;
 
+char **make_array(){
+    char **pvowels = (char **) malloc(50 * sizeof(char *));
+    return pvowels;
+}
+
 void strInit(string *s) {
     if ((s->str = (char*) malloc(ALOCATION_SIZE)) == NULL){
         errors_exit(INTERNAL_ERROR,"Internl Error\n");

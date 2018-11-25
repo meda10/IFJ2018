@@ -10,7 +10,6 @@
 #include "generator.h"
 #include "error.h"
 #include "stringss.h"
-#include "examples.h"
 #include "tokens.h"
 
 BTNode *local_TS;
@@ -19,7 +18,7 @@ BTNode *main_local_TS;
 BTNode temp_node;
 BTNode NONE = NULL;
 
-void built_in_functions(){  //TODO:Do we need local_symtable for buillt-in functions, i think no
+void built_in_functions(){
     create_node(root_GTS, "inputs", -1, 0, NULL, true, true, true, false, &NONE);
 
     create_node(root_GTS, "inputi", -1, 0, NULL, true, true, true, false, &NONE);
@@ -35,11 +34,6 @@ void built_in_functions(){  //TODO:Do we need local_symtable for buillt-in funct
     create_node(root_GTS, "ord", -1, 2, NULL, true, true, true, false, &NONE);
 
     create_node(root_GTS, "chr", -1, 1, NULL, true, true, true, false, &NONE);
-}
-
-char **make_array(){
-    char **pvowels = (char **) malloc(50 * sizeof(char *));
-    return pvowels;
 }
 
 int fill_sym_table(){

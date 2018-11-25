@@ -15,12 +15,12 @@
 token_t *token, *next_token;
 bool read_token;
 BTNode current_LTS;
-extern BTNode *local_TS;
 extern BTNode *root_GTS;
 extern BTNode *main_local_TS;
 extern BTNode temp_node;
 string actual_variable;
 string actual_function;
+char** actual_params;
 int actual_params_number;
 
 int parse(){
@@ -30,6 +30,7 @@ int parse(){
 
   strInit(&actual_variable);
   strInit(&actual_function);
+  actual_params = make_array();
   actual_params_number = 0;	
   current_LTS = *main_local_TS; //set current LTS to main body of program
   
@@ -338,7 +339,7 @@ int ASS(){
 					// printf("\n");
 				}
 
-				variable_declare(token->type, token->string.str);
+				variable_declare(token->string.str);
 				strFree(&actual_variable);
 				strInit(&actual_variable);
 				strAddCharArray(&actual_variable, token->string.str);
@@ -379,7 +380,7 @@ int VALUE(){
 			//check if it is a function
 			temp_node = B_tree_search(*root_GTS, token->string.str);
 			if (temp_node != NULL && temp_node->data.is_function == true){
-				strAddCharArray(&instrukce,"PUSHFRAME\n");
+				//strAddCharArray(&instrukce,"PUSHFRAME\n");
 				return FUNC_CALL();
 			}else{
 				return E();		
@@ -426,6 +427,16 @@ int INPUT_PARAMS(){
 		case EOL:
 		case ENDOFFILE:
 		case CLOSING_BRACKET:						//21. <INPUT_PARAMS> -> eps
+			
+			//check functions' call without parameters
+			temp_node = B_tree_search(*root_GTS, actual_function.str);
+			if (temp_node == NULL){
+				errors_exit(SEMANTIC_ERROR_OTHER, "undefined function call.");
+			}
+			if (temp_node->data.params_number != 0){
+				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
+
+			}
 			return SYNTAX_OK;
 		case IDENTIFIER:
 		case STRING_TYPE:
@@ -459,6 +470,8 @@ int TERM(){
 		case DOUBLE_TYPE:
 		//case BOOL_TYPE:
 		case NIL:						//25. - 30.
+			actual_params[actual_params_number] = (char *) malloc(token->string.length + 1 * sizeof(char));
+            strcpy(actual_params[actual_params_number], token->string.str);
 			actual_params_number++;
 			get_next_token(token);
 			return SYNTAX_OK;
@@ -487,9 +500,17 @@ int NEXT_TERM(){
 			if (temp_node == NULL)
 				errors_exit(SEMANTIC_ERROR_OTHER, "undefined function call.");
 			
-			if(temp_node->data.params_number != actual_params_number){
+			printf("actual param %s\n", actual_params[0]);
+			//check if number of params for print function is at least one
+			if ((strcmp(actual_function.str, "print") == 0) && (actual_params_number >= temp_node->data.params_number)){
+				;
+			} else if(temp_node->data.params_number != actual_params_number){
+				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
+			} else{
 				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
 			}
+
+
 			return SYNTAX_OK;
 		case COMMA:								//24. <NEXT_TERM> -> , <TERM> <NEXT_TERM>	
 			get_next_token(token);

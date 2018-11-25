@@ -19,4 +19,5 @@ void strAddChar(string *s1, char c);
 void delete_string(string *s);
 void strCopyString(string *s1, string *s2);
 
+char** make_array();
 #endif
