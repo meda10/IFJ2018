@@ -204,6 +204,12 @@ void generate_start(){
     inScope = false;
 
     strAddCharArray(&instrukce,".IFJcode18\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_2\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_3\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$var_4\n");
+    strAddCharArray(&instrukce,"DEFVAR GF@$$result\n");
     strAddCharArray(&instrukce,"JUMP $$main\n");
 }
 
@@ -906,7 +912,7 @@ void generate_comparative_operations(int type){
  * @param type - typ hodnoty (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE,IDENTIFIER)
  * @param name - hodnota (pokud jde o IDENTIFIER tak je zde jeho nazev)
  */
-void generate_print(int type, char* name) {
+void generate_print_aaa(int type, char* name) {
     char str[MAX_INSTRUCTION_LEN];
     string s;
     switch (type) {

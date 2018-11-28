@@ -136,11 +136,11 @@ void example_generator_1 (){
     generate_main();
 
     //deklarace promene a prirazeni hodnoty
-    variable_declare(INTEGER_TYPE,"a");
+    variable_declare("a");
     generate_variable_assign(INT_E,"a","50");
 
     //deklarace promene a prirazeni hodnoty
-    variable_declare(INTEGER_TYPE,"b");
+    variable_declare("b");
     generate_variable_assign(INT_E,"b","15");
 
     //push hodnot co se maji porovnat
@@ -197,7 +197,7 @@ void example_generator_1 (){
     generate_if_else_end(1);
 
     //test stringu
-    variable_declare(STRING_TYPE,"str");
+    variable_declare("str");
     generate_variable_assign(STRING_E,"str","\nMuj string\n +#-->\\\n");
 
     //vypis promene
@@ -232,9 +232,9 @@ void example_generator_2 (){
     generate_start();
     generate_main();
 
-    variable_declare(INTEGER_TYPE,"a");
+    variable_declare("a");
     generate_variable_assign(INT_E,"a","0");
-    variable_declare(INTEGER_TYPE,"b");
+    variable_declare("b");
     generate_variable_assign(INT_E,"b","10");
 
     //podminka while
@@ -294,7 +294,7 @@ void example_generator_3(){
     //Main
     generate_main();
 
-    variable_declare(INTEGER_TYPE,"x");
+    variable_declare("x");
 
     //předání parametrů funkce
     generate_TF_for_function_args();
@@ -364,7 +364,7 @@ void example_generator_4(){
 
     generate_main();
 
-    variable_declare(DOUBLE_E,"x");
+    variable_declare("x");
     generate_variable_assign(DOUBLE_E,"x","42.58EEW");
     generate_TF_for_function_args();
     generate_assign_arguments_to_function(VARIABLE_E,0,"x");
@@ -386,7 +386,7 @@ void example_generator_5(){
     generate_length();
 
     generate_main();
-    variable_declare(INTEGER_TYPE,"x");
+    variable_declare("x");
 
     generate_TF_for_function_args();
     generate_function_call("INPUTS");
@@ -412,14 +412,13 @@ void example_generator_6(){
 
 
     generate_main();
-    variable_declare(INTEGER_TYPE,"x");
+    variable_declare("x");
 
     generate_TF_for_function_args();
     generate_assign_arguments_to_function(STRING_E,0,"HELLO");
     generate_assign_arguments_to_function(INT_E,1,"1");
     generate_function_call("ORD");
     generate_function_return_value_assign_to_var("x");
-    generate_print(IDENTIFIER,"x");
     generate_main_end();
 
     printf("%s",instrukce.str);
