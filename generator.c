@@ -17,7 +17,7 @@ char* get_frame() {
     if (inScope) {
         return "LF";
     } else {
-        return "GF";
+        return "TF";
     }
 }
 
@@ -163,29 +163,11 @@ void generate_ord(){
  * @param type - typ proměné (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE)
  * @param name - jmeno promene
  */
-void variable_declare(int type, char *name) {
+void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Variable declare\n");
     sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
     strAddCharArray(&instrukce,str);
-    //double a = 0;
-    switch (type) {
-        case INTEGER_TYPE:
-            sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
-            strAddCharArray(&instrukce,str);
-            break;
-        case DOUBLE_TYPE:
-            sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
-            strAddCharArray(&instrukce,str);
-            break;
-        case STRING_TYPE:
-            sprintf(str,"MOVE %s@%s nil@nil\n", get_frame(), name);
-            strAddCharArray(&instrukce,str);
-            break;
-        default:
-            //todo
-            break;
-    }
 }
 
 
@@ -202,12 +184,6 @@ void generate_start(){
     inScope = false;
 
     strAddCharArray(&instrukce,".IFJcode18\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$var_2\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$var_3\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$var_4\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$result\n");
     strAddCharArray(&instrukce,"JUMP $$main\n");
 }
 
@@ -225,7 +201,7 @@ void generate_main(){
     strAddCharArray(&instrukce,"\n# Main\n");
     strAddCharArray(&instrukce,"LABEL $$main\n");
     strAddCharArray(&instrukce,"CREATEFRAME\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    //strAddCharArray(&instrukce,"PUSHFRAME\n");
 }
 
 /**
@@ -233,7 +209,10 @@ void generate_main(){
  */
 void generate_main_end(){
     strAddCharArray(&instrukce,"\n#Main end\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
+    if (inScope){
+        strAddCharArray(&instrukce,"POPFRAME\n");
+        inScope = false;
+    }
     strAddCharArray(&instrukce,"CLEARS\n");
 }
 
@@ -1181,7 +1160,7 @@ void generate_function_start(char *name){
     sprintf(str, "LABEL $$FUN_%s_START\n",name);
     strAddCharArray(&instrukce,str);
     strAddCharArray(&instrukce,"PUSHFRAME\n");
-    variable_declare(INTEGER_TYPE,"$$FUN_RET");
+    variable_declare("$$FUN_RET");
 
     //strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
 }
