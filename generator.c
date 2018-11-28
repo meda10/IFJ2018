@@ -21,6 +21,26 @@ char* get_frame() {
     }
 }
 
+
+void generate_print(){
+    strAddCharArray(&instrukce,"\n#PRINT\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+
+    strAddCharArray(&instrukce,"WRITE LF@V_0\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_PRINT_END\n");
+
+    //end
+    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_END\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+
 /**
  * Generuje funkci inputs
  */
