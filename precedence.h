@@ -46,6 +46,11 @@ item_stack_t* find_StartOfRule(stack_t* s);
 tPrec_op token_to_prec(token_t t);
 
 /*
+ * Funkce zjistuje jestli je promnema jiz declarovana a nema nazev jako funkce
+ */
+int declared_variable(token_t variable);
+
+/*
  * Funkce na kontrolu semantiky a generovani kodu
  */
 int semantic(token_t op1, token_t op2, int operator, int* result_type);

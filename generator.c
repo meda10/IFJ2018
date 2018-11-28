@@ -21,24 +21,6 @@ char* get_frame() {
     }
 }
 
-void generate_print(){
-    strAddCharArray(&instrukce,"\n#PRINT\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
-
-    strAddCharArray(&instrukce,"WRITE LF@V_0\n");
-    strAddCharArray(&instrukce,"JUMP $$FUN_PRINT_END\n");
-
-    //end
-    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_END\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
-}
-
 /**
  * Generuje funkci inputs
  */
@@ -371,6 +353,259 @@ void data_conversion_to_int() {
     strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
 }
 
+
+/**
+ * Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, jinak ukonci interpretr chybou 4, napr. ( 5.0 + a )
+ */
+void generate_compare_variable_1_with_float(){
+   
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable (first in stack) with float\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_3 GF@$$var_1\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$INT GF@$$var_3 string@int\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$FLOAT GF@$$var_3 string@float\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    generate_stack_1_to_float();
+    sprintf(str, "JUMP $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$FLOAT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+}
+
+
+/**
+ * Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, pokud je float tak zmeni konstantu jinak ukonci interpretr chybou 4, napr. ( 5 + a )
+ */
+void generate_compare_variable_1_with_int(){
+    
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable (first in stack) with int\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_3  GF@$$var_1\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$INT GF@$$var_3 string@int\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$FLOAT  GF@$$var_3 string@float\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    sprintf(str, "JUMP $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$FLOAT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    generate_stack_1_to_float();
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Otestuje promnenou (prvni na zasobniku) jestli je string, pokud neni ukonci interpretr chybou 4, napr. ( "ahoj" + a)
+ */
+void generate_compare_variable_1_with_string(){
+
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable (first in stack) with string\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_3 GF@$$var_1\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$STRING GF@$$var_3 string@string\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$STRING\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+}
+
+/**
+ * Otestuje promnenou (druhou na zasobniku) jestli je float nebo int, jinak ukonci interpretr chybou 4, napr. ( a + 5.0 )
+ */
+void generate_compare_variable_2_with_float(){
+   
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable (second in stack) with float\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_2\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_4 GF@$$var_2\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$INT GF@$$var_4 string@int\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$FLOAT GF@$$var_4 string@float\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    generate_stack_1_to_float();
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    sprintf(str, "JUMP $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$FLOAT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Otestuje promnenou (druhou na zasobniku) jestli je float nebo int, pokud je float tak zmeni konstantu jinak ukonci interpretr chybou 4, napr. ( a + 5 )
+ */
+void generate_compare_variable_2_with_int(){
+    
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable (second in stack) with int\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_2\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_4 GF@$$var_2\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$INT GF@$$var_4 string@int\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$FLOAT GF@$$var_4 string@float\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    sprintf(str, "JUMP $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$FLOAT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    generate_stack_1_to_float();
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$INT_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+}
+
+/**
+ * Otestuje promnenou (druhou na zasobniku) jestli je string, pokud neni ukonci interpretr chybou 4, napr. ( a + "ahoj" )
+ */
+void generate_compare_variable_2_with_string(){
+
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable (second in stack) with string\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_2\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_4 GF@$$var_2\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$%d_$TRUE_$STRING GF@$$var_4 string@string\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$%d_$TRUE_$STRING\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+}
+
+/**
+ * Otestuje typy promnenych ( a + b )
+ */
+void generate_compare_variable_with_variable(){
+
+    char str[MAX_INSTRUCTION_LEN];
+    int current_label_number = get_new_label_number();
+
+    strAddCharArray(&instrukce,"# Compare variable with variable\n");
+
+    strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+    strAddCharArray(&instrukce,"POPS GF@$$var_2\n");
+
+    strAddCharArray(&instrukce,"TYPE GF@$$var_4 GF@$$var_2\n");
+
+    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$INT GF@$$var_4 string@int\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$FLOAT GF@$$var_4 string@float\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$string GF@$$var_4 string@string\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+
+    sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$INT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    generate_compare_variable_1_with_int();
+    sprintf(str, "JUMP $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$FLOAT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    generate_compare_variable_1_with_float();
+    sprintf(str, "JUMP $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+    sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+    generate_compare_variable_1_with_string();
+
+    sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+    strAddCharArray(&instrukce,str);
+
+}
+
 /**
  * Převede prvni hodnotu na zasobniku na float
  */
@@ -667,8 +902,12 @@ void generate_comparative_operations(int type){
     }
 }
 
-/// Nepouzivat
-void generate_print_aaa(int type, char* name) {
+/**
+ * Print hodnoty
+ * @param type - typ hodnoty (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE,IDENTIFIER)
+ * @param name - hodnota (pokud jde o IDENTIFIER tak je zde jeho nazev)
+ */
+void generate_print(int type, char* name) {
     char str[MAX_INSTRUCTION_LEN];
     string s;
     switch (type) {

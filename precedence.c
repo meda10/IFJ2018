@@ -13,13 +13,15 @@
 #include "stringss.h"
 #include "precedence.h"
 #include "generator.h"
+#include "symtable.h"
 
 
 extern token_t *token;
 extern bool read_token;
 extern token_t *next_token;
-extern string actual_variable;
-
+extern BTNode current_LTS;
+extern BTNode *root_GTS;
+//extern string actual_variable;
 
 tPrec prec_table[ PREC_TABE_SIZE ][ PREC_TABE_SIZE ] = 
 //       */   |	   +-	|< <= > >=| == !=  |    (    |    )    |   ID    |   $
@@ -150,6 +152,19 @@ tPrec_op token_to_prec(token_t t){
 }
 
 
+int declared_variable(token_t variable){
+	
+	BTNode tmp_node, tmp2_node;
+	tmp_node = B_tree_search(current_LTS, variable.string.str);
+	tmp2_node = B_tree_search(*root_GTS, variable.string.str);
+
+	if( (tmp_node == NULL) || (tmp2_node != NULL) )
+		return SEM_ERR;
+
+	return SEM_OK;
+
+}
+
 
 /*
  * Funkce na kontrolu semantiky a generovani kodu
@@ -159,6 +174,8 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 	int type_operation;
 	bool relation_operator = false;
 	bool equal_notequal = false;
+	bool both_string = false;
+	bool plus_string = false;
 
 	switch(operator){
 		case MUL_S:
@@ -169,6 +186,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			break;
 		case PLUS_S:
 			type_operation = G_TYPE_PLUS;
+			plus_string = true;
 			break;
 		case MINUS_S:		
 			type_operation = G_TYPE_MINUS;
@@ -205,17 +223,10 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		
 		if((type_operation == G_TYPE_IDIV) && (strcmp(op2.string.str, "0") == 0))
 			return ZERO_DIV_ERR;
-
-		if(relation_operator){
-			generate_comparative_operations(type_operation);
-			*result_type = EXP_BOOLEAN;
-		}
-		else{
-			generate_mathemeatical_operations(type_operation);
-			*result_type = EXP_INTEGER;
-		}
-
+		
+		*result_type = EXP_INTEGER;
 	}
+
 	else if(op1.type == EXP_DOUBLE && op2.type == EXP_INTEGER){
 		
 		if (type_operation == G_TYPE_IDIV){
@@ -228,14 +239,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 		generate_stack_1_to_float();
 
-		if(relation_operator){
-			generate_comparative_operations(type_operation);
-			*result_type = EXP_BOOLEAN;
-		}
-		else{
-			generate_mathemeatical_operations(type_operation);
-			*result_type = EXP_DOUBLE;
-		}		
+		*result_type = EXP_DOUBLE;		
 	}
 
 	else if(op1.type == EXP_INTEGER && op2.type == EXP_DOUBLE){
@@ -250,14 +254,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		
 		generate_stack_2_to_float();
 
-		if(relation_operator){
-			generate_comparative_operations(type_operation);
-			*result_type = EXP_BOOLEAN;
-		}
-		else{
-			generate_mathemeatical_operations(type_operation);
-			*result_type = EXP_DOUBLE;
-		}	
+		*result_type = EXP_DOUBLE;	
 	}
 
 	else if (op1.type == EXP_DOUBLE && op2.type == EXP_DOUBLE){
@@ -270,36 +267,109 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			type_operation = G_TYPE_DIV;
 		}
 
-		if(relation_operator){
-			generate_comparative_operations(type_operation);
-			*result_type = EXP_BOOLEAN;
-		}
-		else{
-			generate_mathemeatical_operations(type_operation);
-			*result_type = EXP_DOUBLE;
-		}	
+		*result_type = EXP_DOUBLE;
 	}
 
 	else if(op1.type == EXP_STRING && op2.type == EXP_STRING){
-		if(relation_operator){
-			generate_comparative_operations(type_operation);
-			*result_type = EXP_BOOLEAN;
-		}
-		else{
-			generate_concat();
-			*result_type = EXP_STRING;
-		}
+
+		both_string = true;
+		*result_type = EXP_STRING;
 	}
-	else
+
+	else if(op1.type == EXP_IDENTIFIER && (op2.type >= EXP_INTEGER && op2.type <= EXP_STRING )){
+		
+		 if (declared_variable(op1) == SEM_ERR)
+		 	return SEM_ERR;
+
+		switch(op2.type){
+
+			case EXP_INTEGER:
+				// compare op1 with INTEGER (pokud je op1 FLOAT tak zmenit op2 na FLOAT)
+				generate_compare_variable_2_with_int();
+				break;
+
+			case EXP_DOUBLE:
+				// compare op1 with FLOAT a INTEGER(kdyztak predelat na FLOAT)
+				generate_compare_variable_2_with_float();
+				//*result_type = EXP_DOUBLE;
+				break;
+
+			case EXP_STRING:
+				//compare op1 with string
+				generate_compare_variable_2_with_string();
+				break;
+		}
+
+		*result_type = EXP_IDENTIFIER;
+	}
+
+	else if((op1.type >= EXP_INTEGER && op1.type <= EXP_STRING ) && op2.type == EXP_IDENTIFIER ){
+		
+		if (declared_variable(op2) == SEM_ERR)
+		 	return SEM_ERR;
+
+		switch(op1.type){
+
+			case EXP_INTEGER:
+				// compare op2 with INTEGER (pokud je op2 FLOAT tak zmenit op1 na FLOAT)
+				generate_compare_variable_1_with_int();
+				break;
+			
+			case EXP_DOUBLE:
+				// compare op2 with FLOAT a INTEGER(kdyztak predelat na FLOAT)
+				generate_compare_variable_1_with_float();
+				break;
+			
+			case EXP_STRING:
+				//compare op2 with string
+				generate_compare_variable_1_with_string();
+				break;			
+		}
+		
+		*result_type = EXP_IDENTIFIER;
+
+	}
+
+	else if(op1.type == EXP_IDENTIFIER && op2.type == EXP_IDENTIFIER){
+
+		if (declared_variable(op1) == SEM_ERR || declared_variable(op2) == SEM_ERR)
+		 	return SEM_ERR;
+
+		generate_compare_variable_with_variable();
+		*result_type = EXP_IDENTIFIER;
+
+	}
+
+	else{
 
 		if (equal_notequal){
 			generate_comparative_operations(type_operation);
 			*result_type = EXP_BOOLEAN;
+			return SEM_OK;
 		}
 		else
 			return SEM_RUNTIME_ERR;
+	}	
 
-	generate_pop_to_variable(actual_variable.str);
+	if(relation_operator){
+		generate_comparative_operations(type_operation);
+		*result_type = EXP_BOOLEAN;
+	}
+	else{
+		if(!both_string){
+			generate_mathemeatical_operations(type_operation);
+		}
+		else{
+			if(plus_string)
+				generate_concat();
+			else
+				return SEM_RUNTIME_ERR;
+
+		}
+		
+	}
+
+	//generate_pop_to_variable(actual_variable.str);
 	return SEM_OK;
 
 }

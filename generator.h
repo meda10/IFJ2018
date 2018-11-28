@@ -51,6 +51,16 @@ void generate_inputf();
 void generate_length();
 void generate_ord();
 
+void generate_compare_variable_1_with_float();
+void generate_compare_variable_1_with_int();
+void generate_compare_variable_1_with_string();
+
+void generate_compare_variable_2_with_float();
+void generate_compare_variable_2_with_int();
+void generate_compare_variable_2_with_string();
+
+void generate_compare_variable_with_variable();
+
 void generate_stack_1_to_float();
 void generate_stack_1_to_int();
 void generate_stack_2_to_float();
