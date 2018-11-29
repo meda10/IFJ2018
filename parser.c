@@ -530,5 +530,6 @@ int E(){
 	if(result != SYNTAX_OK)
 		return SYNTAX_ERR;
 
+	generate_pop_to_variable(actual_variable.str);
 	return SYNTAX_OK;
 }

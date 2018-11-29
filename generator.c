@@ -771,25 +771,48 @@ void generate_push(int type, char* name) {
  */
 void generate_mathemeatical_operations(int type){
     //data_conversion();
+    int current_label_number = get_new_label_number();
+    char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Mathematical operations\n");
     switch (type){
         case G_TYPE_PLUS:
             strAddCharArray(&instrukce,"ADDS\n");
             break;
+
         case G_TYPE_DIV:
-            //data_conversion_to_float();
+            strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+            
+            sprintf(str, "JUMPIFNEQ $IF_$%d_$FLOAT_$NOT_$ZERO GF@$$var_1 float@0x0p+0\n", current_label_number);
+            strAddCharArray(&instrukce,str);
+            
+            strAddCharArray(&instrukce,"EXIT int@9\n");
+
+            sprintf(str, "LABEL $IF_$%d_$FLOAT_$NOT_$ZERO\n",current_label_number);
+            strAddCharArray(&instrukce,str);
             strAddCharArray(&instrukce,"DIVS\n");
             break;
+
         case G_TYPE_IDIV:
-           // data_conversion_to_int();
+            strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+            
+            sprintf(str, "JUMPIFNEQ $IF_$%d_$INT_$NOT_$ZERO GF@$$var_1 int@0\n", current_label_number);
+            strAddCharArray(&instrukce,str);
+            
+            strAddCharArray(&instrukce,"EXIT int@9\n");
+
+            sprintf(str, "LABEL $IF_$%d_$INT_$NOT_$ZERO\n",current_label_number);
+            strAddCharArray(&instrukce,str);
             strAddCharArray(&instrukce,"IDIVS\n");
             break;
+
         case G_TYPE_MINUS:
             strAddCharArray(&instrukce,"SUBS\n");
             break;
+
         case G_TYPE_MUL:
             strAddCharArray(&instrukce,"MULS\n");
             break;
+            
         default:
             //todo
             break;

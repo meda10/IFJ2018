@@ -21,7 +21,6 @@ extern bool read_token;
 extern token_t *next_token;
 extern BTNode current_LTS;
 extern BTNode *root_GTS;
-//extern string actual_variable;
 
 tPrec prec_table[ PREC_TABE_SIZE ][ PREC_TABE_SIZE ] = 
 //       */   |	   +-	|< <= > >=| == !=  |    (    |    )    |   ID    |   $
@@ -173,9 +172,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 	int type_operation;
 	bool relation_operator = false;
-	bool equal_notequal = false;
-	bool both_string = false;
-	bool plus_string = false;
+	bool is_string = false;
 
 	switch(operator){
 		case MUL_S:
@@ -186,7 +183,6 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			break;
 		case PLUS_S:
 			type_operation = G_TYPE_PLUS;
-			plus_string = true;
 			break;
 		case MINUS_S:		
 			type_operation = G_TYPE_MINUS;
@@ -209,33 +205,22 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			break;
 		case EQUAL_S:
 			type_operation = G_TYPE_EQUAL;
-			equal_notequal = true;
 			relation_operator = true;
 			break;
 		case NOT_EQUAL_S:
 			type_operation = G_TYPE_NOT_EQUAL;
-			equal_notequal = true;
 			relation_operator = true;
 			break;
 		}
 	
 	if(op1.type == EXP_INTEGER && op2.type == EXP_INTEGER){
-		
-		if((type_operation == G_TYPE_IDIV) && (strcmp(op2.string.str, "0") == 0))
-			return ZERO_DIV_ERR;
-		
 		*result_type = EXP_INTEGER;
 	}
 
 	else if(op1.type == EXP_DOUBLE && op2.type == EXP_INTEGER){
 		
-		if (type_operation == G_TYPE_IDIV){
-
-			if(strcmp(op2.string.str, "0") == 0)
-				return ZERO_DIV_ERR;
-
+		if (type_operation == G_TYPE_IDIV)
 			type_operation = G_TYPE_DIV;
-		}
 
 		generate_stack_1_to_float();
 
@@ -244,13 +229,8 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 	else if(op1.type == EXP_INTEGER && op2.type == EXP_DOUBLE){
 		
-		if (type_operation == G_TYPE_IDIV){
-			
-			if(strcmp(op2.string.str, "0.0") == 0)
-				return ZERO_DIV_ERR;
-			
+		if (type_operation == G_TYPE_IDIV)
 			type_operation = G_TYPE_DIV;
-		}
 		
 		generate_stack_2_to_float();
 
@@ -259,20 +239,15 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 	else if (op1.type == EXP_DOUBLE && op2.type == EXP_DOUBLE){
 
-		if (type_operation == G_TYPE_IDIV){
-			
-			if(strcmp(op2.string.str, "0.0") == 0)
-				return ZERO_DIV_ERR;
-			
+		if (type_operation == G_TYPE_IDIV)
 			type_operation = G_TYPE_DIV;
-		}
 
 		*result_type = EXP_DOUBLE;
 	}
 
 	else if(op1.type == EXP_STRING && op2.type == EXP_STRING){
 
-		both_string = true;
+		is_string = true;
 		*result_type = EXP_STRING;
 	}
 
@@ -296,6 +271,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 			case EXP_STRING:
 				//compare op1 with string
+				is_string = true;
 				generate_compare_variable_2_with_string();
 				break;
 		}
@@ -322,6 +298,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 			
 			case EXP_STRING:
 				//compare op2 with string
+				is_string = true;
 				generate_compare_variable_1_with_string();
 				break;			
 		}
@@ -341,8 +318,8 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 	}
 
 	else{
-
-		if (equal_notequal){
+		// == nebo != se muze pouzit i na ostatni typy
+		if ((type_operation == G_TYPE_EQUAL) || (type_operation == G_TYPE_NOT_EQUAL)){
 			generate_comparative_operations(type_operation);
 			*result_type = EXP_BOOLEAN;
 			return SEM_OK;
@@ -356,11 +333,11 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		*result_type = EXP_BOOLEAN;
 	}
 	else{
-		if(!both_string){
+		if(!is_string){
 			generate_mathemeatical_operations(type_operation);
 		}
 		else{
-			if(plus_string)
+			if(type_operation == G_TYPE_PLUS)
 				generate_concat();
 			else
 				return SEM_RUNTIME_ERR;
@@ -369,7 +346,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		
 	}
 
-	//generate_pop_to_variable(actual_variable.str);
+
 	return SEM_OK;
 
 }
@@ -558,7 +535,7 @@ int rule(stack_t* s, item_stack_t* start_rule){
 
 				int result_type;
 
-				if ((err_sem =semantic(rule->next->next->token, rule->token, operator, &result_type)) != SEM_OK ){
+				if ((err_sem = semantic(rule->next->next->token, rule->token, operator, &result_type)) != SEM_OK ){
 					return err_sem;
 				}
 
