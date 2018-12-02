@@ -148,8 +148,11 @@ void generate_length() {
 }
 
 
-
+/**
+ * Generuje funkci ord
+ */
 void generate_ord(){
+    strAddCharArray(&instrukce,"\n#ORD\n");
     strAddCharArray(&instrukce,"LABEL $$FUN_ORD_START\n");
     strAddCharArray(&instrukce,"PUSHFRAME\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
@@ -179,6 +182,60 @@ void generate_ord(){
 }
 
 /**
+ * Generuje funkci substr
+ */
+void generate_substr(){
+    strAddCharArray(&instrukce,"\n#SUBSTR\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_SUBSTR_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
+    strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$pom\n");
+    strAddCharArray(&instrukce,"STRLEN LF@$$pom LF@V_0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@$$pom int@0\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$pom_1\n");
+    strAddCharArray(&instrukce,"LT LF@$$pom_1 LF@V_1 int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@$$pom_1 bool@true\n");
+    strAddCharArray(&instrukce,"LABEL $LABEL_A\n");
+    strAddCharArray(&instrukce,"CREATEFRAME\n");
+    strAddCharArray(&instrukce,"DEFVAR TF@$$pom_2\n");
+    strAddCharArray(&instrukce,"DEFVAR TF@$$pom_3\n");
+    strAddCharArray(&instrukce,"GETCHAR TF@$$pom_3 LF@V_0 LF@V_1\n");
+    strAddCharArray(&instrukce,"ADD LF@V_1 LF@V_1 int@1\n");
+    strAddCharArray(&instrukce,"CONCAT LF@$$FUN_RET LF@$$FUN_RET TF@$$pom_3\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@V_2 int@0\n");
+    strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
+    strAddCharArray(&instrukce,"LT TF@$$pom_2 LF@V_1 LF@$$pom\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_A TF@$$pom_2 bool@true\n");
+    strAddCharArray(&instrukce,"LABEL $LABEL_EQUAL\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+/**
+ * Generuje funkci chr
+ */
+void generate_chr(){
+    strAddCharArray(&instrukce,"\n#SUBSTR\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_CHR_START\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET string@\n");
+    strAddCharArray(&instrukce,"DEFVAR LF@RAN\n");
+    strAddCharArray(&instrukce,"LT LF@RAN LF@V_0 int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"GT LF@RAN LF@V_0 int@255\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"INT2CHAR LF@$$FUN_RET LF@V_0\n");
+    strAddCharArray(&instrukce,"LABEL $$FUN_CHR_RETURN\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+}
+
+
+/**
  * Deklarace proměné
  * @param type - typ proměné (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE)
  * @param name - jmeno promene
@@ -202,7 +259,6 @@ void generate_start(){
     if_end_num = 0;
     arr_free_pos = 0;
     inScope = false;
-
     strAddCharArray(&instrukce,".IFJcode18\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
@@ -211,6 +267,16 @@ void generate_start(){
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_4\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$result\n");
     strAddCharArray(&instrukce,"JUMP $$main\n");
+
+    generate_substr();
+    generate_ord();
+    generate_length();
+    generate_inputf();
+    generate_inputi();
+    generate_inputs();
+    generate_print();
+    generate_chr();
+
 }
 
 /**

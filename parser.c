@@ -500,7 +500,7 @@ int NEXT_TERM(){
 			if (temp_node == NULL)
 				errors_exit(SEMANTIC_ERROR_OTHER, "undefined function call.");
 			
-			printf("actual param %s\n", actual_params[0]);
+			//printf("actual param %s\n", actual_params[0]);
 			//check if number of params for print function is at least one
 			if ((strcmp(actual_function.str, "print") == 0) && (actual_params_number >= temp_node->data.params_number)){
 				;
