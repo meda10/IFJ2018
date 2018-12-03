@@ -122,7 +122,7 @@ int B_tree_insert(BTNode *root, struct Values data){
                 tmp->R_ptr = new_node;
             }
         }
-        //printf("Created Node %s, Left: %s Right: %s\n", new_node->data.name,new_node->L_ptr, new_node->R_ptr);
+        //printf("Created Node %s, Left: %s Right: %s\n", new_node->data.name->str,new_node->L_ptr, new_node->R_ptr);
     }
     return RETURN_OK;
 }

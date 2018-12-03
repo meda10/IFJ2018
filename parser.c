@@ -43,8 +43,6 @@ int parse(){
 
 int PROGRAM(){
 	int result;
-	// printf("PROGRAM\n");
-	// print_token(token);
 	switch(token->type){
 		case DEF:
 		case IF:
@@ -72,7 +70,6 @@ int PROGRAM(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;
 			
-			//get_next_token(token);
 			return PROGRAM();
 		case ENDOFFILE:
 			return SYNTAX_OK;
@@ -81,8 +78,6 @@ int PROGRAM(){
 }
 
 int FUNC_DEF(){
-	// printf("FUNC_DEF\n");
-	// print_token(token);
 	int result;
 	switch(token->type){
 		case DEF:									//4.<FUNC_DEF> -> def ID (<PARAMS>) EOL <STL> end
@@ -90,14 +85,10 @@ int FUNC_DEF(){
 			if (token->type != IDENTIFIER) return SYNTAX_ERR;
 
 			current_LTS = B_tree_search_local_table(*root_GTS, token->string.str);
-			//B_tree_walk(current_LTS);
 
 			//check if function's name differ from variables' in main body
 			temp_node = B_tree_search(*main_local_TS, token->string.str);
 			if (temp_node != NULL){
-				// printf("Main LTS content\n");
-				// B_tree_walk(*main_local_TS);
-				// printf("\n");
 				errors_exit(SEMANTIC_ERROR_UNDEFINED_VARIABLE, "undefined variable.");
 			}
 
@@ -132,7 +123,6 @@ int FUNC_DEF(){
 		case WHILE:
 		case IDENTIFIER:
 		case STRING_TYPE:
-		//case BOOL_TYPE:
 		case INTEGER_TYPE:
 		case DOUBLE_TYPE:
 		case NIL:
@@ -154,8 +144,6 @@ int FUNC_DEF(){
 }
 
 int PARAMS(){
-	// printf("PARAMS\n");
-	// print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 			get_next_token(token);					//6. <PARAMS> -> ID <NEXT_PARAM>
@@ -167,8 +155,6 @@ int PARAMS(){
 }
 
 int NEXT_PARAM(){
-	// printf("NEXT_PARAM\n");
-	// print_token(token);
 	switch(token->type){
 		case COMMA:
 			get_next_token(token);
@@ -183,8 +169,6 @@ int NEXT_PARAM(){
 }
 
 int STL(){
-	// printf("STL\n");
-	// print_token(token);
 	int result;
 	switch(token->type){
 		case DEF:
@@ -196,7 +180,6 @@ int STL(){
 		case WHILE:
 		case IDENTIFIER:
 		case STRING_TYPE:
-		//case BOOL_TYPE:
 		case INTEGER_TYPE:
 		case DOUBLE_TYPE:
 		case NIL:
@@ -220,8 +203,6 @@ int STL(){
 }
 
 int S(){
-	// printf("S\n");
-	// print_token(token);
 	int result;
 	switch(token->type){
 		case IF:									//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
@@ -298,8 +279,6 @@ int S(){
 }
 
 int ASS(){
-	// printf("ASS\n");
-	// print_token(token);
 	switch(token->type){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
@@ -334,16 +313,12 @@ int ASS(){
 				//if not, insert it to current function LTS 
 				if (temp_node == NULL){
 					create_node(&current_LTS, token->string.str, 0, 0, NULL, false, true, false, true, &current_LTS);
-					// printf("Current LTS content:\n");
-					// B_tree_walk(current_LTS);
-					// printf("\n");
 				}
 
 				variable_declare(token->string.str);
 				strFree(&actual_variable);
 				strInit(&actual_variable);
 				strAddCharArray(&actual_variable, token->string.str);
-				//TODO generate_variable_assignment nil@nil
 
 				read_token = false;
 				get_next_token(token);
@@ -356,8 +331,6 @@ int ASS(){
 
 
 int VALUE(){
-	// printf("VALUE\n");
-	// print_token(token);
 	switch(token->type){
 		case STRING_TYPE:
 		case DOUBLE_TYPE:
@@ -374,13 +347,11 @@ int VALUE(){
 		case SUBSTR:
 		case ORD:
 		case CHR:
-			strAddCharArray(&instrukce,"PUSHFRAME\n");
 			return FUNC_CALL();
 		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
 			//check if it is a function
 			temp_node = B_tree_search(*root_GTS, token->string.str);
 			if (temp_node != NULL && temp_node->data.is_function == true){
-				//strAddCharArray(&instrukce,"PUSHFRAME\n");
 				return FUNC_CALL();
 			}else{
 				return E();		
@@ -390,8 +361,6 @@ int VALUE(){
 }
 
 int FUNC_CALL(){
-	// printf("FUNC_CALL\n");
-	// print_token(token);
 	switch(token->type){
 		case INPUTS:
 		case INPUTI:
@@ -412,14 +381,13 @@ int FUNC_CALL(){
 			}else
 				get_next_token(token);
 			
+			generate_TF_for_function_args();
 			return INPUT_PARAMS();
 	}
 	return SYNTAX_ERR;
 }
 
 int INPUT_PARAMS(){
-	// printf("INPUT_PARAMS\n");
-	// print_token(token);
 	int result;
 	switch(token->type){
 		case IF:
@@ -435,8 +403,9 @@ int INPUT_PARAMS(){
 			}
 			if (temp_node->data.params_number != 0){
 				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
-
 			}
+
+			generate_function_call(actual_function.str);
 			return SYNTAX_OK;
 		case IDENTIFIER:
 		case STRING_TYPE:
@@ -461,17 +430,18 @@ int INPUT_PARAMS(){
 }
 
 int TERM(){
-	// printf("TERM\n");
-	// print_token(token);
 	switch(token->type){
 		case IDENTIFIER:
 		case STRING_TYPE:
 		case INTEGER_TYPE:
 		case DOUBLE_TYPE:
-		//case BOOL_TYPE:
 		case NIL:						//25. - 30.
 			actual_params[actual_params_number] = (char *) malloc(token->string.length + 1 * sizeof(char));
             strcpy(actual_params[actual_params_number], token->string.str);
+
+			//printf("TOKEN:%s TYPE: %d\n", token->string.str, token->type);
+			generate_assign_arguments_to_function(token->type, actual_params_number, actual_params[actual_params_number]);
+			
 			actual_params_number++;
 			get_next_token(token);
 			return SYNTAX_OK;
@@ -480,8 +450,6 @@ int TERM(){
 }
 
 int NEXT_TERM(){
-	// printf("NEXT_TERM\n");
-	// print_token(token);
 	int result;
 	switch(token->type){
 		case IF:
@@ -499,18 +467,18 @@ int NEXT_TERM(){
 			temp_node = B_tree_search(*root_GTS, actual_function.str);
 			if (temp_node == NULL)
 				errors_exit(SEMANTIC_ERROR_OTHER, "undefined function call.");
-			
-			//printf("actual param %s\n", actual_params[0]);
 			//check if number of params for print function is at least one
 			if ((strcmp(actual_function.str, "print") == 0) && (actual_params_number >= temp_node->data.params_number)){
 				;
 			} else if(temp_node->data.params_number != actual_params_number){
 				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
-			} else{
-				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
-			}
+			} 
+			// else{
+			// 	printf("GG\n");
+			// 	errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
+			// }
 
-
+			generate_function_call(actual_function.str);
 			return SYNTAX_OK;
 		case COMMA:								//24. <NEXT_TERM> -> , <TERM> <NEXT_TERM>	
 			get_next_token(token);
@@ -523,8 +491,6 @@ int NEXT_TERM(){
 }
 
 int E(){
-	// printf("E\n");
-	// print_token(token);
 	int result;
 	result = precedence();
 	if(result != SYNTAX_OK)

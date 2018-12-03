@@ -8,7 +8,6 @@
 #include "symtable.h"
 
 
-
 int get_new_label_number(){
     return ++label_number;
 }
@@ -24,20 +23,12 @@ char* get_frame() {
 
 void generate_print(){
     strAddCharArray(&instrukce,"\n#PRINT\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    generate_function_start("PRINT");
 
     strAddCharArray(&instrukce,"WRITE LF@V_0\n");
     strAddCharArray(&instrukce,"JUMP $$FUN_PRINT_END\n");
 
-    //end
-    strAddCharArray(&instrukce,"LABEL $$FUN_PRINT_END\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("PRINT");
 }
 
 
@@ -46,11 +37,7 @@ void generate_print(){
  */
 void generate_inputs() {
     strAddCharArray(&instrukce,"\n#INPUTS\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTS_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    generate_function_start("INPUTS");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET string\n");
 
@@ -63,9 +50,7 @@ void generate_inputs() {
     strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
     strAddCharArray(&instrukce,"JUMP $$FUN_INPUTS_END\n");
 
-    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTS_END\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("INPUTS");
 }
 
 
@@ -73,13 +58,8 @@ void generate_inputs() {
  * Generuje funkci inputi
  */
 void generate_inputi() {
-
     strAddCharArray(&instrukce,"\n#INPUTI\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTI_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    generate_function_start("INPUTI");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET int\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTI_FAIL LF@$$FUN_RET int@0\n");
@@ -89,9 +69,7 @@ void generate_inputi() {
     strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET int@0\n");
     strAddCharArray(&instrukce,"JUMP $$FUN_INPUTI_END\n");
 
-    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTI_END\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("INPUTI");
 }
 
 /**
@@ -99,11 +77,7 @@ void generate_inputi() {
  */
 void generate_inputf() {
     strAddCharArray(&instrukce,"\n#INPUTF\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTF_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    generate_function_start("INPUTF");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET float\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTF_FAIL LF@$$FUN_RET float@0x0p+0\n");
@@ -113,9 +87,7 @@ void generate_inputf() {
     strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET float@0x0p+0\n");
     strAddCharArray(&instrukce,"JUMP $$FUN_INPUTF_END\n");
 
-    strAddCharArray(&instrukce,"LABEL $$FUN_INPUTF_END\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("INPUTF");
 }
 
 /**
@@ -123,11 +95,7 @@ void generate_inputf() {
  */
 void generate_length() {
     strAddCharArray(&instrukce,"\n#LENGTH\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
-
+    generate_function_start("LENGTH");
 
     strAddCharArray(&instrukce,"TYPE GF@$$var_1 LF@V_0\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@string\n");
@@ -142,9 +110,7 @@ void generate_length() {
     strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_FAIL\n");
     strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET int@0\n");
 
-    strAddCharArray(&instrukce,"LABEL $$FUN_LENGTH_END\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("LENGTH");
 }
 
 
@@ -153,10 +119,7 @@ void generate_length() {
  */
 void generate_ord(){
     strAddCharArray(&instrukce,"\n#ORD\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_ORD_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    generate_function_start("ORD");
 
     strAddCharArray(&instrukce,"STRLEN LF@$$FUN_RET LF@V_0\n");
     strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_1 LF@$$FUN_RET\n");
@@ -169,16 +132,11 @@ void generate_ord(){
     strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"STRI2INT LF@$$FUN_RET LF@V_0 LF@V_1\n");
 
-    strAddCharArray(&instrukce,"LABEL $$FUN_ORD_END\n");
-
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("ORD");
 
     strAddCharArray(&instrukce,"LABEL $$FUN_ORD_FAIL\n");
     strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
     strAddCharArray(&instrukce,"JUMP $$FUN_ORD_END\n");
-
-
 }
 
 /**
@@ -238,12 +196,15 @@ void generate_chr(){
 /**
  * Deklarace proměné
  * @param type - typ proměné (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE)
+ * Deklarace a pocatecni inicializace proměnné
  * @param name - jmeno promene
  */
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Variable declare\n");
     sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
+    strAddCharArray(&instrukce,str);
+    sprintf(str, "MOVE %s@%s nil@nil\n", get_frame(), name);
     strAddCharArray(&instrukce,str);
 }
 
@@ -1149,15 +1110,15 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
     sprintf(str, "DEFVAR TF@V_%d\n",num);
     strAddCharArray(&instrukce,str);
     switch (expresion_type) {
-        case INT_E:
+        case INTEGER_TYPE:
             sprintf(str, "MOVE TF@V_%d int@%d\n", num, string_To_Int(value));
             strAddCharArray(&instrukce,str); //todo %d
             break;
-        case DOUBLE_E:
+        case DOUBLE_TYPE:
             sprintf(str, "MOVE TF@V_%d float@%a\n", num, string_to_Double(value));
             strAddCharArray(&instrukce,str);
             break;
-        case STRING_E:
+        case STRING_TYPE:
             strInit(&s);
             for (int i = 0; i < (int)strlen(value); ++i) {
                 char c = value[i];
@@ -1177,48 +1138,9 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
             strAddCharArray(&instrukce,str);
             free(s.str);
             break;
-        case VARIABLE_E:
+        case IDENTIFIER:
             sprintf(str, "MOVE TF@V_%d %s@%s\n", num, get_frame(),value);
             strAddCharArray(&instrukce,str);
-
-/*
-            sprintf(str, "PUSHS TF@V_%d\n",num);
-            strAddCharArray(&instrukce,str);
-
-            strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
-            strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
-
-            int current_number = get_new_label_number();
-
-            sprintf(str, "JUMPIFEQ %%L_NUM_%d_STR GF@$$var_1 string@string\n", current_number);
-            strAddCharArray(&instrukce, str);
-            sprintf(str, "JUMPIFEQ %%L_NUM_%d_INT GF@$$var_1 string@int\n", current_number);
-            strAddCharArray(&instrukce, str);
-            sprintf(str, "JUMPIFEQ %%L_NUM_%d_FLOAT GF@$$var_1 string@float\n", current_number);
-            strAddCharArray(&instrukce, str);
-            sprintf(str, "JUMP %%L_NUM_%d_END\n", current_number);
-            strAddCharArray(&instrukce, str);
-            //float
-            sprintf(str, "LABEL %%L_NUM_%d_FLOAT\n", current_number);
-            strAddCharArray(&instrukce, str);
-
-            sprintf(str, "JUMP %%L_NUM_%d_END\n", current_number);
-            strAddCharArray(&instrukce, str);
-
-            //int
-            sprintf(str, "LABEL %%L_NUM_%d_INT\n", current_number);
-            strAddCharArray(&instrukce, str);
-
-
-            //str
-            sprintf(str, "LABEL %%L_NUM_%d_STR\n", current_number);
-            strAddCharArray(&instrukce, str);
-
-
-            sprintf(str, "LABEL %%L_NUM_%d_END\n", current_number);
-            strAddCharArray(&instrukce, str);
-            strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
-*/
         default:
             break;
     }
@@ -1244,6 +1166,11 @@ void generate_read_function_params(int num, char *name){
  */
 void generate_function_call(char* name){
     char str[MAX_INSTRUCTION_LEN];
+    char *upperName = name;
+    while (*upperName) {
+        *upperName = toupper((unsigned char) *upperName);
+        upperName++;
+    }
     sprintf(str, "CALL $$FUN_%s_START\n", name);
     strAddCharArray(&instrukce,str);
 }
@@ -1252,7 +1179,9 @@ void generate_function_call(char* name){
  *
  */
 void generate_TF_for_function_args(){
-    strAddCharArray(&instrukce,"CREATEFRAME\n");
+    if (inScope){
+        strAddCharArray(&instrukce,"CREATEFRAME\n");
+    }
 }
 
 /**

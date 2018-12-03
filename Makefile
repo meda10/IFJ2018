@@ -25,6 +25,29 @@ $(TARGET): $(OBJECTS)
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	@$(CC) $(CFLAGS) -c $< -o $@
 
+.PHONY: test
+test: $(TARGET) run_tests
+
+$(TARGET): $(OBJECTS)
+	@$(BLUE)
+	@echo "[ Building project ]"
+	@$(RESET)
+	@$(LINKER) $(OBJECTS) $(LFLAGS) -o $@
+	@$(GREEN)
+	@echo " -> Binary file \"$(TARGET)\" created"
+	@$(RESET)
+
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: run_tests
+run_tests:
+	@$(BLUE)
+	@echo "[ Preparing tests ]"
+	@$(RESET)
+	@cd tests; bash run_tests.sh
+	@$(RESET)
+
 .PHONY: clean
 clean:
 	@$(rm) $(OBJECTS)
