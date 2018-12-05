@@ -16,6 +16,7 @@ token_t *token, *next_token;
 bool read_token;
 bool return_to_var;
 bool if_expr, while_expr;
+bool in_else;
 BTNode current_LTS;
 extern BTNode *root_GTS;
 extern BTNode *main_local_TS;
@@ -38,7 +39,8 @@ int parse(){
   return_to_var = false;
   if_expr = false;
   if_else_num = 0;
-  while_expr = false;	
+  while_expr = false;
+  in_else = false;	
   current_LTS = *main_local_TS; //set current LTS to main body of program
   
   if (get_next_token(token) == RET_ERR)
@@ -231,6 +233,7 @@ int S(){
 			generate_jump_to_if_else_end(if_else_num);
 			if (token->type != ELSE) return SYNTAX_ERR;
 			generate_else(if_else_num);
+			in_else = true;
 
 			get_next_token(token);
 			if (token->type != EOL) return SYNTAX_ERR;
@@ -241,7 +244,7 @@ int S(){
 
 			if (token->type != END) return SYNTAX_ERR;
 			generate_if_else_end(if_else_num);
-
+			in_else = false;
 			get_next_token(token); 
 			return SYNTAX_OK;
 		case WHILE:										//13. <S> -> while <E> do EOL <STL> end
@@ -326,6 +329,8 @@ int ASS(){
 				if (temp_node == NULL){
 					create_node(&current_LTS, token->string.str, 0, 0, NULL, false, true, false, true, &current_LTS);
 					variable_declare(token->string.str);				
+				}else if(in_else){
+					variable_declare(token->string.str);	
 				}
 				strFree(&actual_variable);
 				strInit(&actual_variable);
