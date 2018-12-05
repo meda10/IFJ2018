@@ -20,7 +20,7 @@ BTNode current_LTS;
 extern BTNode *root_GTS;
 extern BTNode *main_local_TS;
 extern BTNode temp_node;
-extern int label_number;
+int if_else_num;
 string actual_variable;
 string actual_function;
 char** actual_params;
@@ -37,6 +37,7 @@ int parse(){
   actual_params_number = 0;
   return_to_var = false;
   if_expr = false;
+  if_else_num = 0;
   while_expr = false;	
   current_LTS = *main_local_TS; //set current LTS to main body of program
   
@@ -213,6 +214,7 @@ int S(){
 	switch(token->type){
 		case IF:									//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
 			get_next_token(token);
+			if_else_num++;
 			if_expr = true;	//indicator for precedence
 			result = E();	//precedencni			
 			if (result != SYNTAX_OK) return result;
@@ -227,7 +229,7 @@ int S(){
 			if (result != SYNTAX_OK) return result;
 
 			if (token->type != ELSE) return SYNTAX_ERR;
-			generate_else(label_number);
+			generate_else(if_else_num);
 
 			get_next_token(token);
 			if (token->type != EOL) return SYNTAX_ERR;
@@ -527,6 +529,7 @@ int E(){
 	return_to_var = false;
 	if(if_expr){
 		generate_pop_to_variable("$$result");
+		generate_if(if_else_num);
 		if_expr = false;
 	}else{
 		generate_pop_to_variable(actual_variable.str);		
