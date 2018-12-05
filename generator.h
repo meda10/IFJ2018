@@ -19,15 +19,16 @@
 #define G_TYPE_MINUS 2
 #define G_TYPE_DIV 3
 #define G_TYPE_IDIV 4
-#define G_TYPE_MUL 5
+#define G_VARIABLE_DIV 5
+#define G_TYPE_MUL 6
 
 //Porovnavani
-#define G_TYPE_LESS 6
-#define G_TYPE_LESS_OR_EQUAL 7
-#define G_TYPE_GREATER 8
-#define G_TYPE_GREATER_OR_EQUAL 9
-#define G_TYPE_EQUAL 10
-#define G_TYPE_NOT_EQUAL 11
+#define G_TYPE_LESS 7
+#define G_TYPE_LESS_OR_EQUAL 8
+#define G_TYPE_GREATER 9
+#define G_TYPE_GREATER_OR_EQUAL 10
+#define G_TYPE_EQUAL 11
+#define G_TYPE_NOT_EQUAL 12
 
 #define MAX_INSTRUCTION_LEN 150
 

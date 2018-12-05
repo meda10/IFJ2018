@@ -261,6 +261,9 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 	}
 
 	else if(op1.type == EXP_IDENTIFIER && (op2.type >= EXP_INTEGER && op2.type <= EXP_STRING )){
+
+		if (type_operation == G_TYPE_IDIV)
+			type_operation = G_VARIABLE_DIV;
 		
 		 if (declared_variable(op1) == SEM_ERR)
 		 	return SEM_ERR;
@@ -291,6 +294,9 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
 	else if((op1.type >= EXP_INTEGER && op1.type <= EXP_STRING ) && op2.type == EXP_IDENTIFIER ){
 		
+		if (type_operation == G_TYPE_IDIV)
+			type_operation = G_VARIABLE_DIV;
+		
 		if (declared_variable(op2) == SEM_ERR)
 		 	return SEM_ERR;
 
@@ -320,6 +326,9 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 	}
 
 	else if(op1.type == EXP_IDENTIFIER && op2.type == EXP_IDENTIFIER){
+
+		if (type_operation == G_TYPE_IDIV)
+					type_operation = G_VARIABLE_DIV;
 
 		if (declared_variable(op1) == SEM_ERR || declared_variable(op2) == SEM_ERR)
 		 	return SEM_ERR;

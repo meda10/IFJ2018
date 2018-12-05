@@ -478,7 +478,7 @@ int generate_compare_variable_with_variable(int operator_type){
 
    switch(operator_type){
         case G_TYPE_MUL:
-        case G_TYPE_IDIV:
+        case G_VARIABLE_DIV:
         case G_TYPE_MINUS:       
 
             sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
@@ -688,6 +688,27 @@ void generate_mathemeatical_operations(int type , int label_number){
             strAddCharArray(&instrukce,str);
             strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
             strAddCharArray(&instrukce,"IDIVS\n");
+            break;
+
+        case G_VARIABLE_DIV:
+            strAddCharArray(&instrukce,"POPS GF@$$var_1\n");
+            strAddCharArray(&instrukce,"TYPE GF@$$var_3 GF@$$var_1\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+            sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$FLOAT GF@$$var_3 string@float\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+           
+            generate_mathemeatical_operations(G_TYPE_IDIV , 0);
+
+            sprintf(str, "JUMP $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$FLOAT \n",current_label_number);
+            strAddCharArray(&instrukce,str);
+
+            generate_mathemeatical_operations(G_TYPE_DIV , 0);
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
             break;
 
         case G_TYPE_MINUS:
