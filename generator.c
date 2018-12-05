@@ -134,28 +134,43 @@ void generate_ord(){
  * Generuje funkci substr
  */
 void generate_substr(){
-    strAddCharArray(&instrukce,"\n#SUBSTR\n");
+/*
+    strAddCharArray(&instrukce,"LT GF@$$var_1 LF@V_0 int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_substr_RETURN_NIL GF@$$var_1 bool@true\n");
+    strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_0 int@255\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_chr_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_substr_A\n");
+
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_substr_RETURN_NIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
+*/
+    strAddCharArray(&instrukce,"\n#Substr\n");
     generate_function_start("substr");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET string@\n");
     strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom\n");
     strAddCharArray(&instrukce,"STRLEN LF@$$pom LF@V_0\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@$$pom int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_EQ LF@$$pom int@0\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom_1\n");
     strAddCharArray(&instrukce,"LT LF@$$pom_1 LF@V_1 int@0\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@$$pom_1 bool@true\n");
-    strAddCharArray(&instrukce,"LABEL $LABEL_A\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_EQ LF@$$pom_1 bool@true\n");
+    strAddCharArray(&instrukce,"LABEL SUBSTR_AG\n");
     strAddCharArray(&instrukce,"CREATEFRAME\n");
     strAddCharArray(&instrukce,"DEFVAR TF@$$pom_2\n");
     strAddCharArray(&instrukce,"DEFVAR TF@$$pom_3\n");
     strAddCharArray(&instrukce,"GETCHAR TF@$$pom_3 LF@V_0 LF@V_1\n");
     strAddCharArray(&instrukce,"ADD LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"CONCAT LF@$$FUN_RET LF@$$FUN_RET TF@$$pom_3\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@V_2 int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_EQ LF@V_2 int@0\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"LT TF@$$pom_2 LF@V_1 LF@$$pom\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_A TF@$$pom_2 bool@true\n");
-    strAddCharArray(&instrukce,"LABEL $LABEL_EQUAL\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_AG TF@$$pom_2 bool@true\n");
+    strAddCharArray(&instrukce,"LABEL SUBSTR_EQ\n");
     strAddCharArray(&instrukce,"POPFRAME\n");
     strAddCharArray(&instrukce,"RETURN\n");
 }
