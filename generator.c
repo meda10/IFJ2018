@@ -37,7 +37,7 @@ void generate_print(){
  */
 void generate_inputs() {
     strAddCharArray(&instrukce,"\n#INPUTS\n");
-    generate_function_start("INPUTS");
+    generate_function_start("inputs");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET string\n");
 
@@ -59,7 +59,7 @@ void generate_inputs() {
  */
 void generate_inputi() {
     strAddCharArray(&instrukce,"\n#INPUTI\n");
-    generate_function_start("INPUTI");
+    generate_function_start("inputi");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET int\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTI_FAIL LF@$$FUN_RET int@0\n");
@@ -77,7 +77,7 @@ void generate_inputi() {
  */
 void generate_inputf() {
     strAddCharArray(&instrukce,"\n#INPUTF\n");
-    generate_function_start("INPUTF");
+    generate_function_start("inputf");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET float\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTF_FAIL LF@$$FUN_RET float@0x0p+0\n");
@@ -95,7 +95,7 @@ void generate_inputf() {
  */
 void generate_length() {
     strAddCharArray(&instrukce,"\n#LENGTH\n");
-    generate_function_start("LENGTH");
+    generate_function_start("length");
 
     strAddCharArray(&instrukce,"TYPE GF@$$var_1 LF@V_0\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@string\n");
@@ -119,7 +119,7 @@ void generate_length() {
  */
 void generate_ord(){
     strAddCharArray(&instrukce,"\n#ORD\n");
-    generate_function_start("ORD");
+    generate_function_start("ord");
 
     strAddCharArray(&instrukce,"STRLEN LF@$$FUN_RET LF@V_0\n");
     strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_1 LF@$$FUN_RET\n");
@@ -144,7 +144,7 @@ void generate_ord(){
  */
 void generate_substr(){
     strAddCharArray(&instrukce,"\n#SUBSTR\n");
-    generate_function_start("SUBSTR");
+    generate_function_start("substr");
     strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom\n");
@@ -174,7 +174,7 @@ void generate_substr(){
  */
 void generate_chr(){
     strAddCharArray(&instrukce,"\n#CHR\n");
-    generate_function_start("CHR");
+    generate_function_start("chr");
 
     strAddCharArray(&instrukce,"DEFVAR LF@RAN\n");
     strAddCharArray(&instrukce,"LT LF@RAN LF@V_0 int@0\n");
@@ -183,8 +183,6 @@ void generate_chr(){
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
     strAddCharArray(&instrukce,"INT2CHAR LF@$$FUN_RET LF@V_0\n");
     generate_function_end("CHR");
-    // strAddCharArray(&instrukce,"LABEL $$FUN_CHR_RETURN\n");
-    // strAddCharArray(&instrukce,"EXIT int@58\n");
 }
 
 
@@ -194,11 +192,6 @@ void generate_chr(){
  */
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
-    // strAddCharArray(&instrukce,"# Variable declare\n");
-    // sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
-    // strAddCharArray(&instrukce,str);
-    // sprintf(str, "MOVE %s@%s nil@nil\n", get_frame(), name);
-    // strAddCharArray(&instrukce,str);
     strAddCharArray(&instrukce,"# Variable declare\n");
     sprintf(str, "DEFVAR LF@%s\n", name);
     strAddCharArray(&instrukce,str);
@@ -1136,7 +1129,6 @@ void generate_TF_for_function_args(){
  */
 void generate_function_return_value_assign_to_var(char *name){
     char str[MAX_INSTRUCTION_LEN];
-    //sprintf(str, "MOVE %s@%s TF@$$FUN_RET\n", get_frame(),name);
     sprintf(str, "MOVE LF@%s TF@$$FUN_RET\n",name);
     strAddCharArray(&instrukce,str);
 }
@@ -1146,7 +1138,6 @@ void generate_function_return_value_assign_to_var(char *name){
  * @param name - název funkce
  */
 void generate_function_start(char *name){
-    //inScope = true;
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_START\n",name);
     strAddCharArray(&instrukce,str);
@@ -1173,7 +1164,6 @@ void generate_function_return(char *name){
  * @param name - název funkce
  */
 void generate_function_end(char *name){
-    //inScope = false;
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_END\n",name);
     strAddCharArray(&instrukce,str);

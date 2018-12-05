@@ -384,7 +384,6 @@ int FUNC_CALL(){
 			}else
 				get_next_token(token);
 			
-			//strAddCharArray(&instrukce,"PUSHFRAME\n");
 			generate_TF_for_function_args();
 			return INPUT_PARAMS();
 	}
@@ -442,7 +441,6 @@ int TERM(){
 			actual_params[actual_params_number] = (char *) malloc(token->string.length + 1 * sizeof(char));
             strcpy(actual_params[actual_params_number], token->string.str);
 
-			//printf("TOKEN:%s TYPE: %d\n", token->string.str, token->type);
 			if (strcmp(actual_function.str, "print") == 0){
 				generate_assign_arguments_to_function(token->type, 0, actual_params[actual_params_number]);
 				generate_function_call(actual_function.str);
@@ -499,12 +497,6 @@ int NEXT_TERM(){
 				}
 			}	
 			actual_params_number = 0;
-
-			// generate_function_call(actual_function.str);
-			// if (return_to_var){
-			// 	generate_function_return_value_assign_to_var(actual_variable.str);
-			// 	return_to_var = false;
-			// }
 			return SYNTAX_OK;
 		case COMMA:								//24. <NEXT_TERM> -> , <TERM> <NEXT_TERM>	
 			get_next_token(token);
