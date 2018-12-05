@@ -137,11 +137,11 @@ void example_generator_1 (){
 
     //deklarace promene a prirazeni hodnoty
     variable_declare("a");
-    generate_variable_assign(INT_E,"a","50");
+    generate_variable_assign(INTEGER_TYPE,"a","50");
 
     //deklarace promene a prirazeni hodnoty
     variable_declare("b");
-    generate_variable_assign(INT_E,"b","15");
+    generate_variable_assign(INTEGER_TYPE,"b","15");
 
     //push hodnot co se maji porovnat
     generate_push(INTEGER_TYPE,"5");
@@ -198,10 +198,10 @@ void example_generator_1 (){
 
     //test stringu
     variable_declare("str");
-    generate_variable_assign(STRING_E,"str","\nMuj string\n +#-->\\\n");
+    generate_variable_assign(STRING_TYPE,"str","\nMuj string\n +#-->\\\n");
 
     //vypis promene
-    generate_print(IDENTIFIER,"str");
+    //generate_print("str");
 
     //konec
     generate_main_end();
@@ -233,9 +233,9 @@ void example_generator_2 (){
     generate_main();
 
     variable_declare("a");
-    generate_variable_assign(INT_E,"a","0");
+    generate_variable_assign(INTEGER_TYPE,"a","0");
     variable_declare("b");
-    generate_variable_assign(INT_E,"b","10");
+    generate_variable_assign(INTEGER_TYPE,"b","10");
 
     //podminka while
     generate_while_condition_check(1);
@@ -298,13 +298,13 @@ void example_generator_3(){
 
     //předání parametrů funkce
     generate_TF_for_function_args();
-    generate_assign_arguments_to_function(INT_E, 1, "10");
-    generate_assign_arguments_to_function(INT_E, 2, "5");
+    generate_assign_arguments_to_function(INTEGER_TYPE, 1, "10");
+    generate_assign_arguments_to_function(INTEGER_TYPE, 2, "5");
     //volani funkce
     generate_function_call("HELL");
     //Přiřazení návratové hodnoty funkce do c
     generate_function_return_value_assign_to_var("x");
-    generate_print(IDENTIFIER,"x");
+    generate_print();
     generate_main_end();
 
 
@@ -365,9 +365,9 @@ void example_generator_4(){
     generate_main();
 
     variable_declare("x");
-    generate_variable_assign(DOUBLE_E,"x","42.58EEW");
+    generate_variable_assign(DOUBLE_TYPE,"x","42.58EEW");
     generate_TF_for_function_args();
-    generate_assign_arguments_to_function(VARIABLE_E,0,"x");
+    generate_assign_arguments_to_function(IDENTIFIER,0,"x");
     generate_function_call("PRINT");
     //generate_function_return_value_assign_to_var("x");
     generate_main_end();
@@ -393,7 +393,7 @@ void example_generator_5(){
     generate_function_return_value_assign_to_var("x");
 
     generate_TF_for_function_args();
-    generate_assign_arguments_to_function(VARIABLE_E,0,"x");
+    generate_assign_arguments_to_function(IDENTIFIER,0,"x");
     generate_function_call("LENGTH");
     generate_function_return_value_assign_to_var("x");
     generate_print(IDENTIFIER,"x");
@@ -415,8 +415,8 @@ void example_generator_6(){
     variable_declare("x");
 
     generate_TF_for_function_args();
-    generate_assign_arguments_to_function(STRING_E,0,"HELLO");
-    generate_assign_arguments_to_function(INT_E,1,"1");
+    generate_assign_arguments_to_function(STRING_TYPE,0,"HELLO");
+    generate_assign_arguments_to_function(INTEGER_TYPE,1,"1");
     generate_function_call("ORD");
     generate_function_return_value_assign_to_var("x");
     generate_main_end();
