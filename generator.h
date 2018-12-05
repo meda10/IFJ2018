@@ -54,7 +54,7 @@ void generate_compare_variable_2_with_float();
 void generate_compare_variable_2_with_int();
 void generate_compare_variable_2_with_string();
 
-void generate_compare_variable_with_variable();
+int generate_compare_variable_with_variable(int operator_type);
 
 void generate_stack_1_to_float();
 void generate_stack_1_to_int();
@@ -66,7 +66,7 @@ void generate_free_memory();
 void generate_main();
 void generate_main_end();
 void generate_push(int type, char* name);
-void generate_mathemeatical_operations(int type);
+void generate_mathemeatical_operations(int type, int label_number);
 void generate_print();
 void generate_print_result();
 void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value);

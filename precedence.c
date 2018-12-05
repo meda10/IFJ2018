@@ -170,9 +170,10 @@ int declared_variable(token_t variable){
  */
 int semantic(token_t op1, token_t op2, int operator, int* result_type){
 
-	int type_operation;
+	int type_operation = 1;
 	bool relation_operator = false;
 	bool is_string = false;
+	int label_number = 0;
 
 	switch(operator){
 		case MUL_S:
@@ -315,7 +316,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 		if (declared_variable(op1) == SEM_ERR || declared_variable(op2) == SEM_ERR)
 		 	return SEM_ERR;
 
-		generate_compare_variable_with_variable();
+		label_number = generate_compare_variable_with_variable(type_operation);
 		*result_type = EXP_IDENTIFIER;
 
 	}
@@ -337,7 +338,7 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 	}
 	else{
 		if(!is_string){
-			generate_mathemeatical_operations(type_operation);
+			generate_mathemeatical_operations(type_operation, label_number);
 		}
 		else{
 			if(type_operation == G_TYPE_PLUS)

@@ -474,7 +474,7 @@ void generate_compare_variable_2_with_string(){
 /**
  * Otestuje typy promnenych ( a + b )
  */
-void generate_compare_variable_with_variable(){
+int generate_compare_variable_with_variable(int operator_type){
 
     char str[MAX_INSTRUCTION_LEN];
     int current_label_number = get_new_label_number();
@@ -511,15 +511,56 @@ void generate_compare_variable_with_variable(){
     sprintf(str, "JUMP $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
     strAddCharArray(&instrukce,str);
 
-    sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
-    generate_compare_variable_1_with_string();
+   switch(operator_type){
+        case G_TYPE_MUL:
+        case G_TYPE_IDIV:
+        case G_TYPE_MINUS:       
+        case G_TYPE_LESS:
+        case G_TYPE_LESS_OR_EQUAL:
+        case G_TYPE_GREATER:
+        case G_TYPE_GREATER_OR_EQUAL:
 
-    sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
-    strAddCharArray(&instrukce,str);
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
+            strAddCharArray(&instrukce,str);
 
+            strAddCharArray(&instrukce,"EXIT int@4\n");
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            break;
+
+        case G_TYPE_PLUS:
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+            generate_compare_variable_1_with_string();
+
+            generate_concat();
+
+            sprintf(str, "JUMP $IF_$STRING_$%d$CONCAT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            return current_label_number;
+            break;
+
+        case G_TYPE_EQUAL:
+        case G_TYPE_NOT_EQUAL: 
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            break;
+    }
+
+    return 0;
 }
 
 /**
@@ -699,13 +740,20 @@ void generate_push(int type, char* name) {
  * Matematické operace na zásobníku
  * @param type - typ operace (G_TYPE_PLUS,G_TYPE_DIV,G_TYPE_MINUS,G_TYPE_MUL)
  */
-void generate_mathemeatical_operations(int type){
-    int current_label_number = get_new_label_number();
+void generate_mathemeatical_operations(int type , int label_number){
+    int current_label_number;
+    if (label_number == 0)
+        current_label_number = get_new_label_number();
+    else 
+        current_label_number = label_number;
+
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Mathematical operations\n");
     switch (type){
         case G_TYPE_PLUS:
             strAddCharArray(&instrukce,"ADDS\n");
+            sprintf(str, "LABEL $IF_$STRING_$%d$CONCAT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
             break;
 
         case G_TYPE_DIV:
