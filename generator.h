@@ -6,11 +6,6 @@
 #include "symtable.h"
 #include "scaner.h"
 
-#define INT_E 1
-#define DOUBLE_E 2
-#define STRING_E 3
-#define VARIABLE_E 4
-
 //Matematicke operace
 #define G_TYPE_PLUS 1
 #define G_TYPE_MINUS 2
@@ -86,13 +81,10 @@ void generate_if_else_end(int num);
 
 void generate_comparative_operations(int type);
 
-
-
 void generate_while_condition_check(int num);
 void generate_while_start(int num);
 void generate_while_end(int num);
 void generate_pop_to_variable(char* name);
-
 
 void generate_assign_arguments_to_function(int expresion_type, int num, char *value);
 void generate_read_function_params(int num, char *name);
