@@ -169,11 +169,21 @@ void generate_chr(){
 
     strAddCharArray(&instrukce,"DEFVAR LF@RAN\n");
     strAddCharArray(&instrukce,"LT LF@RAN LF@V_0 int@0\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_chr_RETURN LF@RAN bool@true\n");
     strAddCharArray(&instrukce,"GT LF@RAN LF@V_0 int@255\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_chr_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_chr_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_chr_RETURN\n");
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_chr_END\n");
     strAddCharArray(&instrukce,"INT2CHAR LF@$$FUN_RET LF@V_0\n");
-    generate_function_end("CHR");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
 }
 
 
