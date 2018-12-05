@@ -628,8 +628,13 @@ int precedence(){
 				stackPush (s, *token);
 				
 				// generuje code push
-				if (token->type == IDENTIFIER || token->type == STRING_TYPE || token->type == INTEGER_TYPE || token->type == DOUBLE_TYPE)
-					generate_push(token->type, token->string.str);
+				if (token->type == IDENTIFIER || token->type == STRING_TYPE || token->type == INTEGER_TYPE || token->type == DOUBLE_TYPE){
+					if(token->type == IDENTIFIER){
+						if (declared_variable(*token) == SEM_ERR)
+			 				errors_exit(SEM_ERR, "\n");
+			 			}
+						generate_push(token->type, token->string.str);
+				}	
 				
 				get_next_token_prec();
 				break;
