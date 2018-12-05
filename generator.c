@@ -203,8 +203,7 @@ void generate_chr(){
 
 
 /**
- * Deklarace a pocatecni inicializace proměnné
- * @param name - jmeno promene
+ * Deklarace a pocatecni inicializace proměnné na nil
  */
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
@@ -234,6 +233,7 @@ void generate_start(){
     strAddCharArray(&instrukce,"DEFVAR GF@$$result\n");
     strAddCharArray(&instrukce,"JUMP $$main\n");
 
+    //generovani vestavenych funkci
     generate_substr();
     generate_ord();
     generate_length();
@@ -691,7 +691,6 @@ void generate_push(int type, char* name) {
             strAddCharArray(&instrukce,str);
             break;
         default:
-            //todo
             break;
     }
 }
@@ -701,7 +700,6 @@ void generate_push(int type, char* name) {
  * @param type - typ operace (G_TYPE_PLUS,G_TYPE_DIV,G_TYPE_MINUS,G_TYPE_MUL)
  */
 void generate_mathemeatical_operations(int type){
-    //data_conversion();
     int current_label_number = get_new_label_number();
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Mathematical operations\n");
@@ -747,7 +745,6 @@ void generate_mathemeatical_operations(int type){
             break;
             
         default:
-            //todo
             break;
     }
 }
@@ -759,7 +756,6 @@ void generate_mathemeatical_operations(int type){
  */
 void generate_comparative_operations(int type){
     char str[MAX_INSTRUCTION_LEN];
-    //data_conversion();
     strAddCharArray(&instrukce,"# Comparative operations\n");
     switch (type){
         case G_TYPE_LESS:
@@ -858,7 +854,6 @@ void generate_comparative_operations(int type){
             strAddCharArray(&instrukce,"NOTS\n");
             break;
         default:
-            //todo
             break;
     }
 }
@@ -866,18 +861,17 @@ void generate_comparative_operations(int type){
 /**
  * Uloží hodnotu ze zasobnikuna globalni promene result
  */
-void generate_pop_to_result(){
-    strAddCharArray(&instrukce,"# Pop \n");
-    strAddCharArray(&instrukce,"POPS GF@$$result\n");
-}
+// void generate_pop_to_result(){
+//     strAddCharArray(&instrukce,"# Pop \n");
+//     strAddCharArray(&instrukce,"POPS GF@$$result\n");
+// }
 
-/**
- * Print hodnoty v globalni promene result
- */
-void generate_print_result(){
-    strAddCharArray(&instrukce,"WRITE GF@$$result\n");
-
-}
+// *
+//  * Print hodnoty v globalni promene result
+ 
+// void generate_print_result(){
+//     strAddCharArray(&instrukce,"WRITE GF@$$result\n");
+// }
 
 /**
  * Zacatek IF (generuje se až po zpracovani vstupni podminky)
@@ -891,7 +885,6 @@ void generate_if(int num) {
 }
 
 /**
- * Musi se vydy volat!! Kdyz neexistuje else vola se s false
  * @param num - číslo IF
  * @param else_statment - true pokud existuje else statment, false pokud ne
  */
@@ -903,15 +896,11 @@ void generate_else(int num, bool else_statment) {
 
     sprintf(str, "LABEL IF_%d_ELSE\n",num);
     strAddCharArray(&instrukce,str);
-    if(else_statment == false){
-        sprintf(str, "JUMP IF_%d_END\n",num);
-        strAddCharArray(&instrukce,str);
-    }
 }
 
 
 /**
- * Komec IF
+ * Konec IF
  * @param num - číslo IF
  */
 void generate_if_else_end(int num) {
@@ -972,7 +961,7 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
     switch (expresion_type) {
         case INTEGER_TYPE:
             sprintf(str, "MOVE TF@V_%d int@%d\n", num, string_To_Int(value));
-            strAddCharArray(&instrukce,str); //todo %d
+            strAddCharArray(&instrukce,str);
             break;
         case DOUBLE_TYPE:
             sprintf(str, "MOVE TF@V_%d float@%a\n", num, string_to_Double(value));
@@ -1019,7 +1008,6 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
             free(s.str);
             break;
         case IDENTIFIER:
-            //sprintf(str, "MOVE TF@V_%d %s@%s\n", num, get_frame(),value);
             sprintf(str, "MOVE TF@V_%d LF@%s\n", num, value);
             strAddCharArray(&instrukce,str);
         default:
@@ -1062,7 +1050,7 @@ void generate_TF_for_function_args(){
  * Přiřadí návratovou hodnotu funkce do proměnné
  * @param name - název funkce
  */
-void generate_function_return_value_assign_to_var(char *name){
+void generate_retval_to_var(char *name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "MOVE LF@%s TF@$$FUN_RET\n",name);
     strAddCharArray(&instrukce,str);
