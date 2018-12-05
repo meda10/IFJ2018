@@ -264,9 +264,10 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 				break;
 
 			case EXP_DOUBLE:
+				if (type_operation == G_TYPE_IDIV)
+					type_operation = G_TYPE_DIV;
 				// compare op1 with FLOAT a INTEGER(kdyztak predelat na FLOAT)
 				generate_compare_variable_2_with_float();
-				//*result_type = EXP_DOUBLE;
 				break;
 
 			case EXP_STRING:
@@ -292,6 +293,8 @@ int semantic(token_t op1, token_t op2, int operator, int* result_type){
 				break;
 			
 			case EXP_DOUBLE:
+				if (type_operation == G_TYPE_IDIV)
+					type_operation = G_TYPE_DIV;
 				// compare op2 with FLOAT a INTEGER(kdyztak predelat na FLOAT)
 				generate_compare_variable_1_with_float();
 				break;
@@ -539,7 +542,10 @@ int rule(stack_t* s, item_stack_t* start_rule){
 					return err_sem;
 				}
 
-				delete_rule(s, start_rule, rule->token, &result_type);
+				if (rule->next->next->token.type == EXP_IDENTIFIER)
+					delete_rule(s, start_rule, rule->next->next->token, &result_type);
+				else
+					delete_rule(s, start_rule, rule->token, &result_type);
 				//push_E(s, E_rule.token);
 				//return operator;
 				return SYNTAX_OK;
@@ -586,9 +592,9 @@ int precedence(){
 
 	while(1){
 		
-					/*	// jen pro testovani
-						printStack(s);
-					*/	
+						/*// jen pro testovani
+						printStack(s);*/
+					
 
 		if ((a = token_to_prec(stackTopTerm(s)->token)) >= PREC_TABE_SIZE ){
 			stackFree(s);
@@ -644,7 +650,7 @@ int precedence(){
 				}
 				if ((use_rule = rule(s, start_rule)) != 0){
 					stackFree(s);
-					return use_rule;
+					errors_exit(use_rule, "\n");
 				}
 				break;
 

@@ -12,15 +12,6 @@ int get_new_label_number(){
     return ++label_number;
 }
 
-char* get_frame() {
-    if (inScope) {
-        return "LF";
-    } else {
-        return "TF";
-    }
-}
-
-
 void generate_print(){
     strAddCharArray(&instrukce,"\n#PRINT\n");
     generate_function_start("print");
@@ -37,7 +28,7 @@ void generate_print(){
  */
 void generate_inputs() {
     strAddCharArray(&instrukce,"\n#INPUTS\n");
-    generate_function_start("INPUTS");
+    generate_function_start("inputs");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET string\n");
 
@@ -59,7 +50,7 @@ void generate_inputs() {
  */
 void generate_inputi() {
     strAddCharArray(&instrukce,"\n#INPUTI\n");
-    generate_function_start("INPUTI");
+    generate_function_start("inputi");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET int\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTI_FAIL LF@$$FUN_RET int@0\n");
@@ -77,7 +68,7 @@ void generate_inputi() {
  */
 void generate_inputf() {
     strAddCharArray(&instrukce,"\n#INPUTF\n");
-    generate_function_start("INPUTF");
+    generate_function_start("inputf");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET float\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTF_FAIL LF@$$FUN_RET float@0x0p+0\n");
@@ -95,7 +86,7 @@ void generate_inputf() {
  */
 void generate_length() {
     strAddCharArray(&instrukce,"\n#LENGTH\n");
-    generate_function_start("LENGTH");
+    generate_function_start("length");
 
     strAddCharArray(&instrukce,"TYPE GF@$$var_1 LF@V_0\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@string\n");
@@ -119,7 +110,7 @@ void generate_length() {
  */
 void generate_ord(){
     strAddCharArray(&instrukce,"\n#ORD\n");
-    generate_function_start("ORD");
+    generate_function_start("ord");
 
     strAddCharArray(&instrukce,"STRLEN LF@$$FUN_RET LF@V_0\n");
     strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_1 LF@$$FUN_RET\n");
@@ -144,7 +135,7 @@ void generate_ord(){
  */
 void generate_substr(){
     strAddCharArray(&instrukce,"\n#SUBSTR\n");
-    generate_function_start("SUBSTR");
+    generate_function_start("substr");
     strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom\n");
@@ -174,7 +165,7 @@ void generate_substr(){
  */
 void generate_chr(){
     strAddCharArray(&instrukce,"\n#CHR\n");
-    generate_function_start("CHR");
+    generate_function_start("chr");
 
     strAddCharArray(&instrukce,"DEFVAR LF@RAN\n");
     strAddCharArray(&instrukce,"LT LF@RAN LF@V_0 int@0\n");
@@ -183,8 +174,6 @@ void generate_chr(){
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
     strAddCharArray(&instrukce,"INT2CHAR LF@$$FUN_RET LF@V_0\n");
     generate_function_end("CHR");
-    // strAddCharArray(&instrukce,"LABEL $$FUN_CHR_RETURN\n");
-    // strAddCharArray(&instrukce,"EXIT int@58\n");
 }
 
 
@@ -194,11 +183,6 @@ void generate_chr(){
  */
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
-    // strAddCharArray(&instrukce,"# Variable declare\n");
-    // sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
-    // strAddCharArray(&instrukce,str);
-    // sprintf(str, "MOVE %s@%s nil@nil\n", get_frame(), name);
-    // strAddCharArray(&instrukce,str);
     strAddCharArray(&instrukce,"# Variable declare\n");
     sprintf(str, "DEFVAR LF@%s\n", name);
     strAddCharArray(&instrukce,str);
@@ -217,7 +201,6 @@ void generate_start(){
     if_else_num = 0;
     if_end_num = 0;
     arr_free_pos = 0;
-    inScope = false;
     strAddCharArray(&instrukce,".IFJcode18\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
@@ -259,129 +242,9 @@ void generate_main(){
  */
 void generate_main_end(){
     strAddCharArray(&instrukce,"\n#Main end\n");
-    if (inScope){
-        strAddCharArray(&instrukce,"POPFRAME\n");
-        inScope = false;
-    }
+    strAddCharArray(&instrukce,"POPFRAME\n");
     strAddCharArray(&instrukce,"CLEARS\n");
 }
-
-/**
- * Zkontroluje že vrchní dvě hodnoty na zásobníku jsou stejného typu,pokud ne převede je na float
- */
-void data_conversion() {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# Data Conversion\n");
-    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
-    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
-
-    strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
-    strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
-
-    int current_number = get_new_label_number();
-
-    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_number);
-    strAddCharArray(&instrukce, str);
-    sprintf(str, "JUMPIFEQ %%L_NUM_%dV1_NOT GF@$$var_1 string@float\n", current_number);
-    strAddCharArray(&instrukce, str);
-
-    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_3 GF@$$var_3\n");
-
-    sprintf(str, "LABEL %%L_NUM_%dV1_NOT\n", current_number);
-    strAddCharArray(&instrukce, str);
-    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_2 string@float\n", current_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_4 GF@$$var_4\n");
-
-    sprintf(str, "LABEL %%L_NUM_%d\n", current_number);
-    strAddCharArray(&instrukce, str);
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
-}
-
-/**
- * Převede vrchní dvě hodnoty na zásobníku na float
- */
-void data_conversion_to_float() {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# Data Conversion to float\n");
-    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
-    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
-
-    strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
-    strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
-
-    int current_label_number = get_new_label_number();
-
-    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV1_NOT GF@$$var_1 string@float\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@float\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL %%L_NUM_%dV1_NOT\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_3 GF@$$var_3\n");
-    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@float\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL %%L_NUM_%dV2_NOT\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"INT2FLOAT GF@$$var_4 GF@$$var_4\n");
-    sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL %%L_NUM_%d\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
-}
-
-
-/**
- * Převede vrchní dvě hodnoty na zásobníku na int
- */
-void data_conversion_to_int() {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# Data Conversion to float\n");
-    strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
-    strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
-
-    strAddCharArray(&instrukce,"TYPE GF@$$var_1 GF@$$var_3\n");
-    strAddCharArray(&instrukce,"TYPE GF@$$var_2 GF@$$var_4\n");
-
-    int current_label_number = get_new_label_number();
-
-    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV1_NOT GF@$$var_1 string@int\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@int\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL %%L_NUM_%dV1_NOT\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"FLOAT2INT GF@$$var_3 GF@$$var_3\n");
-    sprintf(str, "JUMPIFNEQ %%L_NUM_%dV2_NOT GF@$$var_1 string@int\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFEQ %%L_NUM_%d GF@$$var_1 GF@$$var_2\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL %%L_NUM_%dV2_NOT\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"FLOAT2INT GF@$$var_4 GF@$$var_4\n");
-    sprintf(str, "JUMP %%L_NUM_%d\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL %%L_NUM_%d\n", current_label_number);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
-    strAddCharArray(&instrukce,"PUSHS GF@$$var_3\n");
-}
-
 
 /**
  * Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, jinak ukonci interpretr chybou 4, napr. ( 5.0 + a )
@@ -603,7 +466,7 @@ void generate_compare_variable_with_variable(){
     strAddCharArray(&instrukce,str);
     sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$FLOAT GF@$$var_4 string@float\n",current_label_number);
     strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$string GF@$$var_4 string@string\n",current_label_number);
+    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$STRING GF@$$var_4 string@string\n",current_label_number);
     strAddCharArray(&instrukce,str);
 
     strAddCharArray(&instrukce,"EXIT int@4\n");
@@ -673,51 +536,51 @@ void generate_stack_2_to_int(){
  * @param variable_name - jmeno proměnné
  * @param variable_value - hodnota proměnné (pokud jde o VARIABLE_E tak je zde jmeno druhé proměnné)
  */
-void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value) {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# Variable assign\n");
-    string s;
-    switch (expresion_type) {
-        case INTEGER_TYPE: {
-            sprintf(str, "MOVE %s@%s int@%d\n", get_frame(), variable_name, string_To_Int(variable_value));
-            strAddCharArray(&instrukce,str); //todo %d
-            break;
-        }
-        case DOUBLE_TYPE: {
-            sprintf(str, "MOVE %s@%s float@%a\n", get_frame(), variable_name, string_to_Double(variable_value));
-            strAddCharArray(&instrukce,str);
-            break;
-        }
-        case STRING_TYPE:
-            strInit(&s);
-            for (int i = 0; i < (int)strlen(variable_value); ++i) {
-                char c = variable_value[i];
-                if(c == '#'){
-                    strAddCharArray(&s,"\\035");
-                } else if (c == '\\'){
-                    strAddCharArray(&s,"\\092");
-                } else if(c <= 32){
-                    char tmp[3];
-                    sprintf(tmp, "\\%03d", c);
-                    strAddCharArray(&s,tmp);
-                } else{
-                    strAddChar(&s,c);
-                }
-            }
-            sprintf(str, "MOVE %s@%s string@%s\n", get_frame(), variable_name, s.str);
-            strAddCharArray(&instrukce,str);
-            free(s.str);
-            break;
-        case IDENTIFIER:
-            sprintf(str, "MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
-            strAddCharArray(&instrukce,str);
-            break;
+// void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value) {
+//     char str[MAX_INSTRUCTION_LEN];
+//     strAddCharArray(&instrukce,"# Variable assign\n");
+//     string s;
+//     switch (expresion_type) {
+//         case INTEGER_TYPE: {
+//             sprintf(str, "MOVE LF@%s int@%d\n", variable_name, string_To_Int(variable_value));
+//             strAddCharArray(&instrukce,str); //todo %d
+//             break;
+//         }
+//         case DOUBLE_TYPE: {
+//             sprintf(str, "MOVE LF@%s float@%a\n", get_frame(), variable_name, string_to_Double(variable_value));
+//             strAddCharArray(&instrukce,str);
+//             break;
+//         }
+//         case STRING_TYPE:
+//             strInit(&s);
+//             for (int i = 0; i < (int)strlen(variable_value); ++i) {
+//                 char c = variable_value[i];
+//                 if(c == '#'){
+//                     strAddCharArray(&s,"\\035");
+//                 } else if (c == '\\'){
+//                     strAddCharArray(&s,"\\092");
+//                 } else if(c <= 32){
+//                     char tmp[3];
+//                     sprintf(tmp, "\\%03d", c);
+//                     strAddCharArray(&s,tmp);
+//                 } else{
+//                     strAddChar(&s,c);
+//                 }
+//             }
+//             sprintf(str, "MOVE %s@%s string@%s\n", get_frame(), variable_name, s.str);
+//             strAddCharArray(&instrukce,str);
+//             free(s.str);
+//             break;
+//         case IDENTIFIER:
+//             sprintf(str, "MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
+//             strAddCharArray(&instrukce,str);
+//             break;
 
-        default:
-            break;
-    }
+//         default:
+//             break;
+//     }
 
-}
+// }
 
 /**
  * Spoji 2 stringy na vrcholu zasobniku, vysledek da na zasobnik
@@ -781,7 +644,7 @@ void generate_push(int type, char* name) {
             free(s.str);
             break;
         case IDENTIFIER:
-            sprintf(str, "PUSHS %s@%s\n",get_frame(),name);
+            sprintf(str, "PUSHS LF@%s\n",name);
             strAddCharArray(&instrukce,str);
             break;
         default:
@@ -814,6 +677,7 @@ void generate_mathemeatical_operations(int type){
 
             sprintf(str, "LABEL $IF_$%d_$FLOAT_$NOT_$ZERO\n",current_label_number);
             strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
             strAddCharArray(&instrukce,"DIVS\n");
             break;
 
@@ -827,6 +691,7 @@ void generate_mathemeatical_operations(int type){
 
             sprintf(str, "LABEL $IF_$%d_$INT_$NOT_$ZERO\n",current_label_number);
             strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
             strAddCharArray(&instrukce,"IDIVS\n");
             break;
 
@@ -1136,7 +1001,6 @@ void generate_TF_for_function_args(){
  */
 void generate_function_return_value_assign_to_var(char *name){
     char str[MAX_INSTRUCTION_LEN];
-    //sprintf(str, "MOVE %s@%s TF@$$FUN_RET\n", get_frame(),name);
     sprintf(str, "MOVE LF@%s TF@$$FUN_RET\n",name);
     strAddCharArray(&instrukce,str);
 }
@@ -1146,7 +1010,6 @@ void generate_function_return_value_assign_to_var(char *name){
  * @param name - název funkce
  */
 void generate_function_start(char *name){
-    //inScope = true;
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_START\n",name);
     strAddCharArray(&instrukce,str);
@@ -1173,7 +1036,6 @@ void generate_function_return(char *name){
  * @param name - název funkce
  */
 void generate_function_end(char *name){
-    //inScope = false;
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_END\n",name);
     strAddCharArray(&instrukce,str);
