@@ -23,7 +23,7 @@ char* get_frame() {
 
 void generate_print(){
     strAddCharArray(&instrukce,"\n#PRINT\n");
-    generate_function_start("PRINT");
+    generate_function_start("print");
 
     strAddCharArray(&instrukce,"WRITE LF@V_0\n");
     strAddCharArray(&instrukce,"JUMP $$FUN_PRINT_END\n");
@@ -37,7 +37,7 @@ void generate_print(){
  */
 void generate_inputs() {
     strAddCharArray(&instrukce,"\n#INPUTS\n");
-    generate_function_start("INPUTS");
+    generate_function_start("inputs");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET string\n");
 
@@ -59,7 +59,7 @@ void generate_inputs() {
  */
 void generate_inputi() {
     strAddCharArray(&instrukce,"\n#INPUTI\n");
-    generate_function_start("INPUTI");
+    generate_function_start("inputi");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET int\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTI_FAIL LF@$$FUN_RET int@0\n");
@@ -77,7 +77,7 @@ void generate_inputi() {
  */
 void generate_inputf() {
     strAddCharArray(&instrukce,"\n#INPUTF\n");
-    generate_function_start("INPUTF");
+    generate_function_start("inputf");
 
     strAddCharArray(&instrukce,"READ LF@$$FUN_RET float\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_INPUTF_FAIL LF@$$FUN_RET float@0x0p+0\n");
@@ -95,7 +95,7 @@ void generate_inputf() {
  */
 void generate_length() {
     strAddCharArray(&instrukce,"\n#LENGTH\n");
-    generate_function_start("LENGTH");
+    generate_function_start("length");
 
     strAddCharArray(&instrukce,"TYPE GF@$$var_1 LF@V_0\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_LENGTH_B GF@$$var_1 string@string\n");
@@ -119,7 +119,7 @@ void generate_length() {
  */
 void generate_ord(){
     strAddCharArray(&instrukce,"\n#ORD\n");
-    generate_function_start("ORD");
+    generate_function_start("ord");
 
     strAddCharArray(&instrukce,"STRLEN LF@$$FUN_RET LF@V_0\n");
     strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_1 LF@$$FUN_RET\n");
@@ -144,10 +144,7 @@ void generate_ord(){
  */
 void generate_substr(){
     strAddCharArray(&instrukce,"\n#SUBSTR\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_SUBSTR_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    generate_function_start("substr");
     strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom\n");
@@ -176,35 +173,29 @@ void generate_substr(){
  * Generuje funkci chr
  */
 void generate_chr(){
-    strAddCharArray(&instrukce,"\n#SUBSTR\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_CHR_START\n");
-    strAddCharArray(&instrukce,"PUSHFRAME\n");
-    strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
-    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET string@\n");
+    strAddCharArray(&instrukce,"\n#CHR\n");
+    generate_function_start("chr");
+
     strAddCharArray(&instrukce,"DEFVAR LF@RAN\n");
     strAddCharArray(&instrukce,"LT LF@RAN LF@V_0 int@0\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
     strAddCharArray(&instrukce,"GT LF@RAN LF@V_0 int@255\n");
     strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
     strAddCharArray(&instrukce,"INT2CHAR LF@$$FUN_RET LF@V_0\n");
-    strAddCharArray(&instrukce,"LABEL $$FUN_CHR_RETURN\n");
-    strAddCharArray(&instrukce,"POPFRAME\n");
-    strAddCharArray(&instrukce,"RETURN\n");
+    generate_function_end("CHR");
 }
 
 
 /**
- * Deklarace proměné
- * @param type - typ proměné (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE)
  * Deklarace a pocatecni inicializace proměnné
  * @param name - jmeno promene
  */
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Variable declare\n");
-    sprintf(str, "DEFVAR %s@%s\n", get_frame(), name);
+    sprintf(str, "DEFVAR LF@%s\n", name);
     strAddCharArray(&instrukce,str);
-    sprintf(str, "MOVE %s@%s nil@nil\n", get_frame(), name);
+    sprintf(str, "MOVE LF@%s nil@nil\n", name);
     strAddCharArray(&instrukce,str);
 }
 
@@ -237,7 +228,6 @@ void generate_start(){
     generate_inputs();
     generate_print();
     generate_chr();
-
 }
 
 /**
@@ -254,7 +244,7 @@ void generate_main(){
     strAddCharArray(&instrukce,"\n# Main\n");
     strAddCharArray(&instrukce,"LABEL $$main\n");
     strAddCharArray(&instrukce,"CREATEFRAME\n");
-    //strAddCharArray(&instrukce,"PUSHFRAME\n");
+    strAddCharArray(&instrukce,"PUSHFRAME\n");
 }
 
 /**
@@ -681,17 +671,17 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
     strAddCharArray(&instrukce,"# Variable assign\n");
     string s;
     switch (expresion_type) {
-        case INT_E: {
+        case INTEGER_TYPE: {
             sprintf(str, "MOVE %s@%s int@%d\n", get_frame(), variable_name, string_To_Int(variable_value));
             strAddCharArray(&instrukce,str); //todo %d
             break;
         }
-        case DOUBLE_E: {
+        case DOUBLE_TYPE: {
             sprintf(str, "MOVE %s@%s float@%a\n", get_frame(), variable_name, string_to_Double(variable_value));
             strAddCharArray(&instrukce,str);
             break;
         }
-        case STRING_E:
+        case STRING_TYPE:
             strInit(&s);
             for (int i = 0; i < (int)strlen(variable_value); ++i) {
                 char c = variable_value[i];
@@ -711,7 +701,7 @@ void generate_variable_assign(int expresion_type,char* variable_name, char* vari
             strAddCharArray(&instrukce,str);
             free(s.str);
             break;
-        case VARIABLE_E:
+        case IDENTIFIER:
             sprintf(str, "MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
             strAddCharArray(&instrukce,str);
             break;
@@ -738,7 +728,8 @@ void generate_concat(){
  */
 void generate_pop_to_variable(char* name){
     char str[MAX_INSTRUCTION_LEN];
-    sprintf(str, "POPS %s@%s\n",get_frame(),name);
+    // sprintf(str, "POPS %s@%s\n",get_frame(),name);
+    sprintf(str, "POPS LF@%s\n", name);
     strAddCharArray(&instrukce,str);
 }
 
@@ -960,52 +951,6 @@ void generate_comparative_operations(int type){
 }
 
 /**
- * Print hodnoty
- * @param type - typ hodnoty (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE,IDENTIFIER)
- * @param name - hodnota (pokud jde o IDENTIFIER tak je zde jeho nazev)
- */
-void generate_print_aaa(int type, char* name) {
-    char str[MAX_INSTRUCTION_LEN];
-    string s;
-    switch (type) {
-        case INTEGER_TYPE:
-            sprintf(str, "WRITE int@%d\n", string_To_Int(name));
-            strAddCharArray(&instrukce,str);
-            break;
-        case DOUBLE_TYPE:
-            sprintf(str, "WRITE float@%a\n", string_to_Double(name));
-            strAddCharArray(&instrukce,str);
-            break;
-        case STRING_TYPE:
-            strInit(&s);
-            for (int i = 0; i < (int)strlen(name); ++i) {
-                char c = name[i];
-                if(c == '#'){
-                    strAddCharArray(&s,"\\035");
-                } else if (c == '\\'){
-                    strAddCharArray(&s,"\\092");
-                } else if(c <= 32){
-                    char tmp[3];
-                    sprintf(tmp, "\\%03d", c);
-                    strAddCharArray(&s,tmp);
-                } else{
-                    strAddChar(&s,c);
-                }
-            }
-            sprintf(str, "WRITE string@%s\n", s.str);
-            strAddCharArray(&instrukce,str);
-            free(s.str);
-            break;
-        case IDENTIFIER:
-            sprintf(str, "WRITE %s@%s\n", get_frame(), name);
-            strAddCharArray(&instrukce,str);
-            break;
-        default:
-            break;
-    }
-}
-
-/**
  * Uloží hodnotu ze zasobnikuna globalni promene result
  */
 void generate_pop_to_result(){
@@ -1141,7 +1086,8 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
             free(s.str);
             break;
         case IDENTIFIER:
-            sprintf(str, "MOVE TF@V_%d %s@%s\n", num, get_frame(),value);
+            //sprintf(str, "MOVE TF@V_%d %s@%s\n", num, get_frame(),value);
+            sprintf(str, "MOVE TF@V_%d LF@%s\n", num, value);
             strAddCharArray(&instrukce,str);
         default:
             break;
@@ -1168,11 +1114,6 @@ void generate_read_function_params(int num, char *name){
  */
 void generate_function_call(char* name){
     char str[MAX_INSTRUCTION_LEN];
-    char *upperName = name;
-    while (*upperName) {
-        *upperName = toupper((unsigned char) *upperName);
-        upperName++;
-    }
     sprintf(str, "CALL $$FUN_%s_START\n", name);
     strAddCharArray(&instrukce,str);
 }
@@ -1181,9 +1122,7 @@ void generate_function_call(char* name){
  *
  */
 void generate_TF_for_function_args(){
-    if (inScope){
-        strAddCharArray(&instrukce,"CREATEFRAME\n");
-    }
+    strAddCharArray(&instrukce,"CREATEFRAME\n");
 }
 
 /**
@@ -1192,7 +1131,7 @@ void generate_TF_for_function_args(){
  */
 void generate_function_return_value_assign_to_var(char *name){
     char str[MAX_INSTRUCTION_LEN];
-    sprintf(str, "MOVE %s@%s TF@$$FUN_RET\n", get_frame(),name);
+    sprintf(str, "MOVE LF@%s TF@$$FUN_RET\n",name);
     strAddCharArray(&instrukce,str);
 }
 
@@ -1201,7 +1140,6 @@ void generate_function_return_value_assign_to_var(char *name){
  * @param name - název funkce
  */
 void generate_function_start(char *name){
-    inScope = true;
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_START\n",name);
     strAddCharArray(&instrukce,str);
@@ -1228,7 +1166,6 @@ void generate_function_return(char *name){
  * @param name - název funkce
  */
 void generate_function_end(char *name){
-    inScope = false;
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_END\n",name);
     strAddCharArray(&instrukce,str);

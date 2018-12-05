@@ -14,10 +14,12 @@
 
 token_t *token, *next_token;
 bool read_token;
+bool return_to_var;
 BTNode current_LTS;
 extern BTNode *root_GTS;
 extern BTNode *main_local_TS;
 extern BTNode temp_node;
+// extern bool inScope;
 string actual_variable;
 string actual_function;
 char** actual_params;
@@ -31,7 +33,8 @@ int parse(){
   strInit(&actual_variable);
   strInit(&actual_function);
   actual_params = make_array();
-  actual_params_number = 0;	
+  actual_params_number = 0;
+  return_to_var = false;	
   current_LTS = *main_local_TS; //set current LTS to main body of program
   
   if (get_next_token(token) == RET_ERR)
@@ -71,7 +74,7 @@ int PROGRAM(){
 			if (result != SYNTAX_OK) return result;
 			
 			return PROGRAM();
-		case ENDOFFILE:
+		case ENDOFFILE:								//2.<PROGRAM> -> EOF
 			return SYNTAX_OK;
 	}
 	return SYNTAX_ERR;
@@ -299,7 +302,6 @@ int ASS(){
 			get_next_token(next_token);
 			read_token = true;
 			if (next_token->type == EQUAL){	//variable initialization/assignment
-
 				//check if variable's name not function's
 				temp_node = B_tree_search(*root_GTS, token->string.str);
 				//"initialized" checked to be sure that function is located 
@@ -319,6 +321,7 @@ int ASS(){
 				strFree(&actual_variable);
 				strInit(&actual_variable);
 				strAddCharArray(&actual_variable, token->string.str);
+				return_to_var = true;  //indicating that function return value asign to variable
 
 				read_token = false;
 				get_next_token(token);
@@ -347,7 +350,7 @@ int VALUE(){
 		case SUBSTR:
 		case ORD:
 		case CHR:
-			return FUNC_CALL();
+			return FUNC_CALL();						//18. <VALUE> -> <FUNC_CALL
 		case IDENTIFIER:							//18. <VALUE> -> <FUNC_CALL> or 17.<VALUE> -> <E> 
 			//check if it is a function
 			temp_node = B_tree_search(*root_GTS, token->string.str);
@@ -405,7 +408,6 @@ int INPUT_PARAMS(){
 				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
 			}
 
-			generate_function_call(actual_function.str);
 			return SYNTAX_OK;
 		case IDENTIFIER:
 		case STRING_TYPE:
@@ -439,8 +441,13 @@ int TERM(){
 			actual_params[actual_params_number] = (char *) malloc(token->string.length + 1 * sizeof(char));
             strcpy(actual_params[actual_params_number], token->string.str);
 
-			//printf("TOKEN:%s TYPE: %d\n", token->string.str, token->type);
-			generate_assign_arguments_to_function(token->type, actual_params_number, actual_params[actual_params_number]);
+			if (strcmp(actual_function.str, "print") == 0){
+				generate_assign_arguments_to_function(token->type, 0, actual_params[actual_params_number]);
+				generate_function_call(actual_function.str);
+				generate_TF_for_function_args();
+			}else{
+				generate_assign_arguments_to_function(token->type, actual_params_number, actual_params[actual_params_number]);				
+			}
 			
 			actual_params_number++;
 			get_next_token(token);
@@ -464,9 +471,13 @@ int NEXT_TERM(){
 		case NOT:
 		case CLOSING_BRACKET:
 		case OPENNING_BRACKET:					//23. <NEXT_TERM> -> eps
+			//function call expression ended
+			//check semantic and make function call
 			temp_node = B_tree_search(*root_GTS, actual_function.str);
-			if (temp_node == NULL)
+			if (temp_node == NULL){
 				errors_exit(SEMANTIC_ERROR_OTHER, "undefined function call.");
+			}
+			
 			//check if number of params for print function is at least one
 			if ((strcmp(actual_function.str, "print") == 0) && (actual_params_number >= temp_node->data.params_number)){
 				;
@@ -474,11 +485,18 @@ int NEXT_TERM(){
 				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
 			} 
 			// else{
-			// 	printf("GG\n");
 			// 	errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
 			// }
 
-			generate_function_call(actual_function.str);
+
+			if (strcmp(actual_function.str, "print") != 0){
+				generate_function_call(actual_function.str);
+				if (return_to_var){
+					generate_function_return_value_assign_to_var(actual_variable.str);
+					return_to_var = false;
+				}
+			}	
+			actual_params_number = 0;
 			return SYNTAX_OK;
 		case COMMA:								//24. <NEXT_TERM> -> , <TERM> <NEXT_TERM>	
 			get_next_token(token);
@@ -496,6 +514,7 @@ int E(){
 	if(result != SYNTAX_OK)
 		return SYNTAX_ERR;
 
+	return_to_var = false;
 	generate_pop_to_variable(actual_variable.str);
 	return SYNTAX_OK;
 }
