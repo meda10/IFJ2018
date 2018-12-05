@@ -526,7 +526,7 @@ int E(){
 
 	return_to_var = false;
 	if(if_expr){
-		generate_pop_to_variable("result");
+		generate_pop_to_variable("$$result");
 		if_expr = false;
 	}else{
 		generate_pop_to_variable(actual_variable.str);		
