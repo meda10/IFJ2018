@@ -606,7 +606,7 @@ void generate_compare_variable_with_variable(){
     strAddCharArray(&instrukce,str);
     sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$FLOAT GF@$$var_4 string@float\n",current_label_number);
     strAddCharArray(&instrukce,str);
-    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$string GF@$$var_4 string@string\n",current_label_number);
+    sprintf(str, "JUMPIFEQ $IF_$VARIABLE_$%d$TRUE_$STRING GF@$$var_4 string@string\n",current_label_number);
     strAddCharArray(&instrukce,str);
 
     strAddCharArray(&instrukce,"EXIT int@4\n");
@@ -816,6 +816,7 @@ void generate_mathemeatical_operations(int type){
 
             sprintf(str, "LABEL $IF_$%d_$FLOAT_$NOT_$ZERO\n",current_label_number);
             strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
             strAddCharArray(&instrukce,"DIVS\n");
             break;
 
@@ -829,6 +830,7 @@ void generate_mathemeatical_operations(int type){
 
             sprintf(str, "LABEL $IF_$%d_$INT_$NOT_$ZERO\n",current_label_number);
             strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
             strAddCharArray(&instrukce,"IDIVS\n");
             break;
 
