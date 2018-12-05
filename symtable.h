@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Petr Medek, xmedek07
+ */
+
 #ifndef TREE_BT_H
 #define TREE_BT_H
 

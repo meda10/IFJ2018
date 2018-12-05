@@ -1,3 +1,11 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Aliaksandr Drankou, xdrank00
+ *    Petr Medek, xmedek07
+ *    Jan Sladky, xsladk09 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -472,15 +480,25 @@ int generate_compare_variable_with_variable(int operator_type){
         case G_TYPE_MUL:
         case G_TYPE_IDIV:
         case G_TYPE_MINUS:       
-        case G_TYPE_LESS:
-        case G_TYPE_LESS_OR_EQUAL:
-        case G_TYPE_GREATER:
-        case G_TYPE_GREATER_OR_EQUAL:
 
             sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
             strAddCharArray(&instrukce,str);
 
             strAddCharArray(&instrukce,"EXIT int@4\n");
+
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            break;
+
+        case G_TYPE_LESS:
+        case G_TYPE_LESS_OR_EQUAL:
+        case G_TYPE_GREATER:
+        case G_TYPE_GREATER_OR_EQUAL:
+            sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$STRING\n",current_label_number);
+            strAddCharArray(&instrukce,str);
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_2\n");
+            strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
+            generate_compare_variable_1_with_string();
 
             sprintf(str, "LABEL $IF_$VARIABLE_$%d$TRUE_$NEXT\n",current_label_number);
             strAddCharArray(&instrukce,str);

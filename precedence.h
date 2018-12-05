@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Jan Sladky, xsladk09
+ */
+
 #ifndef precedence_H
 #define precedence_H
 

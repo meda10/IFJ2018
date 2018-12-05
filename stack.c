@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Jan Sladky, xsladk09
+ */
+
 #include <ctype.h>
 #include <errno.h>
 #include <malloc.h>
