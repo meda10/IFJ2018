@@ -12,6 +12,7 @@ int get_new_label_number(){
     return ++label_number;
 }
 
+//generovani vestavene funkci print
 void generate_print(){
     strAddCharArray(&instrukce,"\n#PRINT\n");
     generate_function_start("print");
@@ -23,9 +24,7 @@ void generate_print(){
 }
 
 
-/**
- * Generuje funkci inputs
- */
+//generovani vestavene funkci inputs
 void generate_inputs() {
     strAddCharArray(&instrukce,"\n#INPUTS\n");
     generate_function_start("inputs");
@@ -45,9 +44,7 @@ void generate_inputs() {
 }
 
 
-/**
- * Generuje funkci inputi
- */
+//generovani vestavene funkci inputi
 void generate_inputi() {
     strAddCharArray(&instrukce,"\n#INPUTI\n");
     generate_function_start("inputi");
@@ -63,9 +60,7 @@ void generate_inputi() {
     generate_function_end("INPUTI");
 }
 
-/**
- * Generuje funkci inputf
- */
+//generovani vestavene funkci inputf
 void generate_inputf() {
     strAddCharArray(&instrukce,"\n#INPUTF\n");
     generate_function_start("inputf");
@@ -81,9 +76,7 @@ void generate_inputf() {
     generate_function_end("INPUTF");
 }
 
-/**
- * Generuje funkci length
- */
+//generovani vestavene funkci length
 void generate_length() {
     strAddCharArray(&instrukce,"\n#LENGTH\n");
     generate_function_start("length");
@@ -104,10 +97,7 @@ void generate_length() {
     generate_function_end("LENGTH");
 }
 
-
-/**
- * Generuje funkci ord
- */
+//generovani vestavene funkci ord
 void generate_ord(){
     strAddCharArray(&instrukce,"\n#ORD\n");
     generate_function_start("ord");
@@ -130,9 +120,7 @@ void generate_ord(){
     strAddCharArray(&instrukce,"JUMP $$FUN_ORD_END\n");
 }
 
-/**
- * Generuje funkci substr
- */
+//generovani vestavene funkci substr
 void generate_substr(){
 /*
     strAddCharArray(&instrukce,"LT GF@$$var_1 LF@V_0 int@0\n");
@@ -175,9 +163,7 @@ void generate_substr(){
     strAddCharArray(&instrukce,"RETURN\n");
 }
 
-/**
- * Generuje funkci chr
- */
+//generovani vestavene funkci chr
 void generate_chr(){
     strAddCharArray(&instrukce,"\n#CHR\n");
     generate_function_start("chr");
@@ -201,10 +187,7 @@ void generate_chr(){
 
 }
 
-
-/**
- * Deklarace a pocatecni inicializace proměnné na nil
- */
+//Deklarace a pocatecni inicializace proměnné na nil
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Variable declare\n");
@@ -214,17 +197,10 @@ void variable_declare(char *name) {
     strAddCharArray(&instrukce,str);
 }
 
-
-/**
- * Zacatek programu
- */
+//Zacatek programu, header, pomocne promenne a skok do hlavniho tela
 void generate_start(){
     strInit(&instrukce);
     label_number = 0;
-    if_num = 0;
-    if_else_num = 0;
-    if_end_num = 0;
-    arr_free_pos = 0;
     strAddCharArray(&instrukce,".IFJcode18\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_2\n");
@@ -244,16 +220,12 @@ void generate_start(){
     generate_chr();
 }
 
-/**
- * Uvolni alokovanou pamet
- */
+//uvolneni alokovane pameti
 void generate_free_memory(){
     delete_string(&instrukce);
 }
 
-/**
- * Label main
- */
+//generovani labelu pro hlavni telo a vytvoreni LF pro ne
 void generate_main(){
     strAddCharArray(&instrukce,"\n# Main\n");
     strAddCharArray(&instrukce,"LABEL $$main\n");
@@ -261,18 +233,14 @@ void generate_main(){
     strAddCharArray(&instrukce,"PUSHFRAME\n");
 }
 
-/**
- * Konec main
- */
+//konec hlavniho tela programu
 void generate_main_end(){
     strAddCharArray(&instrukce,"\n#Main end\n");
     strAddCharArray(&instrukce,"POPFRAME\n");
     strAddCharArray(&instrukce,"CLEARS\n");
 }
 
-/**
- * Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, jinak ukonci interpretr chybou 4, napr. ( 5.0 + a )
- */
+//Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, jinak ukonci interpret s chybou 4, napr. ( 5.0 + a )
 void generate_compare_variable_1_with_float(){
    
     char str[MAX_INSTRUCTION_LEN];
@@ -306,10 +274,7 @@ void generate_compare_variable_1_with_float(){
     strAddCharArray(&instrukce,str);
 }
 
-
-/**
- * Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, pokud je float tak zmeni konstantu jinak ukonci interpretr chybou 4, napr. ( 5 + a )
- */
+//Otestuje promnenou (prvni na zasobniku) jestli je float nebo int, pokud je float tak zmeni konstantu jinak ukonci interpretr chybou 4, napr. ( 5 + a )
 void generate_compare_variable_1_with_int(){
     
     char str[MAX_INSTRUCTION_LEN];
@@ -343,9 +308,7 @@ void generate_compare_variable_1_with_int(){
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Otestuje promnenou (prvni na zasobniku) jestli je string, pokud neni ukonci interpretr chybou 4, napr. ( "ahoj" + a)
- */
+//Otestuje promnenou (prvni na zasobniku) jestli je string, pokud neni ukonci interpretr chybou 4, napr. ( "ahoj" + a)
 void generate_compare_variable_1_with_string(){
 
     char str[MAX_INSTRUCTION_LEN];
@@ -367,9 +330,7 @@ void generate_compare_variable_1_with_string(){
     strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
 }
 
-/**
- * Otestuje promnenou (druhou na zasobniku) jestli je float nebo int, jinak ukonci interpretr chybou 4, napr. ( a + 5.0 )
- */
+//Otestuje promnenou (druhou na zasobniku) jestli je float nebo int, jinak ukonci interpretr chybou 4, napr. ( a + 5.0 )
 void generate_compare_variable_2_with_float(){
    
     char str[MAX_INSTRUCTION_LEN];
@@ -406,9 +367,7 @@ void generate_compare_variable_2_with_float(){
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Otestuje promnenou (druhou na zasobniku) jestli je float nebo int, pokud je float tak zmeni konstantu jinak ukonci interpretr chybou 4, napr. ( a + 5 )
- */
+//Otestuje promnenou (druhou na zasobniku) jestli je float nebo int, pokud je float tak zmeni konstantu jinak ukonci interpretr chybou 4, napr. ( a + 5 )
 void generate_compare_variable_2_with_int(){
     
     char str[MAX_INSTRUCTION_LEN];
@@ -445,9 +404,7 @@ void generate_compare_variable_2_with_int(){
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Otestuje promnenou (druhou na zasobniku) jestli je string, pokud neni ukonci interpretr chybou 4, napr. ( a + "ahoj" )
- */
+//Otestuje promnenou (druhou na zasobniku) jestli je string, pokud neni ukonci interpretr chybou 4, napr. ( a + "ahoj" )
 void generate_compare_variable_2_with_string(){
 
     char str[MAX_INSTRUCTION_LEN];
@@ -563,93 +520,31 @@ int generate_compare_variable_with_variable(int operator_type){
     return 0;
 }
 
-/**
- * Převede prvni hodnotu na zasobniku na float
- */
+//Převede prvni hodnotu na zasobniku na float
 void generate_stack_1_to_float(){
     strAddCharArray(&instrukce,"INT2FLOATS\n");
 }
 
-/**
- * Převede prvni hodnotu na zasobniku na int
- */
+//Převede prvni hodnotu na zasobniku na int
 void generate_stack_1_to_int(){
     strAddCharArray(&instrukce,"FLOAT2INTS\n");
 }
 
-/**
- * Převede druhou hodnotu na zasobniku na float
- */
+//Převede druhou hodnotu na zasobniku na float
 void generate_stack_2_to_float(){
     strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
     strAddCharArray(&instrukce,"INT2FLOATS\n");
     strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
 }
 
-/**
- * Převede druhou hodnotu na zasobniku na int
- */
+//Převede druhou hodnotu na zasobniku na int
 void generate_stack_2_to_int(){
     strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
     strAddCharArray(&instrukce,"FLOAT2INTS\n");
     strAddCharArray(&instrukce,"PUSHS GF@$$var_4\n");
 }
 
-/**
- * Přiřadí hodnotu proměnné
- * @param expresion_type - typ přiřazení (INT_E,DOUBLE_E,STRING_E,VARIABLE_E)
- * @param variable_name - jmeno proměnné
- * @param variable_value - hodnota proměnné (pokud jde o VARIABLE_E tak je zde jmeno druhé proměnné)
- */
-// void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value) {
-//     char str[MAX_INSTRUCTION_LEN];
-//     strAddCharArray(&instrukce,"# Variable assign\n");
-//     string s;
-//     switch (expresion_type) {
-//         case INTEGER_TYPE: {
-//             sprintf(str, "MOVE LF@%s int@%d\n", variable_name, string_To_Int(variable_value));
-//             strAddCharArray(&instrukce,str); //todo %d
-//             break;
-//         }
-//         case DOUBLE_TYPE: {
-//             sprintf(str, "MOVE LF@%s float@%a\n", get_frame(), variable_name, string_to_Double(variable_value));
-//             strAddCharArray(&instrukce,str);
-//             break;
-//         }
-//         case STRING_TYPE:
-//             strInit(&s);
-//             for (int i = 0; i < (int)strlen(variable_value); ++i) {
-//                 char c = variable_value[i];
-//                 if(c == '#'){
-//                     strAddCharArray(&s,"\\035");
-//                 } else if (c == '\\'){
-//                     strAddCharArray(&s,"\\092");
-//                 } else if(c <= 32){
-//                     char tmp[3];
-//                     sprintf(tmp, "\\%03d", c);
-//                     strAddCharArray(&s,tmp);
-//                 } else{
-//                     strAddChar(&s,c);
-//                 }
-//             }
-//             sprintf(str, "MOVE %s@%s string@%s\n", get_frame(), variable_name, s.str);
-//             strAddCharArray(&instrukce,str);
-//             free(s.str);
-//             break;
-//         case IDENTIFIER:
-//             sprintf(str, "MOVE %s@%s %s@%s\n", get_frame(), variable_name, get_frame(),variable_value);
-//             strAddCharArray(&instrukce,str);
-//             break;
-
-//         default:
-//             break;
-//     }
-
-// }
-
-/**
- * Spoji 2 stringy na vrcholu zasobniku, vysledek da na zasobnik
- */
+//Provede konkatenaci 2 stringy na vrcholu zasobniku, vysledek da na zasobnik
 void generate_concat(){
     strAddCharArray(&instrukce,"POPS GF@$$var_4\n");
     strAddCharArray(&instrukce,"POPS GF@$$var_3\n");
@@ -657,10 +552,7 @@ void generate_concat(){
     strAddCharArray(&instrukce,"PUSHS GF@$$var_1\n");
 }
 
-/**
- * Vezme hodnotu z vrcholu zasobniku a ulozi ji do promene
- * @param name - nazev promene
- */
+//Hodnota z vrcholu zasobniku se ulozi do promenne
 void generate_pop_to_variable(char* name){
     char str[MAX_INSTRUCTION_LEN];
     // sprintf(str, "POPS %s@%s\n",get_frame(),name);
@@ -668,11 +560,7 @@ void generate_pop_to_variable(char* name){
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Pushne hodnotu na zásobník
- * @param type - typ hodnoty (INTEGER_TYPE,DOUBLE_TYPE,STRING_TYPE,IDENTIFIER)
- * @param name - hodnota (v případě identifikátoru je zde jeho název)
- */
+//Push hodnoty na zásobník
 void generate_push(int type, char* name) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Push\n");
@@ -797,11 +685,8 @@ void generate_mathemeatical_operations(int type , int label_number){
     }
 }
 
-/**
- * Operace na porovnavani hodnot na zasobniku
- * @param type - typ operace (G_TYPE_LESS,G_TYPE_LESS_OR_EQUAL,G_TYPE_GREATER,
- *                            G_TYPE_GREATER_OR_EQUAL,G_TYPE_NOT_EQUAL,G_TYPE_EQUAL)
- */
+
+//Operace na porovnavani hodnot na zasobniku
 void generate_comparative_operations(int type){
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Comparative operations\n");
@@ -906,63 +791,23 @@ void generate_comparative_operations(int type){
     }
 }
 
-/**
- * Uloží hodnotu ze zasobnikuna globalni promene result
- */
-// void generate_pop_to_result(){
-//     strAddCharArray(&instrukce,"# Pop \n");
-//     strAddCharArray(&instrukce,"POPS GF@$$result\n");
-// }
-
-// *
-//  * Print hodnoty v globalni promene result
- 
-// void generate_print_result(){
-//     strAddCharArray(&instrukce,"WRITE GF@$$result\n");
-// }
-
-/**
- * Zacatek IF (generuje se až po zpracovani vstupni podminky)
- * @param num - číslo IF
- */
+//generovani zacatku if vetvi
 void generate_if(int num) {
     char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# If start \n");
-    sprintf(str, "JUMPIFEQ IF_%d_ELSE GF@$$result bool@false\n",num);
+    strAddCharArray(&instrukce,"#if\n");
+    sprintf(str, "JUMPIFEQ ELSE_%d GF@$$result bool@false\n",num);
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * @param num - číslo IF
- * @param else_statment - true pokud existuje else statment, false pokud ne
- */
-void generate_else(int num, bool else_statment) {
+//generovani else vetvi
+void generate_else(int num) {
     char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# else \n");
-    sprintf(str, "JUMP IF_%d_END\n",num);
-    strAddCharArray(&instrukce,str);
-
-    sprintf(str, "LABEL IF_%d_ELSE\n",num);
+    strAddCharArray(&instrukce,"#else \n");
+    sprintf(str, "LABEL ELSE_%d\n",num);
     strAddCharArray(&instrukce,str);
 }
 
-
-/**
- * Konec IF
- * @param num - číslo IF
- */
-void generate_if_else_end(int num) {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# End If\n");
-    sprintf(str, "LABEL IF_%d_END\n",num);
-    strAddCharArray(&instrukce,str);
-}
-
-
-/**
- * Zacatek WHILE (Generuje se před zpracovanim podminky)
- * @param num - číslo WHILE
- */
+//Zacatek WHILE (Generuje se před zpracovanim podminky)
 void generate_while_condition_check(int num) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# While condition\n");
@@ -970,10 +815,7 @@ void generate_while_condition_check(int num) {
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Zacatek těla funkce WHILE
- * @param num - číslo WHILE
- */
+//Zacatek těla funkce WHILE
 void generate_while_start(int num) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# While start\n");
@@ -981,10 +823,7 @@ void generate_while_start(int num) {
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Konec WHILE
- * @param num - číslo WHILE
- */
+// Konec WHILE
 void generate_while_end(int num){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "JUMP WHILE_%d_CONDITION\n",num);
@@ -994,19 +833,14 @@ void generate_while_end(int num){
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Používá se před voláním funkce
- * Vytvoří proměnou v TF a přidá do ní hodnotu, TF se pak předává funkci jako její parametry
- * @param expresion_type - typ přiřazení (INT_E,DOUBLE_E,STRING_E,VARIABLE_E)
- * @param num - pořadí parametru (1,2,3,4...)
- * @param value - hodnota
- */
-void generate_assign_arguments_to_function(int expresion_type, int num, char *value){
+// Používá se před voláním funkce
+// Vytvoří proměnou v TF a přidá do ní hodnotu, TF se pak pushne do funkci 
+void generate_assign_arguments_to_function(int value_type, int num, char *value){
     char str[MAX_INSTRUCTION_LEN];
     string s;
     sprintf(str, "DEFVAR TF@V_%d\n",num);
     strAddCharArray(&instrukce,str);
-    switch (expresion_type) {
+    switch (value_type) {
         case INTEGER_TYPE:
             sprintf(str, "MOVE TF@V_%d int@%d\n", num, string_To_Int(value));
             strAddCharArray(&instrukce,str);
@@ -1051,7 +885,6 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
                 }
             }
             sprintf(str, "MOVE TF@V_%d string@%s\n", num, s.str);
-            //sprintf(str, "MOVE TF@V_%d string@%s\n", num, value);
             strAddCharArray(&instrukce,str);
             free(s.str);
             break;
@@ -1063,12 +896,7 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
     }
 }
 
-
-/**
- * Používá se ve funkci k načtení parametrů
- * @param num - pořadí parametru (1,2,3,4...)
- * @param name - název parametru
- */
+//Používá se ve funkci k načtení parametrů
 void generate_read_function_params(int num, char *name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "DEFVAR LF@%s\n",name);
@@ -1077,63 +905,44 @@ void generate_read_function_params(int num, char *name){
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Volání funkce
- * @param name - název funkce
- */
+//Volání funkce
 void generate_function_call(char* name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "CALL $$FUN_%s_START\n", name);
     strAddCharArray(&instrukce,str);
 }
 
-/**
- *
- */
+//Vytvoreni docasneho ramce pro predani parametru do funkce
 void generate_TF_for_function_args(){
     strAddCharArray(&instrukce,"CREATEFRAME\n");
 }
 
-/**
- * Přiřadí návratovou hodnotu funkce do proměnné
- * @param name - název funkce
- */
+//Přiřadí návratovou hodnotu funkce do proměnné
 void generate_retval_to_var(char *name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "MOVE LF@%s TF@$$FUN_RET\n",name);
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Začátek funkce
- * @param name - název funkce
- */
+//Zacatek funkce
 void generate_function_start(char *name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_START\n",name);
     strAddCharArray(&instrukce,str);
     strAddCharArray(&instrukce,"PUSHFRAME\n");
     variable_declare("$$FUN_RET");
-
-    //strAddCharArray(&instrukce,"DEFVAR LF@$$FUN_RET\n");
 }
 
-/**
- * Return z funkce, vezme poslední hodnotu z zásobníku a uloží ji jako výsledek funkce
- * @param name - název funkce
- */
+
+//Return z funkce, vezme poslední hodnotu z zásobníku a uloží ji jako výsledek funkce
 void generate_function_return(char *name){
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"POPS LF@$$FUN_RET\n");
-    //strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET GF@%exp_result\n");
     sprintf(str, "JUMP $$FUN_%s_END\n",name);
     strAddCharArray(&instrukce,str);
 }
 
-/**
- * Ukončení funkce
- * @param name - název funkce
- */
+//Konec funkce 
 void generate_function_end(char *name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "LABEL $$FUN_%s_END\n",name);
