@@ -627,20 +627,39 @@ void generate_push(int type, char* name) {
             strInit(&s);
             for (int i = 0; i < (int)strlen(name); ++i) {
                 char c = name[i];
-                if(c == '#'){
+                if(c == '\"' && i == 0){
+
+                }else if(c == '\"' && i == (int)strlen(name)-1){
+
+                }else if(c == '#'){
                     strAddCharArray(&s,"\\035");
                 } else if (c == '\\'){
-                    strAddCharArray(&s,"\\092");
-                } else if(c <= 32){
-                    char tmp[3];
-                    sprintf(tmp, "\\%03d", c);
-                    strAddCharArray(&s,tmp);
+                    i++;
+                    c = name[i];
+                    if(c == 'n'){
+                        strAddCharArray(&s,"\\010");
+                    } else if(c == 't'){
+                        strAddCharArray(&s,"\\009");
+                    } else if(c == 's'){
+                        strAddCharArray(&s,"\\032");
+                    } else if(c == '"'){
+                        strAddCharArray(&s,"\"");
+                    } else if(c == '\\'){
+                        strAddCharArray(&s,"\\092");
+                    }
+                } else if(c <= 30){
+                    string tmp;
+                    strInit(&tmp);
+                    int g = (int) c;
+                    sprintf(tmp.str, "\\%03d", g);
+                    strAddCharArray(&s,tmp.str);
+                    strFree(&tmp);
                 } else{
                     strAddChar(&s,c);
                 }
             }
             sprintf(str, "PUSHS string@%s\n",s.str);
-            strAddCharArray(&instrukce,str); //todo
+            strAddCharArray(&instrukce,str);
             free(s.str);
             break;
         case IDENTIFIER:
@@ -939,19 +958,39 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
             strInit(&s);
             for (int i = 0; i < (int)strlen(value); ++i) {
                 char c = value[i];
-                if(c == '#'){
+                if(c == '\"' && i == 0){
+
+                }else if(c == '\"' && i == (int)strlen(value)-1){
+
+                }else if(c == '#'){
                     strAddCharArray(&s,"\\035");
                 } else if (c == '\\'){
-                    strAddCharArray(&s,"\\092");
-                } else if(c <= 32){
-                    char tmp[3];
-                    sprintf(tmp, "\\%03d", c);
-                    strAddCharArray(&s,tmp);
+                    i++;
+                    c = value[i];
+                    if(c == 'n'){
+                        strAddCharArray(&s,"\\010");
+                    } else if(c == 't'){
+                        strAddCharArray(&s,"\\009");
+                    } else if(c == 's'){
+                        strAddCharArray(&s,"\\032");
+                    } else if(c == '"'){
+                        strAddCharArray(&s,"\"");
+                    } else if(c == '\\'){
+                        strAddCharArray(&s,"\\092");
+                    }
+                } else if(c <= 30){
+                    string tmp;
+                    strInit(&tmp);
+                    int a = (int) c;
+                    sprintf(tmp.str, "\\%03d", a);
+                    strAddCharArray(&s,tmp.str);
+                    strFree(&tmp);
                 } else{
                     strAddChar(&s,c);
                 }
             }
             sprintf(str, "MOVE TF@V_%d string@%s\n", num, s.str);
+            //sprintf(str, "MOVE TF@V_%d string@%s\n", num, value);
             strAddCharArray(&instrukce,str);
             free(s.str);
             break;
