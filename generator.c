@@ -202,7 +202,6 @@ void generate_start(){
     if_end_num = 0;
     arr_free_pos = 0;
     strAddCharArray(&instrukce,".IFJcode18\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_2\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_3\n");
