@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Aliaksandr Drankou, xdrank00
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>

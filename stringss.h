@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Petr Medek, xmedek07
+ */
+
 #ifndef SCANNER_string_H
 #define SCANNER_string_H
 

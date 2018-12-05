@@ -1,3 +1,11 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Aliaksandr Drankou, xdrank00
+ *    Petr Medek, xmedek07
+ *    Jan Sladky, xsladk09 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

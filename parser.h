@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Aliaksandr Drankou, xdrank00
+ */
+
 #define SYNTAX_OK	0
 #define SEM_OK 0
 #define SYNTAX_ERR	2

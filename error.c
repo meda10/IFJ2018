@@ -1,3 +1,9 @@
+/*
+ * FIT VUT, IFJ 2018
+ * Authors:
+ *    Petr Medek, xmedek07
+ */
+
 #include <stdio.h>
 #include <zconf.h>
 #include <stdlib.h>
