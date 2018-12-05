@@ -20,6 +20,7 @@ BTNode current_LTS;
 extern BTNode *root_GTS;
 extern BTNode *main_local_TS;
 extern BTNode temp_node;
+extern int label_number;
 string actual_variable;
 string actual_function;
 char** actual_params;
@@ -226,8 +227,8 @@ int S(){
 			if (result != SYNTAX_OK) return result;
 
 			if (token->type != ELSE) return SYNTAX_ERR;
-			
-			
+			generate_else(label_number);
+
 			get_next_token(token);
 			if (token->type != EOL) return SYNTAX_ERR;
 
@@ -524,6 +525,11 @@ int E(){
 		return SYNTAX_ERR;
 
 	return_to_var = false;
-	generate_pop_to_variable(actual_variable.str);
+	if(if_expr){
+		generate_pop_to_variable("result");
+		if_expr = false;
+	}else{
+		generate_pop_to_variable(actual_variable.str);		
+	}
 	return SYNTAX_OK;
 }

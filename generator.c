@@ -555,8 +555,11 @@ void generate_concat(){
 //Hodnota z vrcholu zasobniku se ulozi do promenne
 void generate_pop_to_variable(char* name){
     char str[MAX_INSTRUCTION_LEN];
-    // sprintf(str, "POPS %s@%s\n",get_frame(),name);
-    sprintf(str, "POPS LF@%s\n", name);
+    if (strcmp(name, "$$result") == 0){
+        sprintf(str, "POPS GF@$$result\n");    
+    }else{
+        sprintf(str, "POPS LF@%s\n", name);
+    }
     strAddCharArray(&instrukce,str);
 }
 
