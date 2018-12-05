@@ -15,11 +15,11 @@
 token_t *token, *next_token;
 bool read_token;
 bool return_to_var;
+bool if_expr, while_expr;
 BTNode current_LTS;
 extern BTNode *root_GTS;
 extern BTNode *main_local_TS;
 extern BTNode temp_node;
-// extern bool inScope;
 string actual_variable;
 string actual_function;
 char** actual_params;
@@ -34,7 +34,9 @@ int parse(){
   strInit(&actual_function);
   actual_params = make_array();
   actual_params_number = 0;
-  return_to_var = false;	
+  return_to_var = false;
+  if_expr = false;
+  while_expr = false;	
   current_LTS = *main_local_TS; //set current LTS to main body of program
   
   if (get_next_token(token) == RET_ERR)
@@ -210,6 +212,7 @@ int S(){
 	switch(token->type){
 		case IF:									//12. <S> -> if <E> then EOL <STL> else EOL <STL> end
 			get_next_token(token);
+			if_expr = true;	//indicator for precedence
 			result = E();	//precedencni			
 			if (result != SYNTAX_OK) return result;
 
@@ -222,7 +225,8 @@ int S(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;
 
-			if (token->type != ELSE) return SYNTAX_ERR;						
+			if (token->type != ELSE) return SYNTAX_ERR;
+			
 			
 			get_next_token(token);
 			if (token->type != EOL) return SYNTAX_ERR;
@@ -237,6 +241,7 @@ int S(){
 			return SYNTAX_OK;
 		case WHILE:										//13. <S> -> while <E> do EOL <STL> end
 			get_next_token(token);
+			while_expr = true; //indicatro for precedence
 			result = E();	
 			if (result != SYNTAX_OK) return result;
 													
