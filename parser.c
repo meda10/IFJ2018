@@ -408,6 +408,11 @@ int INPUT_PARAMS(){
 				errors_exit(SEMANTIC_ERROR_FUNCTION_PARAMS, "wrong number of parameters in function call.");
 			}
 
+			generate_function_call(actual_function.str);
+			if (return_to_var){
+					generate_function_return_value_assign_to_var(actual_variable.str);
+					return_to_var = false;
+			}
 			return SYNTAX_OK;
 		case IDENTIFIER:
 		case STRING_TYPE:
