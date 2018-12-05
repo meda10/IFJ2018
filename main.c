@@ -18,6 +18,9 @@ BTNode *main_local_TS;
 BTNode temp_node;
 BTNode NONE = NULL;
 
+/**
+ * Vytvoření vestavěných funkcí
+ */
 void built_in_functions(){
     create_node(root_GTS, "inputs", -1, 0, NULL, true, true, true, false, &NONE);
 
@@ -36,6 +39,10 @@ void built_in_functions(){
     create_node(root_GTS, "chr", -1, 1, NULL, true, true, true, false, &NONE);
 }
 
+/**
+ * Naplnění tabulky symbolů definicema funkcí
+ * @return
+ */
 int fill_sym_table(){
     read_from_stdin();
 
@@ -98,10 +105,13 @@ int fill_sym_table(){
 
     free_token(token);
     strFree(&function_name);
-
     return RETURN_OK;
 }
 
+/**
+ * Hlavní tělo programu
+ * @return vrací 0 při úspěchu
+ */
 int main() {
     //vytvoreni globalni tabulky symbolu
     root_GTS = make_new_table();

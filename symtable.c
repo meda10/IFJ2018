@@ -7,6 +7,12 @@
 #include "error.h"
 #include "stringss.h"
 
+/**
+ * Inicializece struktury dat která se vkládá do tabulky symbolů
+ * @param name jméno uzlu
+ * @param len délka name
+ * @return inicializovaná struktura
+ */
 TValues init_val(char *name, int len) {
     TValues data;
     if(name != NULL){
@@ -28,6 +34,10 @@ TValues init_val(char *name, int len) {
     return data;
 }
 
+/**
+ * Vytvoří novou tabulku symbolů
+ * @return
+ */
 BTNode* make_new_table(){
     BTNode *b = (BTNode*) malloc(sizeof(struct node));
     if(b == NULL){
@@ -37,10 +47,20 @@ BTNode* make_new_table(){
     return b;
 }
 
+/**
+ * inicializace tabulky symbolů
+ * @param root
+ */
 void B_tree_init(BTNode *root) {
     *root = NULL;
 }
 
+/**
+ * Hledání v tabulce symbolů podle názvu
+ * @param root - tabulka symbolů
+ * @param name - název
+ * @return - najitý uzel / NULL
+ */
 BTNode B_tree_search(BTNode root, char *name){
     while(root != NULL){
         if(name == NULL){
@@ -59,6 +79,12 @@ BTNode B_tree_search(BTNode root, char *name){
     return NULL;
 }
 
+/**
+ * Vrací odkaz na kokální tabulku symbolů
+ * @param root -tabulka symbolů
+ * @param name -název funkce
+ * @return - odkaz na lokální tabulku symbolů
+ */
 BTNode B_tree_search_local_table(BTNode root, char *name){
     BTNode old_root = root;
     while(root != NULL){
@@ -81,6 +107,12 @@ BTNode B_tree_search_local_table(BTNode root, char *name){
     return NULL;
 }
 
+/**
+ * Vložení uzlu do tabulky symbolů
+ * @param root - tabulka symbolů
+ * @param data - data
+ * @return
+ */
 int B_tree_insert(BTNode *root, struct Values data){
     BTNode tmp_root = *root;
     BTNode tmp = NULL;
@@ -127,6 +159,10 @@ int B_tree_insert(BTNode *root, struct Values data){
     return RETURN_OK;
 }
 
+/**
+ * průchod tabulky smybolů
+ * @param root - uzel
+ */
 void B_tree_walk(BTNode root){
     if(root != NULL){
         B_tree_walk(root->L_ptr);
@@ -136,6 +172,10 @@ void B_tree_walk(BTNode root){
     }
 }
 
+/**
+ * Uvolnení paměti, i lokálních tabulek symbolů
+ * @param root - tabulka symbolů
+ */
 void B_tree_free(BTNode root){
     if(root != NULL){
         B_tree_free(root->L_ptr);
@@ -154,6 +194,20 @@ void B_tree_free(BTNode root){
     }
 }
 
+/**
+ * Vytvoří uzel v tabulce symboů
+ * @param table - tabulka
+ * @param name - název parametru / funkce
+ * @param type - typ
+ * @param params_number - počet parametrů
+ * @param params - parametry
+ * @param defined - jestli je funkce definovaná
+ * @param initialized - jestli je inicializovaná
+ * @param is_function - jestli se jedná o funkci nebo proměnou
+ * @param used - jestli se nejedná o mrtvý kód
+ * @param local_sym_table - odkaz na lokální tabulku symbolů
+ * @return
+ */
 int create_node(BTNode *table, char *name, int type, int params_number, char** params, bool defined, bool initialized, bool is_function, bool used, BTNode *local_sym_table) {
     BTNode node = B_tree_search(*table, name);
 
