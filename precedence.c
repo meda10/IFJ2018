@@ -156,7 +156,9 @@ tPrec_op token_to_prec(token_t t){
 	}
 }
 
-
+/*
+ * Funkce zjistuje jestli je promnema jiz declarovana a nema nazev jako funkce
+ */
 int declared_variable(token_t variable){
 	
 	BTNode tmp_node, tmp2_node;
@@ -450,37 +452,35 @@ int rule(stack_t* s, item_stack_t* start_rule){
 		case DOUBLE_TYPE:
 
 			delete_rule(s, start_rule, rule->token, NULL);
-			//push_E(s, E_rule.token);
-			//return 12;				// 12. <E> -> ID
+			// 12. <E> -> ID
 			return SYNTAX_OK;
 
 		// pokud pravidlo zacina (	
 		case OPENNING_BRACKET:
 			
 			if (rule->previous == NULL)
-				return SYNTAX_ERR; // error
+				return SYNTAX_ERR;
 			
 			rule = rule->previous;
 			
 			if ((rule->token.type >= EXP_IDENTIFIER) && (rule->token.type <= EXP_BOOLEAN)){
 				
 				if (rule->previous == NULL)
-					return SYNTAX_ERR; // error
+					return SYNTAX_ERR;
 				
 				rule = rule->previous;
 				
 				if(rule->token.type == CLOSING_BRACKET){
 					
 					delete_rule(s, start_rule, rule->next->token, NULL);
-					//push_E(s, E_rule.token);
-					//return 11;			//11. <E> -> (<E>)
+					//11. <E> -> (<E>)
 					return SYNTAX_OK;
 				}
 				else
-					return SYNTAX_ERR; //error
+					return SYNTAX_ERR;
 			}
 			else
-				return SYNTAX_ERR; //error
+				return SYNTAX_ERR;
 
 		// pokud pravidlo zacina <E>
 		case EXP_IDENTIFIER:
@@ -553,15 +553,14 @@ int rule(stack_t* s, item_stack_t* start_rule){
 					delete_rule(s, start_rule, rule->next->next->token, &result_type);
 				else
 					delete_rule(s, start_rule, rule->token, &result_type);
-				//push_E(s, E_rule.token);
-				//return operator;
+
 				return SYNTAX_OK;
 			}
 			else
-				return SYNTAX_ERR; //error
+				return SYNTAX_ERR;
 
 		default:
-			return SYNTAX_ERR; //error
+			return SYNTAX_ERR;
 	}
 }
 
@@ -598,10 +597,6 @@ int precedence(){
 	int use_rule;
 
 	while(1){
-		
-						/*// jen pro testovani
-						printStack(s);*/
-					
 
 		if ((a = token_to_prec(stackTopTerm(s)->token)) >= PREC_TABE_SIZE ){
 			stackFree(s);
@@ -616,18 +611,11 @@ int precedence(){
 			stackFree(s);
 			return SYNTAX_OK;
 		}
-						/*
-						// jen na testovani
-						printf(" a: %d\n", a);
-						printf(" b: %d\n", b);
-						*/
 
 		prec = prec_table[a][b];
 		switch(prec){
 			// pokud je v precedencni tabulce =
 			case E_P:
-						/*// jen na testovani	
-						printf("=\n");*/
 		
 				stackPush(s, *token);
 				get_next_token_prec();
@@ -635,8 +623,7 @@ int precedence(){
 
 			// pokud je v precedencni tabulce <	
 			case L_P:
-						/*// jen na testovani
-						printf("<\n");*/
+
 				stackPushBeforeTerm(s, stackTopTerm (s));
 				stackPush (s, *token);
 				
@@ -649,8 +636,7 @@ int precedence(){
 
 			// pokud je v precedencni tabulce > 
 			case G_P:
-						/*// jen na testovani
-						printf(">\n");*/
+
 				if ((start_rule = find_start_of_rule(s)) == NULL){
 					stackFree(s);
 					return SYNTAX_ERR;
