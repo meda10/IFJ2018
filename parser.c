@@ -315,9 +315,8 @@ int ASS(){
 				//if not, insert it to current function LTS 
 				if (temp_node == NULL){
 					create_node(&current_LTS, token->string.str, 0, 0, NULL, false, true, false, true, &current_LTS);
+					variable_declare(token->string.str);				
 				}
-
-				variable_declare(token->string.str);
 				strFree(&actual_variable);
 				strInit(&actual_variable);
 				strAddCharArray(&actual_variable, token->string.str);
@@ -410,7 +409,7 @@ int INPUT_PARAMS(){
 
 			generate_function_call(actual_function.str);
 			if (return_to_var){
-					generate_function_return_value_assign_to_var(actual_variable.str);
+					generate_retval_to_var(actual_variable.str);
 					return_to_var = false;
 			}
 			return SYNTAX_OK;
@@ -497,7 +496,7 @@ int NEXT_TERM(){
 			if (strcmp(actual_function.str, "print") != 0){
 				generate_function_call(actual_function.str);
 				if (return_to_var){
-					generate_function_return_value_assign_to_var(actual_variable.str);
+					generate_retval_to_var(actual_variable.str);
 					return_to_var = false;
 				}
 			}	

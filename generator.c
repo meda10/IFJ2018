@@ -134,28 +134,43 @@ void generate_ord(){
  * Generuje funkci substr
  */
 void generate_substr(){
-    strAddCharArray(&instrukce,"\n#SUBSTR\n");
+/*
+    strAddCharArray(&instrukce,"LT GF@$$var_1 LF@V_0 int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_substr_RETURN_NIL GF@$$var_1 bool@true\n");
+    strAddCharArray(&instrukce,"GT GF@$$var_1 LF@V_0 int@255\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_chr_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_substr_A\n");
+
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_substr_RETURN_NIL\n");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET nil@nil\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
+*/
+    strAddCharArray(&instrukce,"\n#Substr\n");
     generate_function_start("substr");
+    strAddCharArray(&instrukce,"MOVE LF@$$FUN_RET string@\n");
     strAddCharArray(&instrukce,"SUB LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom\n");
     strAddCharArray(&instrukce,"STRLEN LF@$$pom LF@V_0\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@$$pom int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_EQ LF@$$pom int@0\n");
     strAddCharArray(&instrukce,"DEFVAR LF@$$pom_1\n");
     strAddCharArray(&instrukce,"LT LF@$$pom_1 LF@V_1 int@0\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@$$pom_1 bool@true\n");
-    strAddCharArray(&instrukce,"LABEL $LABEL_A\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_EQ LF@$$pom_1 bool@true\n");
+    strAddCharArray(&instrukce,"LABEL SUBSTR_AG\n");
     strAddCharArray(&instrukce,"CREATEFRAME\n");
     strAddCharArray(&instrukce,"DEFVAR TF@$$pom_2\n");
     strAddCharArray(&instrukce,"DEFVAR TF@$$pom_3\n");
     strAddCharArray(&instrukce,"GETCHAR TF@$$pom_3 LF@V_0 LF@V_1\n");
     strAddCharArray(&instrukce,"ADD LF@V_1 LF@V_1 int@1\n");
     strAddCharArray(&instrukce,"CONCAT LF@$$FUN_RET LF@$$FUN_RET TF@$$pom_3\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_EQUAL LF@V_2 int@0\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_EQ LF@V_2 int@0\n");
     strAddCharArray(&instrukce,"SUB LF@V_2 LF@V_2 int@1\n");
     strAddCharArray(&instrukce,"LT TF@$$pom_2 LF@V_1 LF@$$pom\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $LABEL_A TF@$$pom_2 bool@true\n");
-    strAddCharArray(&instrukce,"LABEL $LABEL_EQUAL\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ SUBSTR_AG TF@$$pom_2 bool@true\n");
+    strAddCharArray(&instrukce,"LABEL SUBSTR_EQ\n");
     strAddCharArray(&instrukce,"POPFRAME\n");
     strAddCharArray(&instrukce,"RETURN\n");
 }
@@ -169,17 +184,26 @@ void generate_chr(){
 
     strAddCharArray(&instrukce,"DEFVAR LF@RAN\n");
     strAddCharArray(&instrukce,"LT LF@RAN LF@V_0 int@0\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_chr_RETURN LF@RAN bool@true\n");
     strAddCharArray(&instrukce,"GT LF@RAN LF@V_0 int@255\n");
-    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_CHR_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMPIFEQ $$FUN_chr_RETURN LF@RAN bool@true\n");
+    strAddCharArray(&instrukce,"JUMP $$FUN_chr_END\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_chr_RETURN\n");
+    strAddCharArray(&instrukce,"EXIT int@4\n");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
+    strAddCharArray(&instrukce,"LABEL $$FUN_chr_END\n");
     strAddCharArray(&instrukce,"INT2CHAR LF@$$FUN_RET LF@V_0\n");
-    generate_function_end("CHR");
+    strAddCharArray(&instrukce,"POPFRAME\n");
+    strAddCharArray(&instrukce,"RETURN\n");
+
 }
 
 
 /**
- * Deklarace a pocatecni inicializace proměnné
- * @param name - jmeno promene
+ * Deklarace a pocatecni inicializace proměnné na nil
  */
 void variable_declare(char *name) {
     char str[MAX_INSTRUCTION_LEN];
@@ -202,7 +226,6 @@ void generate_start(){
     if_end_num = 0;
     arr_free_pos = 0;
     strAddCharArray(&instrukce,".IFJcode18\n");
-    strAddCharArray(&instrukce,"DEFVAR GF@$$input\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_1\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_2\n");
     strAddCharArray(&instrukce,"DEFVAR GF@$$var_3\n");
@@ -210,6 +233,7 @@ void generate_start(){
     strAddCharArray(&instrukce,"DEFVAR GF@$$result\n");
     strAddCharArray(&instrukce,"JUMP $$main\n");
 
+    //generovani vestavenych funkci
     generate_substr();
     generate_ord();
     generate_length();
@@ -627,20 +651,39 @@ void generate_push(int type, char* name) {
             strInit(&s);
             for (int i = 0; i < (int)strlen(name); ++i) {
                 char c = name[i];
-                if(c == '#'){
+                if(c == '\"' && i == 0){
+
+                }else if(c == '\"' && i == (int)strlen(name)-1){
+
+                }else if(c == '#'){
                     strAddCharArray(&s,"\\035");
                 } else if (c == '\\'){
-                    strAddCharArray(&s,"\\092");
-                } else if(c <= 32){
-                    char tmp[3];
-                    sprintf(tmp, "\\%03d", c);
-                    strAddCharArray(&s,tmp);
+                    i++;
+                    c = name[i];
+                    if(c == 'n'){
+                        strAddCharArray(&s,"\\010");
+                    } else if(c == 't'){
+                        strAddCharArray(&s,"\\009");
+                    } else if(c == 's'){
+                        strAddCharArray(&s,"\\032");
+                    } else if(c == '"'){
+                        strAddCharArray(&s,"\"");
+                    } else if(c == '\\'){
+                        strAddCharArray(&s,"\\092");
+                    }
+                } else if(c <= 30){
+                    string tmp;
+                    strInit(&tmp);
+                    int g = (int) c;
+                    sprintf(tmp.str, "\\%03d", g);
+                    strAddCharArray(&s,tmp.str);
+                    strFree(&tmp);
                 } else{
                     strAddChar(&s,c);
                 }
             }
             sprintf(str, "PUSHS string@%s\n",s.str);
-            strAddCharArray(&instrukce,str); //todo
+            strAddCharArray(&instrukce,str);
             free(s.str);
             break;
         case IDENTIFIER:
@@ -648,7 +691,6 @@ void generate_push(int type, char* name) {
             strAddCharArray(&instrukce,str);
             break;
         default:
-            //todo
             break;
     }
 }
@@ -658,7 +700,6 @@ void generate_push(int type, char* name) {
  * @param type - typ operace (G_TYPE_PLUS,G_TYPE_DIV,G_TYPE_MINUS,G_TYPE_MUL)
  */
 void generate_mathemeatical_operations(int type){
-    //data_conversion();
     int current_label_number = get_new_label_number();
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"# Mathematical operations\n");
@@ -704,7 +745,6 @@ void generate_mathemeatical_operations(int type){
             break;
             
         default:
-            //todo
             break;
     }
 }
@@ -716,7 +756,6 @@ void generate_mathemeatical_operations(int type){
  */
 void generate_comparative_operations(int type){
     char str[MAX_INSTRUCTION_LEN];
-    //data_conversion();
     strAddCharArray(&instrukce,"# Comparative operations\n");
     switch (type){
         case G_TYPE_LESS:
@@ -815,7 +854,6 @@ void generate_comparative_operations(int type){
             strAddCharArray(&instrukce,"NOTS\n");
             break;
         default:
-            //todo
             break;
     }
 }
@@ -823,18 +861,17 @@ void generate_comparative_operations(int type){
 /**
  * Uloží hodnotu ze zasobnikuna globalni promene result
  */
-void generate_pop_to_result(){
-    strAddCharArray(&instrukce,"# Pop \n");
-    strAddCharArray(&instrukce,"POPS GF@$$result\n");
-}
+// void generate_pop_to_result(){
+//     strAddCharArray(&instrukce,"# Pop \n");
+//     strAddCharArray(&instrukce,"POPS GF@$$result\n");
+// }
 
-/**
- * Print hodnoty v globalni promene result
- */
-void generate_print_result(){
-    strAddCharArray(&instrukce,"WRITE GF@$$result\n");
-
-}
+// *
+//  * Print hodnoty v globalni promene result
+ 
+// void generate_print_result(){
+//     strAddCharArray(&instrukce,"WRITE GF@$$result\n");
+// }
 
 /**
  * Zacatek IF (generuje se až po zpracovani vstupni podminky)
@@ -848,7 +885,6 @@ void generate_if(int num) {
 }
 
 /**
- * Musi se vydy volat!! Kdyz neexistuje else vola se s false
  * @param num - číslo IF
  * @param else_statment - true pokud existuje else statment, false pokud ne
  */
@@ -860,15 +896,11 @@ void generate_else(int num, bool else_statment) {
 
     sprintf(str, "LABEL IF_%d_ELSE\n",num);
     strAddCharArray(&instrukce,str);
-    if(else_statment == false){
-        sprintf(str, "JUMP IF_%d_END\n",num);
-        strAddCharArray(&instrukce,str);
-    }
 }
 
 
 /**
- * Komec IF
+ * Konec IF
  * @param num - číslo IF
  */
 void generate_if_else_end(int num) {
@@ -929,7 +961,7 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
     switch (expresion_type) {
         case INTEGER_TYPE:
             sprintf(str, "MOVE TF@V_%d int@%d\n", num, string_To_Int(value));
-            strAddCharArray(&instrukce,str); //todo %d
+            strAddCharArray(&instrukce,str);
             break;
         case DOUBLE_TYPE:
             sprintf(str, "MOVE TF@V_%d float@%a\n", num, string_to_Double(value));
@@ -939,24 +971,43 @@ void generate_assign_arguments_to_function(int expresion_type, int num, char *va
             strInit(&s);
             for (int i = 0; i < (int)strlen(value); ++i) {
                 char c = value[i];
-                if(c == '#'){
+                if(c == '\"' && i == 0){
+
+                }else if(c == '\"' && i == (int)strlen(value)-1){
+
+                }else if(c == '#'){
                     strAddCharArray(&s,"\\035");
                 } else if (c == '\\'){
-                    strAddCharArray(&s,"\\092");
-                } else if(c <= 32){
-                    char tmp[3];
-                    sprintf(tmp, "\\%03d", c);
-                    strAddCharArray(&s,tmp);
+                    i++;
+                    c = value[i];
+                    if(c == 'n'){
+                        strAddCharArray(&s,"\\010");
+                    } else if(c == 't'){
+                        strAddCharArray(&s,"\\009");
+                    } else if(c == 's'){
+                        strAddCharArray(&s,"\\032");
+                    } else if(c == '"'){
+                        strAddCharArray(&s,"\"");
+                    } else if(c == '\\'){
+                        strAddCharArray(&s,"\\092");
+                    }
+                } else if(c <= 30){
+                    string tmp;
+                    strInit(&tmp);
+                    int a = (int) c;
+                    sprintf(tmp.str, "\\%03d", a);
+                    strAddCharArray(&s,tmp.str);
+                    strFree(&tmp);
                 } else{
                     strAddChar(&s,c);
                 }
             }
             sprintf(str, "MOVE TF@V_%d string@%s\n", num, s.str);
+            //sprintf(str, "MOVE TF@V_%d string@%s\n", num, value);
             strAddCharArray(&instrukce,str);
             free(s.str);
             break;
         case IDENTIFIER:
-            //sprintf(str, "MOVE TF@V_%d %s@%s\n", num, get_frame(),value);
             sprintf(str, "MOVE TF@V_%d LF@%s\n", num, value);
             strAddCharArray(&instrukce,str);
         default:
@@ -999,7 +1050,7 @@ void generate_TF_for_function_args(){
  * Přiřadí návratovou hodnotu funkce do proměnné
  * @param name - název funkce
  */
-void generate_function_return_value_assign_to_var(char *name){
+void generate_retval_to_var(char *name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "MOVE LF@%s TF@$$FUN_RET\n",name);
     strAddCharArray(&instrukce,str);
