@@ -26,7 +26,7 @@
 string instrukce;
 int label_number;
 
-int  get_new_label_number();
+int get_new_label_number();
 
 void generate_start();
 void generate_main();
@@ -65,6 +65,8 @@ void data_conversion();
 
 void generate_if(int num);
 void generate_else(int num);
+void generate_jump_to_if_else_end(int num);
+void generate_if_else_end(int num);
 
 void generate_while_condition_check(int num);
 void generate_while_start(int num);

@@ -810,6 +810,19 @@ void generate_else(int num) {
     strAddCharArray(&instrukce,str);
 }
 
+void generate_if_else_end(int num) {
+    char str[MAX_INSTRUCTION_LEN];
+    strAddCharArray(&instrukce,"#if-else end \n");
+    sprintf(str, "LABEL IF_ELSE_END_%d\n",num);
+    strAddCharArray(&instrukce,str);
+}
+
+generate_jump_to_if_else_end(int num){
+    char str[MAX_INSTRUCTION_LEN];
+    sprintf(str, "JUMP IF_ELSE_END_%d\n",num);
+    strAddCharArray(&instrukce,str);
+}
+
 //Zacatek WHILE (Generuje se před zpracovanim podminky)
 void generate_while_condition_check(int num) {
     char str[MAX_INSTRUCTION_LEN];

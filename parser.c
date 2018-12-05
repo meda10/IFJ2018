@@ -228,6 +228,7 @@ int S(){
 			result = STL();
 			if (result != SYNTAX_OK) return result;
 
+			generate_jump_to_if_else_end(if_else_num);
 			if (token->type != ELSE) return SYNTAX_ERR;
 			generate_else(if_else_num);
 
@@ -239,6 +240,7 @@ int S(){
 			if (result != SYNTAX_OK) return result;	
 
 			if (token->type != END) return SYNTAX_ERR;
+			generate_if_else_end(if_else_num);
 
 			get_next_token(token); 
 			return SYNTAX_OK;
