@@ -774,7 +774,7 @@ void generate_push(int type, char* name) {
             free(s.str);
             break;
         case IDENTIFIER:
-            sprintf(str, "PUSHS %s@%s\n",get_frame(),name);
+            sprintf(str, "PUSHS LF@%s\n",name);
             strAddCharArray(&instrukce,str);
             break;
         default:
