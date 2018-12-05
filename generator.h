@@ -66,34 +66,25 @@ void generate_stack_2_to_int();
 void generate_push(int type, char* name);
 void generate_mathemeatical_operations(int type, int label_number);
 void generate_comparative_operations(int type);
-void generate_print();
-void generate_print_result();
-void generate_variable_assign(int expresion_type,char* variable_name, char* variable_value);
+
 void generate_pop_to_result();
-void data_conversion();
 
 void generate_if(int num);
 void generate_else(int num);
 void generate_jump_to_if_else_end(int num);
 void generate_if_else_end(int num);
 
-void generate_while_condition_check(int num);
-void generate_while_start(int num);
-void generate_while_end(int num);
-
 void variable_declare(char* name);
 void generate_pop_to_variable(char* name);
 
 void generate_function_start(char *name);
 void generate_function_end(char *name);
-void generate_function_return(char *name);
 
 void generate_TF_for_function_args();
 void generate_assign_arguments_to_function(int expresion_type, int num, char *value);
 void generate_function_call(char* name);
 
 void generate_retval_to_var(char *name);
-void generate_read_function_params(int num, char *name);
 
 void generate_free_memory();
 char free_labels();

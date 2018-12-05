@@ -645,10 +645,7 @@ void generate_push(int type, char* name) {
     }
 }
 
-/**
- * Matematické operace na zásobníku
- * @param type - typ operace (G_TYPE_PLUS,G_TYPE_DIV,G_TYPE_MINUS,G_TYPE_MUL)
- */
+//Matematické operace na zásobníku
 void generate_mathemeatical_operations(int type , int label_number){
     int current_label_number;
     if (label_number == 0)
@@ -705,7 +702,6 @@ void generate_mathemeatical_operations(int type , int label_number){
             break;
     }
 }
-
 
 //Operace na porovnavani hodnot na zasobniku
 void generate_comparative_operations(int type){
@@ -828,6 +824,7 @@ void generate_else(int num) {
     strAddCharArray(&instrukce,str);
 }
 
+//konec if-else
 void generate_if_else_end(int num) {
     char str[MAX_INSTRUCTION_LEN];
     strAddCharArray(&instrukce,"#if-else end \n");
@@ -835,35 +832,10 @@ void generate_if_else_end(int num) {
     strAddCharArray(&instrukce,str);
 }
 
+//generovani skoku na konec if-else
 generate_jump_to_if_else_end(int num){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "JUMP IF_ELSE_END_%d\n",num);
-    strAddCharArray(&instrukce,str);
-}
-
-//Zacatek WHILE (Generuje se před zpracovanim podminky)
-void generate_while_condition_check(int num) {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# While condition\n");
-    sprintf(str, "LABEL WHILE_%d_CONDITION\n",num);
-    strAddCharArray(&instrukce,str);
-}
-
-//Zacatek těla funkce WHILE
-void generate_while_start(int num) {
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"# While start\n");
-    sprintf(str, "JUMPIFEQ WHILE_%d_END GF@$$result bool@false\n",num);
-    strAddCharArray(&instrukce,str);
-}
-
-// Konec WHILE
-void generate_while_end(int num){
-    char str[MAX_INSTRUCTION_LEN];
-    sprintf(str, "JUMP WHILE_%d_CONDITION\n",num);
-    strAddCharArray(&instrukce,str);
-    strAddCharArray(&instrukce,"# While end\n");
-    sprintf(str,"LABEL WHILE_%d_END\n",num);
     strAddCharArray(&instrukce,str);
 }
 
@@ -930,13 +902,9 @@ void generate_assign_arguments_to_function(int value_type, int num, char *value)
     }
 }
 
-//Používá se ve funkci k načtení parametrů
-void generate_read_function_params(int num, char *name){
-    char str[MAX_INSTRUCTION_LEN];
-    sprintf(str, "DEFVAR LF@%s\n",name);
-    strAddCharArray(&instrukce,str);
-    sprintf(str, "MOVE LF@%s LF@V_%d\n",name,num);
-    strAddCharArray(&instrukce,str);
+//Vytvoreni docasneho ramce pro predani parametru do funkce
+void generate_TF_for_function_args(){
+    strAddCharArray(&instrukce,"CREATEFRAME\n");
 }
 
 //Volání funkce
@@ -944,11 +912,6 @@ void generate_function_call(char* name){
     char str[MAX_INSTRUCTION_LEN];
     sprintf(str, "CALL $$FUN_%s_START\n", name);
     strAddCharArray(&instrukce,str);
-}
-
-//Vytvoreni docasneho ramce pro predani parametru do funkce
-void generate_TF_for_function_args(){
-    strAddCharArray(&instrukce,"CREATEFRAME\n");
 }
 
 //Přiřadí návratovou hodnotu funkce do proměnné
@@ -965,15 +928,6 @@ void generate_function_start(char *name){
     strAddCharArray(&instrukce,str);
     strAddCharArray(&instrukce,"PUSHFRAME\n");
     variable_declare("$$FUN_RET");
-}
-
-
-//Return z funkce, vezme poslední hodnotu z zásobníku a uloží ji jako výsledek funkce
-void generate_function_return(char *name){
-    char str[MAX_INSTRUCTION_LEN];
-    strAddCharArray(&instrukce,"POPS LF@$$FUN_RET\n");
-    sprintf(str, "JUMP $$FUN_%s_END\n",name);
-    strAddCharArray(&instrukce,str);
 }
 
 //Konec funkce 
